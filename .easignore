@@ -1,0 +1,57 @@
+# EAS Build Ignore File
+# Ignore files that cause casing issues or are not needed
+
+# Node modules (will be installed fresh)
+node_modules/
+
+# Build artifacts - Let EAS generate android fresh
+android
+android/
+ios/build/
+ios/Pods/
+
+# Generated files that may have casing issues
+android/app/src/main/res/drawable-*/node_modules_*
+
+# Temp files
+*.log
+*.txt
+*.tmp
+
+# IDE
+.idea/
+.vscode/
+.vscode
+**/.vscode/
+**/.vscode
+.vscode
+.idea
+android/build
+node_modules
+# OS files
+.DS_Store
+Thumbs.db
+
+# Backup folders
+*_BACKUP/
+*.backup
+
+# Test files
+test_*.jpg
+test_*.png
+
+# Local scripts
+*.bat
+*.py
+*.sql
+
+# Docs that aren't needed for build
+*.md
+!README.md
+
+# Temp folders
+.tmp.driveupload/
+go/
+FacturaApp/
+FacturaScannerApp/
+Ahi/

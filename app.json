@@ -1,0 +1,26 @@
+{
+  "name": "FacturaScannerApp",
+  "displayName": "FacturaScanner",
+  "expo": {
+    "name": "FacturaScanner",
+    "slug": "facturascannerapp",
+    "version": "1.0.1",
+    "sdkVersion": "52.0.0",
+    "platforms": [
+      "android",
+      "ios"
+    ],
+    "android": {
+      "package": "com.anonymous.facturascannerapp"
+    },
+    "plugins": [
+      "expo-asset",
+      "expo-font"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "2a70ab52-1695-4031-acff-025d26c256ba"
+      }
+    }
+  }
+}

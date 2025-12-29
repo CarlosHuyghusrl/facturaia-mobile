@@ -1,0 +1,6 @@
+import type { ConfigPlugin } from '@expo/config-plugins';
+declare const _default: ConfigPlugin<void | {
+    cameraPermission?: string;
+}>;
+export default _default;
+//# sourceMappingURL=withDocumentScanner.d.ts.map
