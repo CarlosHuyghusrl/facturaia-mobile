@@ -20,19 +20,7 @@
     },
     "plugins": [
       "expo-asset",
-      "expo-font",
-      [
-        "expo-camera",
-        {
-          "cameraPermission": "Permitir acceso a la cámara para escanear facturas"
-        }
-      ],
-      [
-        "expo-image-picker",
-        {
-          "photosPermission": "Permitir acceso a fotos para seleccionar facturas"
-        }
-      ]
+      "expo-font"
     ],
     "extra": {
       "eas": {
