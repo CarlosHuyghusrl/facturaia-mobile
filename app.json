@@ -1,8 +1,8 @@
 {
-  "name": "FacturaScannerApp",
-  "displayName": "FacturaScanner",
+  "name": "FacturIA",
+  "displayName": "FacturIA",
   "expo": {
-    "name": "FacturaScanner",
+    "name": "FacturIA",
     "slug": "facturascannerapp",
     "version": "1.0.1",
     "sdkVersion": "52.0.0",
