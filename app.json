@@ -11,11 +11,28 @@
       "ios"
     ],
     "android": {
-      "package": "com.anonymous.facturascannerapp"
+      "package": "com.anonymous.facturascannerapp",
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "plugins": [
       "expo-asset",
-      "expo-font"
+      "expo-font",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Permitir acceso a la cámara para escanear facturas"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Permitir acceso a fotos para seleccionar facturas"
+        }
+      ]
     ],
     "extra": {
       "eas": {
