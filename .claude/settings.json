@@ -1,0 +1,108 @@
+{
+  "env": {
+    "CLAUDE_FLOW_AUTO_COMMIT": "true",
+    "CLAUDE_FLOW_AUTO_PUSH": "false",
+    "CLAUDE_FLOW_HOOKS_ENABLED": "true",
+    "CLAUDE_FLOW_TELEMETRY_ENABLED": "true",
+    "CLAUDE_FLOW_REMOTE_EXECUTION": "true",
+    "CLAUDE_FLOW_CHECKPOINTS_ENABLED": "true",
+    "CLAUDE_FLOW_AUTO_UPDATE_BRAIN": "true"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(npx claude-flow:*)",
+      "Bash(npm run lint)",
+      "Bash(npm run test:*)",
+      "Bash(npm test:*)",
+      "Bash(git status)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push)",
+      "Bash(git config:*)",
+      "Bash(git tag:*)",
+      "Bash(git branch:*)",
+      "Bash(git checkout:*)",
+      "Bash(git stash:*)",
+      "Bash(jq:*)",
+      "Bash(node:*)",
+      "Bash(which:*)",
+      "Bash(pwd)",
+      "Bash(ls:*)",
+      "Bash(claude-flow:*)"
+    ],
+    "deny": [
+      "Bash(rm -rf /)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cat | jq -r '.tool_input.command // empty' | tr '\n' '\0' | xargs -0 -I {} npx claude-flow@alpha hooks pre-command --command '{}' --validate-safety true --prepare-resources true"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cat | jq -r '.tool_input.file_path // .tool_input.path // empty' | tr '\n' '\0' | xargs -0 -I {} npx claude-flow@alpha hooks pre-edit --file '{}' --auto-assign-agents true --load-context true"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cat | jq -r '.tool_input.command // empty' | tr '\n' '\0' | xargs -0 -I {} npx claude-flow@alpha hooks post-command --command '{}' --track-metrics true --store-results true"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cat | jq -r '.tool_input.file_path // .tool_input.path // empty' | tr '\n' '\0' | xargs -0 -I {} npx claude-flow@alpha hooks post-edit --file '{}' --format true --update-memory true"
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "manual",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/bash -c 'echo \"🔄 PreCompact: Guardando contexto en Claude-Flow memory...\"; cd ~/eas-builds/FacturaScannerApp && claude-flow memory store \"facturaia:pre-compact-$(date +%Y%m%d%H%M)\" \"Contexto antes de compactar\" 2>/dev/null; echo \"✅ Contexto guardado\"'"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/bash -c 'echo \"🛑 Sesión finalizada - Guardando estado...\"; cd ~/eas-builds/FacturaScannerApp && claude-flow memory store \"facturaia:session-end-$(date +%Y%m%d%H%M)\" \"Sesión finalizada: $(date)\" 2>/dev/null; .claude/helpers/auto-update-brain.sh 2>/dev/null; echo \"✅ Estado guardado en Claude-Flow\"'"
+          }
+        ]
+      }
+    ]
+  },
+  "includeCoAuthoredBy": true,
+  "enabledMcpjsonServers": ["claude-flow", "ruv-swarm"],
+  "statusLine": {
+    "type": "command",
+    "command": ".claude/statusline-command.sh"
+  }
+}

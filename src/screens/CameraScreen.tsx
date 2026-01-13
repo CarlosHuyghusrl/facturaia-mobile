@@ -1,15 +1,11 @@
 /**
- * CameraScreen - Invoice scanning with auto-detection
+ * CameraScreen - Vision Camera (OCR en Backend)
  *
- * Features:
- * - Document auto-detection with react-native-document-scanner-plugin
- * - Automatic edge detection and perspective correction
- * - Auto-capture when document is properly aligned
- * - OCR processing with backend service
- * - Auto-save to Supabase
+ * Captura fotos y las envía al backend Gemini Vision para OCR.
+ * Sin procesamiento OCR local para evitar problemas de compatibilidad.
  */
 
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef, useCallback} from 'react';
 import {
   View,
   StyleSheet,
@@ -17,21 +13,27 @@ import {
   ActivityIndicator,
   Image,
   Text,
-  PermissionsAndroid,
-  Platform,
+  TouchableOpacity,
+  Dimensions,
+  ScrollView,
 } from 'react-native';
-import {Button, Surface, Title, Paragraph} from 'react-native-paper';
+import {Button, Surface, IconButton} from 'react-native-paper';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RouteProp} from '@react-navigation/native';
-import DocumentScanner from 'react-native-document-scanner-plugin';
-import {RootStackParamList, ProcessInvoiceResponse} from '../types/invoice';
+import {
+  Camera,
+  useCameraDevice,
+  useCameraPermission,
+  PhotoFile,
+} from 'react-native-vision-camera';
+import ImagePicker from 'react-native-image-crop-picker';
+import {RootStackParamList} from '../types/invoice';
 import {processInvoice} from '../services/api';
 import {supabase, getCurrentUser, uploadReceiptImage} from '../config/supabase';
 
-type CameraScreenNavigationProp = StackNavigationProp<
-  RootStackParamList,
-  'Camera'
->;
+const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
+
+type CameraScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Camera'>;
 type CameraScreenRouteProp = RouteProp<RootStackParamList, 'Camera'>;
 
 interface Props {
@@ -39,281 +41,316 @@ interface Props {
   route: CameraScreenRouteProp;
 }
 
+type CaptureMode = 'normal' | 'long' | 'gallery';
+
 const CameraScreen: React.FC<Props> = ({navigation, route}) => {
   const {groupId} = route.params;
 
-  // State
-  const [scannedImage, setScannedImage] = useState<string | null>(null);
+  // Camera refs and state
+  const cameraRef = useRef<Camera>(null);
+  const device = useCameraDevice('back');
+  const {hasPermission, requestPermission} = useCameraPermission();
+
+  // UI State
+  const [captureMode, setCaptureMode] = useState<CaptureMode>('normal');
+  const [flash, setFlash] = useState<'off' | 'on'>('off');
+  const [zoom, setZoom] = useState(1);
+
+  // Capture state
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [longModeImages, setLongModeImages] = useState<{top?: string; bottom?: string}>({});
+  const [longModeStep, setLongModeStep] = useState<'top' | 'bottom'>('top');
+
+  // Processing state
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingStatus, setProcessingStatus] = useState('');
-  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
 
-  // ==========================================
-  // Permission Handling
-  // ==========================================
-
-  const requestCameraPermission = async () => {
-    if (Platform.OS === 'android') {
-      try {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.CAMERA,
-          {
-            title: 'Permiso de Camara',
-            message: 'FacturIA necesita acceso a la camara para escanear facturas',
-            buttonNeutral: 'Preguntar luego',
-            buttonNegative: 'Cancelar',
-            buttonPositive: 'Aceptar',
-          },
-        );
-        setHasPermission(granted === PermissionsAndroid.RESULTS.GRANTED);
-        return granted === PermissionsAndroid.RESULTS.GRANTED;
-      } catch (err) {
-        console.error('Error requesting permission:', err);
-        setHasPermission(false);
-        return false;
-      }
+  // Request permission on mount
+  useEffect(() => {
+    if (!hasPermission) {
+      requestPermission();
     }
-    setHasPermission(true);
-    return true;
-  };
+  }, [hasPermission, requestPermission]);
 
   // ==========================================
-  // Document Scanner
+  // Capture Photo
   // ==========================================
 
-  const scanDocument = async () => {
+  const capturePhoto = async () => {
+    if (!cameraRef.current) return;
+
     try {
-      // Request permission first
-      const permitted = await requestCameraPermission();
-      if (!permitted) {
-        Alert.alert(
-          'Permiso Requerido',
-          'Por favor, permite el acceso a la camara para escanear facturas',
-        );
-        return;
-      }
-
-      // Launch document scanner with auto-detection
-      const result = await DocumentScanner.scanDocument({
-        croppedImageQuality: 100,
-        maxNumDocuments: 1,
-        responseType: 'imageFilePath',
+      const photo = await cameraRef.current.takePhoto({
+        flash: flash,
+        qualityPrioritization: 'quality',
       });
 
-      if (result.scannedImages && result.scannedImages.length > 0) {
-        const imagePath = result.scannedImages[0];
-        console.log('Document scanned:', imagePath);
-        setScannedImage(imagePath);
+      const photoPath = 'file://' + photo.path;
+
+      if (captureMode === 'long') {
+        if (longModeStep === 'top') {
+          setLongModeImages({...longModeImages, top: photoPath});
+          setLongModeStep('bottom');
+          Alert.alert('Parte superior capturada', 'Ahora capture la parte inferior de la factura');
+        } else {
+          setLongModeImages({...longModeImages, bottom: photoPath});
+          setCapturedImage(photoPath);
+        }
       } else {
-        // User cancelled or no image
-        navigation.goBack();
+        setCapturedImage(photoPath);
       }
-    } catch (error: any) {
-      console.error('Error scanning document:', error);
-      Alert.alert('Error', 'No se pudo escanear el documento. Intenta de nuevo.');
+    } catch (error) {
+      console.error('Error capturing photo:', error);
+      Alert.alert('Error', 'No se pudo capturar la foto');
     }
   };
 
-  // Start scanner on mount
-  useEffect(() => {
-    scanDocument();
-  }, []);
+  // ==========================================
+  // Gallery Selection
+  // ==========================================
+
+  const openGallery = async () => {
+    try {
+      const image = await ImagePicker.openPicker({
+        width: 2000,
+        height: 3000,
+        cropping: true,
+        freeStyleCropEnabled: true,
+        compressImageQuality: 0.9,
+      });
+
+      setCapturedImage(image.path);
+    } catch (error: any) {
+      if (error.code !== 'E_PICKER_CANCELLED') {
+        console.error('Gallery error:', error);
+        Alert.alert('Error', 'No se pudo seleccionar la imagen');
+      }
+    }
+  };
 
   // ==========================================
-  // OCR Processing
+  // Process Invoice (Backend OCR)
   // ==========================================
 
   const handleProcessInvoice = async () => {
-    if (!scannedImage) {
+    if (!capturedImage) {
+      Alert.alert('Error', 'No hay imagen capturada');
       return;
     }
 
     setIsProcessing(true);
-    setProcessingStatus('Procesando imagen con OCR...');
+    setProcessingStatus('Enviando imagen al servidor...');
 
     try {
-      // Step 1: Process with OCR service
-      const imageUri = scannedImage.startsWith('file://')
-        ? scannedImage
-        : `file://${scannedImage}`;
-
-      const result = await processInvoice(imageUri, {
-        aiProvider: 'gemini',
-        useVisionModel: false,
-        language: 'spa+eng',
-      });
-
-      if (!result.success || !result.invoice) {
-        throw new Error(result.error || 'OCR processing failed');
-      }
-
-      console.log('OCR Result:', result.invoice);
-      setProcessingStatus('Guardando en base de datos...');
-
-      // Step 2: Get current user
+      // Get current user
       const user = await getCurrentUser();
       if (!user) {
-        throw new Error('Usuario no autenticado');
+        Alert.alert('Error', 'Debe iniciar sesión');
+        return;
       }
 
-      // Step 3: Upload image to Supabase Storage
-      const fileName = `invoice_${Date.now()}.jpg`;
-      const imageUrl = await uploadReceiptImage(imageUri, fileName);
+      setProcessingStatus('Procesando con IA...');
 
-      // Step 4: Create receipt record in Supabase
-      const {data: receipt, error: receiptError} = await supabase
-        .from('receipts')
-        .insert({
-          name: result.invoice.vendor || 'Proveedor Desconocido',
-          amount: result.invoice.total,
-          date: result.invoice.date,
-          paid_by_user_id: user.id,
+      // Send to backend for OCR (Gemini Vision)
+      const result = await processInvoice(capturedImage);
+
+      if (result.success) {
+        setProcessingStatus('Guardando factura...');
+
+        // Upload image to storage
+        const imageUrl = await uploadReceiptImage(capturedImage, user.id);
+
+        // Save to database
+        const {data, error} = await supabase.from('facturas').insert({
+          user_id: user.id,
           group_id: groupId,
-          status: 'OPEN',
-        })
-        .select()
-        .single();
-
-      if (receiptError) {
-        throw receiptError;
-      }
-
-      // Step 5: Create receipt image record
-      const {error: imageError} = await supabase
-        .from('receipt_images')
-        .insert({
-          receipt_id: receipt.id,
+          vendor: result.data.vendor || 'Desconocido',
+          date: result.data.date || new Date().toISOString().split('T')[0],
+          total: result.data.total || 0,
+          subtotal: result.data.subtotal || 0,
+          tax: result.data.tax || 0,
+          ncf: result.data.ncf || null,
+          rnc: result.data.rnc || null,
           image_url: imageUrl,
+          items: result.data.items || [],
+          raw_text: result.data.raw_text || '',
         });
 
-      if (imageError) {
-        throw imageError;
+        if (error) throw error;
+
+        Alert.alert('Exito', 'Factura procesada correctamente', [
+          {text: 'OK', onPress: () => navigation.goBack()},
+        ]);
+      } else {
+        Alert.alert('Error', result.error || 'Error procesando factura');
       }
-
-      // Step 6: Create receipt items
-      if (result.invoice.items && result.invoice.items.length > 0) {
-        const items = result.invoice.items.map(item => ({
-          receipt_id: receipt.id,
-          name: item.name,
-          amount: item.total,
-          quantity: item.quantity,
-          status: 'OPEN',
-        }));
-
-        const {error: itemsError} = await supabase
-          .from('receipt_items')
-          .insert(items);
-
-        if (itemsError) {
-          console.error('Error creating items:', itemsError);
-        }
-      }
-
-      setProcessingStatus('Completado!');
-
-      // Show success message and navigate
-      Alert.alert(
-        'Factura Guardada',
-        `Procesado correctamente:\n${result.invoice.vendor}\nTotal: $${result.invoice.total.toFixed(2)}`,
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              navigation.replace('InvoiceList', {groupId});
-            },
-          },
-        ],
-      );
     } catch (error: any) {
-      console.error('Error processing invoice:', error);
-      Alert.alert(
-        'Error al Procesar',
-        error.message || 'No se pudo procesar la factura. Intenta de nuevo.',
-        [{text: 'Reintentar', onPress: () => setScannedImage(null)}],
-      );
+      console.error('Process error:', error);
+      Alert.alert('Error', error.message || 'Error al procesar');
     } finally {
       setIsProcessing(false);
       setProcessingStatus('');
     }
   };
 
-  const handleRetake = () => {
-    setScannedImage(null);
-    scanDocument();
+  // ==========================================
+  // Reset / Retake
+  // ==========================================
+
+  const resetCapture = () => {
+    setCapturedImage(null);
+    setLongModeImages({});
+    setLongModeStep('top');
   };
 
   // ==========================================
-  // Render
+  // Render Loading / No Permission
   // ==========================================
 
-  // Permission denied
-  if (hasPermission === false) {
+  if (!hasPermission) {
     return (
-      <View style={styles.centerContainer}>
-        <Title>Permiso de Camara Requerido</Title>
-        <Paragraph style={styles.errorText}>
-          Por favor, permite el acceso a la camara para escanear facturas
-        </Paragraph>
-        <Button mode="contained" onPress={requestCameraPermission}>
-          Dar Permiso
-        </Button>
-        <Button
-          mode="outlined"
-          onPress={() => navigation.goBack()}
-          style={{marginTop: 16}}>
-          Volver
+      <View style={styles.centered}>
+        <Text style={styles.message}>Se requiere permiso de camara</Text>
+        <Button mode="contained" onPress={requestPermission}>
+          Solicitar Permiso
         </Button>
       </View>
     );
   }
 
-  // Scanning in progress (no image yet)
-  if (!scannedImage) {
+  if (!device) {
     return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#1976d2" />
-        <Paragraph style={styles.loadingText}>
-          Abriendo escaner de documentos...
-        </Paragraph>
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#2196F3" />
+        <Text style={styles.message}>Cargando camara...</Text>
       </View>
     );
   }
 
-  // Preview scanned image
+  // ==========================================
+  // Render Preview (After Capture)
+  // ==========================================
+
+  if (capturedImage) {
+    return (
+      <View style={styles.container}>
+        <ScrollView contentContainerStyle={styles.previewContainer}>
+          <Image source={{uri: capturedImage}} style={styles.previewImage} resizeMode="contain" />
+
+          {isProcessing ? (
+            <View style={styles.processingContainer}>
+              <ActivityIndicator size="large" color="#2196F3" />
+              <Text style={styles.processingText}>{processingStatus}</Text>
+            </View>
+          ) : (
+            <View style={styles.previewButtons}>
+              <Button
+                mode="outlined"
+                onPress={resetCapture}
+                style={styles.previewButton}
+                icon="camera-retake">
+                Retomar
+              </Button>
+              <Button
+                mode="contained"
+                onPress={handleProcessInvoice}
+                style={styles.previewButton}
+                icon="check">
+                Procesar
+              </Button>
+            </View>
+          )}
+        </ScrollView>
+      </View>
+    );
+  }
+
+  // ==========================================
+  // Render Camera
+  // ==========================================
+
   return (
     <View style={styles.container}>
-      <Image
-        source={{uri: scannedImage}}
-        style={styles.preview}
-        resizeMode="contain"
+      <Camera
+        ref={cameraRef}
+        style={StyleSheet.absoluteFill}
+        device={device}
+        isActive={true}
+        photo={true}
+        zoom={zoom}
       />
 
-      {isProcessing && (
-        <Surface style={styles.processingOverlay}>
-          <ActivityIndicator size="large" color="#fff" />
-          <Text style={styles.processingText}>{processingStatus}</Text>
-        </Surface>
-      )}
+      {/* Mode Selector */}
+      <View style={styles.modeSelector}>
+        <TouchableOpacity
+          style={[styles.modeButton, captureMode === 'normal' && styles.modeButtonActive]}
+          onPress={() => setCaptureMode('normal')}>
+          <Text style={[styles.modeText, captureMode === 'normal' && styles.modeTextActive]}>
+            Normal
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.modeButton, captureMode === 'long' && styles.modeButtonActive]}
+          onPress={() => setCaptureMode('long')}>
+          <Text style={[styles.modeText, captureMode === 'long' && styles.modeTextActive]}>
+            Larga
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.modeButton, captureMode === 'gallery' && styles.modeButtonActive]}
+          onPress={() => {
+            setCaptureMode('gallery');
+            openGallery();
+          }}>
+          <Text style={[styles.modeText, captureMode === 'gallery' && styles.modeTextActive]}>
+            Galeria
+          </Text>
+        </TouchableOpacity>
+      </View>
 
-      {!isProcessing && (
-        <View style={styles.previewActions}>
-          <Button
-            mode="outlined"
-            onPress={handleRetake}
-            style={styles.actionButton}
-            icon="camera-retake"
-            textColor="#fff">
-            Repetir
-          </Button>
-          <Button
-            mode="contained"
-            onPress={handleProcessInvoice}
-            style={styles.actionButton}
-            icon="check">
-            Procesar
-          </Button>
+      {/* Long Mode Instructions */}
+      {captureMode === 'long' && (
+        <View style={styles.longModeOverlay}>
+          <Text style={styles.longModeText}>
+            {longModeStep === 'top' ? 'Capture parte SUPERIOR' : 'Capture parte INFERIOR'}
+          </Text>
+          {longModeImages.top && (
+            <Text style={styles.longModeStatus}>Superior capturada</Text>
+          )}
         </View>
       )}
+
+      {/* Controls */}
+      <View style={styles.controls}>
+        <IconButton
+          icon={flash === 'on' ? 'flash' : 'flash-off'}
+          iconColor="white"
+          size={30}
+          onPress={() => setFlash(flash === 'on' ? 'off' : 'on')}
+        />
+
+        <TouchableOpacity style={styles.captureButton} onPress={capturePhoto}>
+          <View style={styles.captureButtonInner} />
+        </TouchableOpacity>
+
+        <IconButton
+          icon="image-multiple"
+          iconColor="white"
+          size={30}
+          onPress={openGallery}
+        />
+      </View>
+
+      {/* Zoom Slider */}
+      <View style={styles.zoomContainer}>
+        <Text style={styles.zoomText}>{zoom.toFixed(1)}x</Text>
+        <TouchableOpacity onPress={() => setZoom(Math.min(zoom + 0.5, 5))}>
+          <Text style={styles.zoomButton}>+</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => setZoom(Math.max(zoom - 0.5, 1))}>
+          <Text style={styles.zoomButton}>-</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -323,51 +360,141 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#000',
   },
-  centerContainer: {
+  centered: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 24,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#fff',
+    padding: 20,
   },
-  preview: {
-    flex: 1,
-    backgroundColor: '#000',
+  message: {
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: 'center',
+    color: '#333',
   },
-  previewActions: {
+  modeSelector: {
     position: 'absolute',
-    bottom: 40,
-    left: 24,
-    right: 24,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  actionButton: {
-    flex: 1,
-    marginHorizontal: 8,
-  },
-  processingOverlay: {
-    position: 'absolute',
-    top: 0,
+    top: 50,
     left: 0,
     right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    zIndex: 10,
+  },
+  modeButton: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    marginHorizontal: 5,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modeButtonActive: {
+    backgroundColor: '#2196F3',
+  },
+  modeText: {
+    color: 'white',
+    fontSize: 14,
+  },
+  modeTextActive: {
+    fontWeight: 'bold',
+  },
+  longModeOverlay: {
+    position: 'absolute',
+    top: 120,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+  },
+  longModeText: {
+    color: '#FFD700',
+    fontSize: 18,
+    fontWeight: 'bold',
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    padding: 10,
+    borderRadius: 10,
+  },
+  longModeStatus: {
+    color: '#4CAF50',
+    fontSize: 14,
+    marginTop: 10,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    padding: 5,
+    borderRadius: 5,
+  },
+  controls: {
+    position: 'absolute',
+    bottom: 40,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+  },
+  captureButton: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(255,255,255,0.3)',
     justifyContent: 'center',
     alignItems: 'center',
   },
+  captureButtonInner: {
+    width: 65,
+    height: 65,
+    borderRadius: 32.5,
+    backgroundColor: 'white',
+  },
+  zoomContainer: {
+    position: 'absolute',
+    right: 20,
+    top: '40%',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    padding: 10,
+    borderRadius: 10,
+  },
+  zoomText: {
+    color: 'white',
+    fontSize: 14,
+    marginBottom: 10,
+  },
+  zoomButton: {
+    color: 'white',
+    fontSize: 24,
+    fontWeight: 'bold',
+    padding: 5,
+  },
+  previewContainer: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#f5f5f5',
+  },
+  previewImage: {
+    width: SCREEN_WIDTH - 40,
+    height: SCREEN_HEIGHT * 0.6,
+    borderRadius: 10,
+    marginBottom: 20,
+  },
+  previewButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+  },
+  previewButton: {
+    flex: 1,
+    marginHorizontal: 10,
+  },
+  processingContainer: {
+    alignItems: 'center',
+    padding: 20,
+  },
   processingText: {
-    color: '#fff',
+    marginTop: 15,
     fontSize: 16,
-    marginTop: 16,
-  },
-  loadingText: {
-    marginTop: 16,
-    textAlign: 'center',
-  },
-  errorText: {
-    marginVertical: 16,
-    textAlign: 'center',
+    color: '#666',
   },
 });
 

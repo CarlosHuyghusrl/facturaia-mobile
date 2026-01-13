@@ -1,26 +1,46 @@
 {
-  "name": "FacturIA",
-  "displayName": "FacturIA",
+  "name": "GestorIA RD",
+  "displayName": "GestorIA RD",
   "expo": {
-    "name": "FacturIA",
+    "name": "GestorIA RD",
     "slug": "facturascannerapp",
-    "version": "1.0.1",
+    "version": "1.0.3",
     "sdkVersion": "52.0.0",
-    "platforms": [
-      "android",
-      "ios"
-    ],
+    "platforms": ["android", "ios"],
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0F172A"
+    },
     "android": {
       "package": "com.anonymous.facturascannerapp",
+      "usesCleartextTraffic": true,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0F172A"
+      },
       "permissions": [
         "CAMERA",
         "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE"
+        "WRITE_EXTERNAL_STORAGE",
+        "VIBRATE"
       ]
+    },
+    "ios": {
+      "bundleIdentifier": "com.gestoriard.app",
+      "supportsTablet": true
     },
     "plugins": [
       "expo-asset",
-      "expo-font"
+      "expo-font",
+      [
+        "react-native-vision-camera",
+        {
+          "cameraPermissionText": "GestorIA RD necesita acceso a la cámara para escanear facturas",
+          "enableMicrophonePermission": false
+        }
+      ]
     ],
     "extra": {
       "eas": {

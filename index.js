@@ -3,8 +3,11 @@
  */
 
 import 'react-native-url-polyfill/auto';
-import {AppRegistry} from 'react-native';
+import {AppRegistry, LogBox} from 'react-native';
 import App from './App';
 
-// Registrar con el nombre de la app
-AppRegistry.registerComponent('FacturIA', () => App);
+// Disable yellow warning boxes in production
+LogBox.ignoreAllLogs(true);
+
+// EAS development builds usan "main" como nombre de registro
+AppRegistry.registerComponent('main', () => App);

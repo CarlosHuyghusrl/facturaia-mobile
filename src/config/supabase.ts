@@ -15,6 +15,7 @@
 import 'react-native-url-polyfill/auto';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {createClient} from '@supabase/supabase-js';
+import RNFS from 'react-native-fs';
 
 // Environment variables (configured in .env)
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://yljyktrjfgwsznvziqmt.supabase.co';
@@ -225,28 +226,46 @@ export const signOut = async () => {
 };
 
 /**
- * Upload image to Supabase Storage
+ * Upload image to Supabase Storage using react-native-fs
  */
 export const uploadReceiptImage = async (
   uri: string,
   fileName: string,
 ): Promise<string> => {
   try {
-    // Read file as base64
-    const response = await fetch(uri);
-    const blob = await response.blob();
+    // Remove file:// prefix if present
+    const filePath = uri.replace('file://', '');
 
-    // Upload to Supabase Storage
+    console.log('Reading file from:', filePath);
+
+    // Read file as base64 using react-native-fs
+    const base64Data = await RNFS.readFile(filePath, 'base64');
+
+    console.log('File read, size:', base64Data.length);
+
+    // Convert base64 to Uint8Array
+    const binaryString = atob(base64Data);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+
+    console.log('Uploading to Supabase Storage...');
+
+    // Upload to Supabase Storage using SDK
     const {data, error} = await supabase.storage
       .from('receipt-images')
-      .upload(`receipts/${fileName}`, blob, {
+      .upload(`receipts/${fileName}`, bytes, {
         contentType: 'image/jpeg',
-        upsert: false,
+        upsert: true,
       });
 
     if (error) {
+      console.error('Supabase upload error:', error);
       throw error;
     }
+
+    console.log('Upload successful:', data.path);
 
     // Get public URL
     const {
@@ -259,6 +278,23 @@ export const uploadReceiptImage = async (
     throw error;
   }
 };
+
+// Helper function to decode base64
+function atob(base64: string): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+  let str = base64.replace(/=+$/, '');
+  let output = '';
+
+  for (let bc = 0, bs = 0, buffer, i = 0; (buffer = str.charAt(i++)); ) {
+    buffer = chars.indexOf(buffer);
+    if (buffer === -1) continue;
+    bs = bc % 4 ? bs * 64 + buffer : buffer;
+    if (bc++ % 4) {
+      output += String.fromCharCode(255 & (bs >> ((-2 * bc) & 6)));
+    }
+  }
+  return output;
+}
 
 /**
  * Check if user is authenticated
