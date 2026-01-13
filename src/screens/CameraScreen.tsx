@@ -1,241 +1,149 @@
 /**
- * CameraScreen - Vision Camera (OCR en Backend)
- *
- * Captura fotos y las envía al backend Gemini Vision para OCR.
- * Sin procesamiento OCR local para evitar problemas de compatibilidad.
+ * CameraScreen - Document Scanner + Gemini Vision OCR
  */
 
-import React, {useState, useEffect, useRef, useCallback} from 'react';
+import React, {useState, useEffect} from "react";
 import {
   View,
   StyleSheet,
   Alert,
   ActivityIndicator,
-  Image,
   Text,
-  TouchableOpacity,
-  Dimensions,
   ScrollView,
-} from 'react-native';
-import {Button, Surface, IconButton} from 'react-native-paper';
-import {StackNavigationProp} from '@react-navigation/stack';
-import {RouteProp} from '@react-navigation/native';
-import {
-  Camera,
-  useCameraDevice,
-  useCameraPermission,
-  PhotoFile,
-} from 'react-native-vision-camera';
-import ImagePicker from 'react-native-image-crop-picker';
-import {RootStackParamList} from '../types/invoice';
-import {processInvoice} from '../services/api';
-import {supabase, getCurrentUser, uploadReceiptImage} from '../config/supabase';
+  Image,
+  Dimensions,
+} from "react-native";
+import {Button} from "react-native-paper";
+import {StackNavigationProp} from "@react-navigation/stack";
+import {RouteProp} from "@react-navigation/native";
+import DocumentScanner from "react-native-document-scanner-plugin";
+import {RootStackParamList} from "../types/invoice";
+import {processInvoice} from "../services/api";
+import {supabase, getCurrentUser, uploadReceiptImage} from "../config/supabase";
 
-const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
+const {width: SCREEN_WIDTH} = Dimensions.get("window");
 
-type CameraScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Camera'>;
-type CameraScreenRouteProp = RouteProp<RootStackParamList, 'Camera'>;
+type CameraScreenNavigationProp = StackNavigationProp<RootStackParamList, "Camera">;
+type CameraScreenRouteProp = RouteProp<RootStackParamList, "Camera">;
 
 interface Props {
   navigation: CameraScreenNavigationProp;
   route: CameraScreenRouteProp;
 }
 
-type CaptureMode = 'normal' | 'long' | 'gallery';
-
 const CameraScreen: React.FC<Props> = ({navigation, route}) => {
   const {groupId} = route.params;
-
-  // Camera refs and state
-  const cameraRef = useRef<Camera>(null);
-  const device = useCameraDevice('back');
-  const {hasPermission, requestPermission} = useCameraPermission();
-
-  // UI State
-  const [captureMode, setCaptureMode] = useState<CaptureMode>('normal');
-  const [flash, setFlash] = useState<'off' | 'on'>('off');
-  const [zoom, setZoom] = useState(1);
-
-  // Capture state
-  const [capturedImage, setCapturedImage] = useState<string | null>(null);
-  const [longModeImages, setLongModeImages] = useState<{top?: string; bottom?: string}>({});
-  const [longModeStep, setLongModeStep] = useState<'top' | 'bottom'>('top');
-
-  // Processing state
+  
+  const [scannedImages, setScannedImages] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [processingStatus, setProcessingStatus] = useState('');
+  const [processingStatus, setProcessingStatus] = useState("");
 
-  // Request permission on mount
-  useEffect(() => {
-    if (!hasPermission) {
-      requestPermission();
-    }
-  }, [hasPermission, requestPermission]);
-
-  // ==========================================
-  // Capture Photo
-  // ==========================================
-
-  const capturePhoto = async () => {
-    if (!cameraRef.current) return;
-
+  const startScanner = async () => {
     try {
-      const photo = await cameraRef.current.takePhoto({
-        flash: flash,
-        qualityPrioritization: 'quality',
+      const result = await DocumentScanner.scanDocument({
+        croppedImageQuality: 100,
+        maxNumDocuments: 10,
+        responseType: "imageFilePath",
       });
 
-      const photoPath = 'file://' + photo.path;
-
-      if (captureMode === 'long') {
-        if (longModeStep === 'top') {
-          setLongModeImages({...longModeImages, top: photoPath});
-          setLongModeStep('bottom');
-          Alert.alert('Parte superior capturada', 'Ahora capture la parte inferior de la factura');
-        } else {
-          setLongModeImages({...longModeImages, bottom: photoPath});
-          setCapturedImage(photoPath);
-        }
-      } else {
-        setCapturedImage(photoPath);
+      if (result.scannedImages && result.scannedImages.length > 0) {
+        setScannedImages(result.scannedImages);
       }
-    } catch (error) {
-      console.error('Error capturing photo:', error);
-      Alert.alert('Error', 'No se pudo capturar la foto');
-    }
-  };
-
-  // ==========================================
-  // Gallery Selection
-  // ==========================================
-
-  const openGallery = async () => {
-    try {
-      const image = await ImagePicker.openPicker({
-        width: 2000,
-        height: 3000,
-        cropping: true,
-        freeStyleCropEnabled: true,
-        compressImageQuality: 0.9,
-      });
-
-      setCapturedImage(image.path);
     } catch (error: any) {
-      if (error.code !== 'E_PICKER_CANCELLED') {
-        console.error('Gallery error:', error);
-        Alert.alert('Error', 'No se pudo seleccionar la imagen');
+      if (error.message !== "User canceled") {
+        Alert.alert("Error", "No se pudo escanear el documento");
       }
     }
   };
 
-  // ==========================================
-  // Process Invoice (Backend OCR)
-  // ==========================================
-
-  const handleProcessInvoice = async () => {
-    if (!capturedImage) {
-      Alert.alert('Error', 'No hay imagen capturada');
-      return;
-    }
+  const handleProcessInvoices = async () => {
+    if (scannedImages.length === 0) return;
 
     setIsProcessing(true);
-    setProcessingStatus('Enviando imagen al servidor...');
+    let successCount = 0;
 
     try {
-      // Get current user
       const user = await getCurrentUser();
       if (!user) {
-        Alert.alert('Error', 'Debe iniciar sesión');
+        Alert.alert("Error", "Debe iniciar sesión");
         return;
       }
 
-      setProcessingStatus('Procesando con IA...');
+      for (let i = 0; i < scannedImages.length; i++) {
+        const imagePath = scannedImages[i];
+        setProcessingStatus("Procesando página " + (i + 1) + " de " + scannedImages.length + "...");
 
-      // Send to backend for OCR (Gemini Vision)
-      const result = await processInvoice(capturedImage);
+        try {
+          const result = await processInvoice(imagePath);
 
-      if (result.success) {
-        setProcessingStatus('Guardando factura...');
+          if (result.success && result.data) {
+            setProcessingStatus("Guardando factura " + (i + 1) + "...");
+            const imageUrl = await uploadReceiptImage(imagePath, user.id);
 
-        // Upload image to storage
-        const imageUrl = await uploadReceiptImage(capturedImage, user.id);
+            const {error} = await supabase.from("facturas").insert({
+              user_id: user.id,
+              group_id: groupId,
+              vendor: result.data.vendor || "Desconocido",
+              date: result.data.date || new Date().toISOString().split("T")[0],
+              total: result.data.total || 0,
+              subtotal: result.data.subtotal || 0,
+              tax: result.data.tax || 0,
+              ncf: result.data.ncf || null,
+              rnc: result.data.rnc || null,
+              image_url: imageUrl,
+              items: result.data.items || [],
+              raw_text: result.data.raw_text || "",
+            });
 
-        // Save to database
-        const {data, error} = await supabase.from('facturas').insert({
-          user_id: user.id,
-          group_id: groupId,
-          vendor: result.data.vendor || 'Desconocido',
-          date: result.data.date || new Date().toISOString().split('T')[0],
-          total: result.data.total || 0,
-          subtotal: result.data.subtotal || 0,
-          tax: result.data.tax || 0,
-          ncf: result.data.ncf || null,
-          rnc: result.data.rnc || null,
-          image_url: imageUrl,
-          items: result.data.items || [],
-          raw_text: result.data.raw_text || '',
-        });
+            if (!error) successCount++;
+          }
+        } catch (pageError) {
+          console.error("Error página " + (i + 1), pageError);
+        }
+      }
 
-        if (error) throw error;
-
-        Alert.alert('Exito', 'Factura procesada correctamente', [
-          {text: 'OK', onPress: () => navigation.goBack()},
-        ]);
+      if (successCount > 0) {
+        Alert.alert(
+          "Éxito",
+          successCount + " de " + scannedImages.length + " facturas procesadas",
+          [{text: "OK", onPress: () => navigation.goBack()}]
+        );
       } else {
-        Alert.alert('Error', result.error || 'Error procesando factura');
+        Alert.alert("Error", "No se pudo procesar ninguna factura");
       }
     } catch (error: any) {
-      console.error('Process error:', error);
-      Alert.alert('Error', error.message || 'Error al procesar');
+      Alert.alert("Error", error.message || "Error al procesar");
     } finally {
       setIsProcessing(false);
-      setProcessingStatus('');
+      setProcessingStatus("");
     }
   };
 
-  // ==========================================
-  // Reset / Retake
-  // ==========================================
-
-  const resetCapture = () => {
-    setCapturedImage(null);
-    setLongModeImages({});
-    setLongModeStep('top');
+  const resetScanner = () => {
+    setScannedImages([]);
+    startScanner();
   };
 
-  // ==========================================
-  // Render Loading / No Permission
-  // ==========================================
+  useEffect(() => {
+    startScanner();
+  }, []);
 
-  if (!hasPermission) {
-    return (
-      <View style={styles.centered}>
-        <Text style={styles.message}>Se requiere permiso de camara</Text>
-        <Button mode="contained" onPress={requestPermission}>
-          Solicitar Permiso
-        </Button>
-      </View>
-    );
-  }
-
-  if (!device) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#2196F3" />
-        <Text style={styles.message}>Cargando camara...</Text>
-      </View>
-    );
-  }
-
-  // ==========================================
-  // Render Preview (After Capture)
-  // ==========================================
-
-  if (capturedImage) {
+  if (scannedImages.length > 0) {
     return (
       <View style={styles.container}>
         <ScrollView contentContainerStyle={styles.previewContainer}>
-          <Image source={{uri: capturedImage}} style={styles.previewImage} resizeMode="contain" />
+          <Text style={styles.title}>
+            {scannedImages.length} página(s) escaneada(s)
+          </Text>
+          
+          <ScrollView horizontal showsHorizontalScrollIndicator={true} style={styles.imageScroll}>
+            {scannedImages.map((uri, index) => (
+              <View key={index} style={styles.imageWrapper}>
+                <Image source={{uri}} style={styles.previewImage} resizeMode="contain" />
+                <Text style={styles.pageNumber}>Página {index + 1}</Text>
+              </View>
+            ))}
+          </ScrollView>
 
           {isProcessing ? (
             <View style={styles.processingContainer}>
@@ -243,19 +151,11 @@ const CameraScreen: React.FC<Props> = ({navigation, route}) => {
               <Text style={styles.processingText}>{processingStatus}</Text>
             </View>
           ) : (
-            <View style={styles.previewButtons}>
-              <Button
-                mode="outlined"
-                onPress={resetCapture}
-                style={styles.previewButton}
-                icon="camera-retake">
-                Retomar
+            <View style={styles.buttonContainer}>
+              <Button mode="outlined" onPress={resetScanner} style={styles.button} icon="camera-retake">
+                Escanear de nuevo
               </Button>
-              <Button
-                mode="contained"
-                onPress={handleProcessInvoice}
-                style={styles.previewButton}
-                icon="check">
+              <Button mode="contained" onPress={handleProcessInvoices} style={styles.button} icon="check">
                 Procesar
               </Button>
             </View>
@@ -265,237 +165,31 @@ const CameraScreen: React.FC<Props> = ({navigation, route}) => {
     );
   }
 
-  // ==========================================
-  // Render Camera
-  // ==========================================
-
   return (
-    <View style={styles.container}>
-      <Camera
-        ref={cameraRef}
-        style={StyleSheet.absoluteFill}
-        device={device}
-        isActive={true}
-        photo={true}
-        zoom={zoom}
-      />
-
-      {/* Mode Selector */}
-      <View style={styles.modeSelector}>
-        <TouchableOpacity
-          style={[styles.modeButton, captureMode === 'normal' && styles.modeButtonActive]}
-          onPress={() => setCaptureMode('normal')}>
-          <Text style={[styles.modeText, captureMode === 'normal' && styles.modeTextActive]}>
-            Normal
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.modeButton, captureMode === 'long' && styles.modeButtonActive]}
-          onPress={() => setCaptureMode('long')}>
-          <Text style={[styles.modeText, captureMode === 'long' && styles.modeTextActive]}>
-            Larga
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.modeButton, captureMode === 'gallery' && styles.modeButtonActive]}
-          onPress={() => {
-            setCaptureMode('gallery');
-            openGallery();
-          }}>
-          <Text style={[styles.modeText, captureMode === 'gallery' && styles.modeTextActive]}>
-            Galeria
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Long Mode Instructions */}
-      {captureMode === 'long' && (
-        <View style={styles.longModeOverlay}>
-          <Text style={styles.longModeText}>
-            {longModeStep === 'top' ? 'Capture parte SUPERIOR' : 'Capture parte INFERIOR'}
-          </Text>
-          {longModeImages.top && (
-            <Text style={styles.longModeStatus}>Superior capturada</Text>
-          )}
-        </View>
-      )}
-
-      {/* Controls */}
-      <View style={styles.controls}>
-        <IconButton
-          icon={flash === 'on' ? 'flash' : 'flash-off'}
-          iconColor="white"
-          size={30}
-          onPress={() => setFlash(flash === 'on' ? 'off' : 'on')}
-        />
-
-        <TouchableOpacity style={styles.captureButton} onPress={capturePhoto}>
-          <View style={styles.captureButtonInner} />
-        </TouchableOpacity>
-
-        <IconButton
-          icon="image-multiple"
-          iconColor="white"
-          size={30}
-          onPress={openGallery}
-        />
-      </View>
-
-      {/* Zoom Slider */}
-      <View style={styles.zoomContainer}>
-        <Text style={styles.zoomText}>{zoom.toFixed(1)}x</Text>
-        <TouchableOpacity onPress={() => setZoom(Math.min(zoom + 0.5, 5))}>
-          <Text style={styles.zoomButton}>+</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setZoom(Math.max(zoom - 0.5, 1))}>
-          <Text style={styles.zoomButton}>-</Text>
-        </TouchableOpacity>
-      </View>
+    <View style={styles.loadingContainer}>
+      <ActivityIndicator size="large" color="#2196F3" />
+      <Text style={styles.loadingText}>Abriendo escáner...</Text>
+      <Button mode="outlined" onPress={() => navigation.goBack()} style={{marginTop: 20}}>
+        Cancelar
+      </Button>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#000',
-  },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    padding: 20,
-  },
-  message: {
-    fontSize: 16,
-    marginBottom: 20,
-    textAlign: 'center',
-    color: '#333',
-  },
-  modeSelector: {
-    position: 'absolute',
-    top: 50,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    zIndex: 10,
-  },
-  modeButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    marginHorizontal: 5,
-    borderRadius: 20,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
-  modeButtonActive: {
-    backgroundColor: '#2196F3',
-  },
-  modeText: {
-    color: 'white',
-    fontSize: 14,
-  },
-  modeTextActive: {
-    fontWeight: 'bold',
-  },
-  longModeOverlay: {
-    position: 'absolute',
-    top: 120,
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-  },
-  longModeText: {
-    color: '#FFD700',
-    fontSize: 18,
-    fontWeight: 'bold',
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    padding: 10,
-    borderRadius: 10,
-  },
-  longModeStatus: {
-    color: '#4CAF50',
-    fontSize: 14,
-    marginTop: 10,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    padding: 5,
-    borderRadius: 5,
-  },
-  controls: {
-    position: 'absolute',
-    bottom: 40,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-  },
-  captureButton: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: 'rgba(255,255,255,0.3)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  captureButtonInner: {
-    width: 65,
-    height: 65,
-    borderRadius: 32.5,
-    backgroundColor: 'white',
-  },
-  zoomContainer: {
-    position: 'absolute',
-    right: 20,
-    top: '40%',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    padding: 10,
-    borderRadius: 10,
-  },
-  zoomText: {
-    color: 'white',
-    fontSize: 14,
-    marginBottom: 10,
-  },
-  zoomButton: {
-    color: 'white',
-    fontSize: 24,
-    fontWeight: 'bold',
-    padding: 5,
-  },
-  previewContainer: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#f5f5f5',
-  },
-  previewImage: {
-    width: SCREEN_WIDTH - 40,
-    height: SCREEN_HEIGHT * 0.6,
-    borderRadius: 10,
-    marginBottom: 20,
-  },
-  previewButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
-  },
-  previewButton: {
-    flex: 1,
-    marginHorizontal: 10,
-  },
-  processingContainer: {
-    alignItems: 'center',
-    padding: 20,
-  },
-  processingText: {
-    marginTop: 15,
-    fontSize: 16,
-    color: '#666',
-  },
+  container: {flex: 1, backgroundColor: "#f5f5f5"},
+  loadingContainer: {flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#fff"},
+  loadingText: {marginTop: 15, fontSize: 16, color: "#666"},
+  previewContainer: {flexGrow: 1, padding: 20, alignItems: "center"},
+  title: {fontSize: 20, fontWeight: "bold", marginBottom: 20, color: "#333"},
+  imageScroll: {maxHeight: 350, marginBottom: 20},
+  imageWrapper: {marginRight: 15, alignItems: "center"},
+  previewImage: {width: SCREEN_WIDTH * 0.7, height: 300, borderRadius: 10, backgroundColor: "#fff"},
+  pageNumber: {marginTop: 8, fontSize: 14, color: "#666"},
+  processingContainer: {alignItems: "center", padding: 20},
+  processingText: {marginTop: 15, fontSize: 16, color: "#666"},
+  buttonContainer: {flexDirection: "row", justifyContent: "space-around", width: "100%", marginTop: 20},
+  button: {flex: 1, marginHorizontal: 10},
 });
 
 export default CameraScreen;

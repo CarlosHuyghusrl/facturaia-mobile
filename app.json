@@ -4,7 +4,7 @@
   "expo": {
     "name": "GestorIA RD",
     "slug": "facturascannerapp",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "sdkVersion": "52.0.0",
     "platforms": ["android", "ios"],
     "icon": "./assets/icon.png",
@@ -35,10 +35,9 @@
       "expo-asset",
       "expo-font",
       [
-        "react-native-vision-camera",
+        "react-native-document-scanner-plugin",
         {
-          "cameraPermissionText": "GestorIA RD necesita acceso a la cámara para escanear facturas",
-          "enableMicrophonePermission": false
+          "cameraPermissionText": "GestorIA RD necesita acceso a la cámara para escanear facturas"
         }
       ]
     ],

@@ -1,43 +1,136 @@
-# FacturaIA - Ralph Autonomous Loop
+# FacturaIA - Migración a Document Scanner
 
 ## Proyecto
-Sistema de escaneo de facturas con OCR + IA para generar formatos DGII (606, 607).
+App móvil React Native para escaneo de facturas con OCR.
 
 ## Stack
-- **App Movil**: React Native + Expo + vision-camera
-- **Backend**: Go + Gemini API + Tesseract
-- **BD**: PostgreSQL (Contabo)
-- **Automatizacion**: n8n
+- **Frontend:** React Native + Expo
+- **Scanner:** @dariyd/react-native-document-scanner (NUEVO)
+- **OCR:** Backend Gemini Vision (ya funciona)
+- **Build:** Gradle local → validar → EAS
 
-## Tarea Actual
-Completar la implementacion del workflow n8n OCR-DGII:
+## Tarea Actual: MIGRACIÓN COMPLETA
 
-### Subtareas
-1. [ ] Verificar EAS Build completado
-2. [ ] Probar APK en dispositivo fisico
-3. [ ] Crear workflow n8n (8 nodos) para procesar facturas
-4. [ ] Configurar Gemini API en n8n
-5. [ ] Implementar validacion NCF/RNC
-6. [ ] Crear script generador 606.txt y 607.txt
+### FASE 1: Preparar Entorno Android SDK
+1. [ ] Verificar Java 17: java -version
+2. [ ] Instalar Android SDK cmdline-tools si no existe
+3. [ ] Configurar ANDROID_HOME en ~/.bashrc
+4. [ ] Aceptar licencias: sdkmanager --licenses
+5. [ ] Instalar: sdkmanager "build-tools;34.0.0" "platforms;android-34"
 
-## Archivos Clave
-- `FacturaScannerApp_Clean/src/screens/CameraScreen.tsx` - Captura de facturas
-- `invoice-ocr-service/internal/ai/extractor.go` - Extraccion con Gemini
-- `C:\memoria-permanente\brain\current\facturaia\task.md` - Tareas detalladas
+### FASE 2: Migrar Código
+1. [ ] npm uninstall react-native-vision-camera react-native-image-crop-picker
+2. [ ] npm install @dariyd/react-native-document-scanner
+3. [ ] Crear src/screens/CameraScreen.tsx usando DocumentScanner
+4. [ ] Actualizar navegación en App.tsx
 
-## Conexiones
-```bash
-# SSH Contabo
-ssh -p 2024 gestoria@217.216.48.91
+### FASE 3: Build Local (VALIDACIÓN)
+1. [ ] npx expo prebuild --clean
+2. [ ] cd android && ./gradlew clean
+3. [ ] ./gradlew assembleDebug
+4. [ ] Verificar APK en android/app/build/outputs/apk/debug/
 
-# n8n (via tunnel)
-ssh -p 2024 -L 5678:localhost:5678 gestoria@217.216.48.91
+### FASE 4: Solo si Fase 3 OK
+1. [ ] git add . && git commit -m "feat: migrate to document-scanner"
+2. [ ] git push
+3. [ ] eas build --platform android --profile development
 
-# PostgreSQL (via tunnel)
-ssh -p 2024 -L 6432:localhost:6432 gestoria@217.216.48.91
+## Código CameraScreen con DocumentScanner
+
+```typescript
+import React, {useState} from 'react';
+import {View, StyleSheet, Alert, ActivityIndicator, Image, Text} from 'react-native';
+import {Button} from 'react-native-paper';
+import DocumentScanner from '@dariyd/react-native-document-scanner';
+import {processInvoice} from '../services/api';
+import {supabase, getCurrentUser, uploadReceiptImage} from '../config/supabase';
+
+const CameraScreen = ({navigation, route}) => {
+  const {groupId} = route.params;
+  const [scannedImages, setScannedImages] = useState<string[]>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleScanComplete = (images: string[]) => {
+    setScannedImages(images);
+  };
+
+  const handleProcess = async () => {
+    if (scannedImages.length === 0) return;
+    
+    setIsProcessing(true);
+    try {
+      const user = await getCurrentUser();
+      if (!user) throw new Error('No autenticado');
+
+      // Procesar cada imagen con backend Gemini
+      for (const imagePath of scannedImages) {
+        const result = await processInvoice(imagePath);
+        if (result.success) {
+          const imageUrl = await uploadReceiptImage(imagePath, user.id);
+          await supabase.from('facturas').insert({
+            user_id: user.id,
+            group_id: groupId,
+            vendor: result.data.vendor,
+            date: result.data.date,
+            total: result.data.total,
+            image_url: imageUrl,
+            items: result.data.items,
+          });
+        }
+      }
+      Alert.alert('Éxito', 'Facturas procesadas', [
+        {text: 'OK', onPress: () => navigation.goBack()}
+      ]);
+    } catch (error) {
+      Alert.alert('Error', error.message);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  if (scannedImages.length > 0) {
+    return (
+      <View style={styles.container}>
+        <Text>Páginas escaneadas: {scannedImages.length}</Text>
+        {isProcessing ? (
+          <ActivityIndicator size="large" />
+        ) : (
+          <View style={styles.buttons}>
+            <Button onPress={() => setScannedImages([])}>Retomar</Button>
+            <Button mode="contained" onPress={handleProcess}>Procesar</Button>
+          </View>
+        )}
+      </View>
+    );
+  }
+
+  return (
+    <DocumentScanner
+      onComplete={handleScanComplete}
+      onCancel={() => navigation.goBack()}
+      overlayColor="rgba(0,0,0,0.5)"
+      enableMultiPage={true}
+      maxPages={10}
+    />
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {flex: 1, justifyContent: 'center', alignItems: 'center'},
+  buttons: {flexDirection: 'row', gap: 20, marginTop: 20},
+});
+
+export default CameraScreen;
 ```
 
-## Criterios de Exito
-- [ ] APK funcionando en dispositivo
-- [ ] Workflow n8n procesando facturas
-- [ ] Datos guardados en PostgreSQL
+## Criterios de Éxito
+- [ ] Android SDK instalado y funcional
+- [ ] Build local genera APK sin errores
+- [ ] DocumentScanner captura múltiples páginas
+- [ ] Backend Gemini procesa correctamente
+- [ ] EAS build exitoso (después de validación local)
+
+## Conexiones
+- Servidor: gestoria@217.216.48.91:2024
+- Proyecto: ~/eas-builds/FacturaScannerApp
+- Backend: https://invoice-ocr-service-production.up.railway.app
