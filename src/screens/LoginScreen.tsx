@@ -1,15 +1,9 @@
 /**
- * LoginScreen - Authentication screen
- *
- * Features:
- * - Email/password authentication with Supabase
- * - Sign up functionality
- * - Form validation
- * - Loading states
- * - Error handling
+ * LoginScreen - Login con RNC + PIN
+ * Sin selector de empresa
  */
 
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -19,277 +13,158 @@ import {
   Alert,
 } from 'react-native';
 import {
+  Text,
   TextInput,
   Button,
-  Title,
-  Paragraph,
+  ActivityIndicator,
+  Surface,
   HelperText,
-  Divider,
 } from 'react-native-paper';
-import {StackNavigationProp} from '@react-navigation/stack';
-import {RootStackParamList} from '../types/invoice';
-import {signInWithEmail, signUpWithEmail} from '../config/supabase';
+import { useAuth } from '../hooks/useAuth';
+import Logo from '../components/Logo';
 
-type LoginScreenNavigationProp = StackNavigationProp<
-  RootStackParamList,
-  'Login'
->;
+const LoginScreen: React.FC = () => {
+  const { login, isLoading } = useAuth();
 
-interface Props {
-  navigation: LoginScreenNavigationProp;
-}
+  const [rnc, setRnc] = useState('');
+  const [pin, setPin] = useState('');
+  const [errors, setErrors] = useState<{ rnc?: string; pin?: string }>({});
+  const [submitting, setSubmitting] = useState(false);
 
-const LoginScreen: React.FC<Props> = ({navigation}) => {
-  // State
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [isSignUpMode, setIsSignUpMode] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  const validateForm = (): boolean => {
+    const newErrors: typeof errors = {};
 
-  // Validation
-  const [emailError, setEmailError] = useState('');
-  const [passwordError, setPasswordError] = useState('');
-
-  // ==========================================
-  // Validation Functions
-  // ==========================================
-
-  const validateEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!email) {
-      setEmailError('Email is required');
-      return false;
+    if (!rnc) {
+      newErrors.rnc = 'Ingrese su RNC o Cédula';
+    } else if (!/^\d{9,11}$/.test(rnc.replace(/-/g, ''))) {
+      newErrors.rnc = 'RNC debe tener 9 u 11 dígitos';
     }
-    if (!emailRegex.test(email)) {
-      setEmailError('Please enter a valid email');
-      return false;
+
+    if (!pin) {
+      newErrors.pin = 'Ingrese su PIN';
+    } else if (!/^\d{4,6}$/.test(pin)) {
+      newErrors.pin = 'PIN debe tener 4-6 dígitos';
     }
-    setEmailError('');
-    return true;
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  const validatePassword = (password: string): boolean => {
-    if (!password) {
-      setPasswordError('Password is required');
-      return false;
-    }
-    if (password.length < 6) {
-      setPasswordError('Password must be at least 6 characters');
-      return false;
-    }
-    setPasswordError('');
-    return true;
-  };
+  const handleLogin = async () => {
+    if (!validateForm()) return;
 
-  const validateConfirmPassword = (): boolean => {
-    if (isSignUpMode && password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
-      return false;
-    }
-    return true;
-  };
-
-  // ==========================================
-  // Authentication Handlers
-  // ==========================================
-
-  const handleSignIn = async () => {
-    // Validate inputs
-    const isEmailValid = validateEmail(email);
-    const isPasswordValid = validatePassword(password);
-
-    if (!isEmailValid || !isPasswordValid) {
-      return;
-    }
-
-    setIsLoading(true);
+    setSubmitting(true);
+    setErrors({});
 
     try {
-      const {user, session} = await signInWithEmail(email, password);
+      const result = await login({
+        rnc: rnc.replace(/-/g, ''),
+        pin: pin,
+      });
 
-      if (user && session) {
-        console.log('Sign in successful:', user.id);
-        // Navigation will be handled by auth state listener in App.tsx
-        // For now, navigate to InvoiceList with default group
-        navigation.replace('InvoiceList', {groupId: 'default'});
+      if (!result.success) {
+        Alert.alert('Error', result.error || 'Error de autenticación');
       }
     } catch (error: any) {
-      console.error('Sign in error:', error);
-      Alert.alert(
-        'Sign In Failed',
-        error.message || 'Invalid email or password',
-      );
+      Alert.alert('Error', error.message || 'Error de conexión');
     } finally {
-      setIsLoading(false);
+      setSubmitting(false);
     }
   };
 
-  const handleSignUp = async () => {
-    // Validate inputs
-    const isEmailValid = validateEmail(email);
-    const isPasswordValid = validatePassword(password);
-    const isConfirmValid = validateConfirmPassword();
-
-    if (!isEmailValid || !isPasswordValid || !isConfirmValid) {
-      return;
+  const formatRNC = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 9) {
+      return numbers;
     }
-
-    setIsLoading(true);
-
-    try {
-      const {user, session} = await signUpWithEmail(email, password);
-
-      if (user) {
-        Alert.alert(
-          'Sign Up Successful',
-          'Please check your email to verify your account',
-          [
-            {
-              text: 'OK',
-              onPress: () => {
-                setIsSignUpMode(false);
-                setPassword('');
-                setConfirmPassword('');
-              },
-            },
-          ],
-        );
-      }
-    } catch (error: any) {
-      console.error('Sign up error:', error);
-      Alert.alert(
-        'Sign Up Failed',
-        error.message || 'Could not create account',
-      );
-    } finally {
-      setIsLoading(false);
-    }
+    // Formato cédula: 000-0000000-0
+    return numbers.slice(0, 3) + '-' + numbers.slice(3, 10) + '-' + numbers.slice(10, 11);
   };
-
-  const handleSubmit = () => {
-    if (isSignUpMode) {
-      handleSignUp();
-    } else {
-      handleSignIn();
-    }
-  };
-
-  const toggleMode = () => {
-    setIsSignUpMode(!isSignUpMode);
-    setEmail('');
-    setPassword('');
-    setConfirmPassword('');
-    setEmailError('');
-    setPasswordError('');
-  };
-
-  // ==========================================
-  // Render
-  // ==========================================
 
   return (
     <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled">
-        <View style={styles.content}>
-          {/* Header */}
-          <View style={styles.header}>
-            <Title style={styles.title}>FacturaScanner</Title>
-            <Paragraph style={styles.subtitle}>
-              {isSignUpMode
-                ? 'Create your account to get started'
-                : 'Sign in to manage your invoices'}
-            </Paragraph>
-          </View>
-
-          {/* Form */}
-          <View style={styles.form}>
-            {/* Email Input */}
-            <TextInput
-              label="Email"
-              value={email}
-              onChangeText={setEmail}
-              onBlur={() => validateEmail(email)}
-              mode="outlined"
-              autoCapitalize="none"
-              keyboardType="email-address"
-              textContentType="emailAddress"
-              error={!!emailError}
-              disabled={isLoading}
-              style={styles.input}
-            />
-            <HelperText type="error" visible={!!emailError}>
-              {emailError}
-            </HelperText>
-
-            {/* Password Input */}
-            <TextInput
-              label="Password"
-              value={password}
-              onChangeText={setPassword}
-              onBlur={() => validatePassword(password)}
-              mode="outlined"
-              secureTextEntry={!showPassword}
-              textContentType="password"
-              error={!!passwordError}
-              disabled={isLoading}
-              right={
-                <TextInput.Icon
-                  icon={showPassword ? 'eye-off' : 'eye'}
-                  onPress={() => setShowPassword(!showPassword)}
-                />
-              }
-              style={styles.input}
-            />
-            <HelperText type="error" visible={!!passwordError}>
-              {passwordError}
-            </HelperText>
-
-            {/* Confirm Password (Sign Up only) */}
-            {isSignUpMode && (
-              <>
-                <TextInput
-                  label="Confirm Password"
-                  value={confirmPassword}
-                  onChangeText={setConfirmPassword}
-                  mode="outlined"
-                  secureTextEntry={!showPassword}
-                  textContentType="password"
-                  disabled={isLoading}
-                  style={styles.input}
-                />
-              </>
-            )}
-
-            {/* Submit Button */}
-            <Button
-              mode="contained"
-              onPress={handleSubmit}
-              loading={isLoading}
-              disabled={isLoading}
-              style={styles.submitButton}>
-              {isSignUpMode ? 'Sign Up' : 'Sign In'}
-            </Button>
-
-            {/* Toggle Mode */}
-            <Divider style={styles.divider} />
-
-            <Button
-              mode="text"
-              onPress={toggleMode}
-              disabled={isLoading}
-              style={styles.toggleButton}>
-              {isSignUpMode
-                ? 'Already have an account? Sign In'
-                : "Don't have an account? Sign Up"}
-            </Button>
-          </View>
+    >
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {/* Header con Logo */}
+        <View style={styles.logoContainer}>
+          <Logo size={100} showBackground={true} />
+          <Text style={styles.title}>Factura<Text style={styles.titleAccent}>IA</Text></Text>
+          <Text style={styles.subtitle}>Gestor de Facturas Inteligente</Text>
         </View>
+
+        <Surface style={styles.card}>
+          <View style={styles.inputContainer}>
+            <TextInput
+              label="RNC / Cédula"
+              value={rnc}
+              onChangeText={(text) => {
+                setRnc(formatRNC(text));
+                setErrors(prev => ({ ...prev, rnc: undefined }));
+              }}
+              keyboardType="numeric"
+              maxLength={13}
+              mode="outlined"
+              error={!!errors.rnc}
+              left={<TextInput.Icon icon="card-account-details" />}
+              outlineColor="#64748b"
+              activeOutlineColor="#22D3EE"
+              textColor="#FFFFFF"
+              style={styles.input}
+              theme={{ colors: { onSurfaceVariant: '#94a3b8' } }}
+            />
+            {errors.rnc && (
+              <HelperText type="error" visible>{errors.rnc}</HelperText>
+            )}
+          </View>
+
+          <View style={styles.inputContainer}>
+            <TextInput
+              label="PIN"
+              value={pin}
+              onChangeText={(text) => {
+                setPin(text.replace(/\D/g, '').slice(0, 6));
+                setErrors(prev => ({ ...prev, pin: undefined }));
+              }}
+              keyboardType="numeric"
+              secureTextEntry
+              maxLength={6}
+              mode="outlined"
+              error={!!errors.pin}
+              left={<TextInput.Icon icon="lock" />}
+              outlineColor="#64748b"
+              activeOutlineColor="#22D3EE"
+              textColor="#FFFFFF"
+              style={styles.input}
+              theme={{ colors: { onSurfaceVariant: '#94a3b8' } }}
+            />
+            {errors.pin && (
+              <HelperText type="error" visible>{errors.pin}</HelperText>
+            )}
+          </View>
+
+          <Button
+            mode="contained"
+            onPress={handleLogin}
+            disabled={submitting || isLoading}
+            style={styles.button}
+            contentStyle={styles.buttonContent}
+            buttonColor="#22D3EE"
+            textColor="#0f172a"
+            labelStyle={styles.buttonLabel}
+          >
+            {submitting ? (
+              <ActivityIndicator color="#0f172a" size="small" />
+            ) : (
+              'Iniciar Sesión'
+            )}
+          </Button>
+
+          <Text style={styles.infoText}>
+            Ingrese los datos proporcionados por su gestoría
+          </Text>
+        </Surface>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -298,47 +173,61 @@ const LoginScreen: React.FC<Props> = ({navigation}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#0f172a',
   },
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
+    padding: 20,
   },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    padding: 24,
-  },
-  header: {
+  logoContainer: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: 24,
   },
   title: {
-    fontSize: 32,
+    fontSize: 36,
     fontWeight: 'bold',
-    color: '#1976d2',
-    marginBottom: 8,
+    color: '#FFFFFF',
+    textAlign: 'center',
+    marginTop: 16,
+  },
+  titleAccent: {
+    color: '#22D3EE',
   },
   subtitle: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: 14,
+    color: '#CBD5E1',
     textAlign: 'center',
+    marginTop: 4,
   },
-  form: {
-    width: '100%',
+  card: {
+    padding: 24,
+    borderRadius: 16,
+    elevation: 4,
+    backgroundColor: '#1e293b',
+  },
+  inputContainer: {
+    marginBottom: 16,
   },
   input: {
-    marginBottom: 8,
+    backgroundColor: '#1e293b',
   },
-  submitButton: {
-    marginTop: 16,
+  button: {
+    marginTop: 24,
+    borderRadius: 8,
+  },
+  buttonContent: {
     paddingVertical: 8,
   },
-  divider: {
-    marginVertical: 24,
+  buttonLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
   },
-  toggleButton: {
-    marginTop: 8,
+  infoText: {
+    fontSize: 12,
+    color: '#94a3b8',
+    textAlign: 'center',
+    marginTop: 16,
   },
 });
 

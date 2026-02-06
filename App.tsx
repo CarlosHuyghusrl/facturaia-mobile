@@ -1,145 +1,149 @@
 /**
  * App.tsx - Main application entry point
- *
- * Features:
- * - React Navigation stack navigator
- * - Authentication state management
- * - React Native Paper theme provider
- * - Auto-redirect based on auth state
+ * Sistema Multi-Tenant con AuthProvider
  */
 
-import React, {useState, useEffect} from 'react';
-import {StatusBar, LogBox} from 'react-native';
-import {NavigationContainer} from '@react-navigation/native';
-import {createStackNavigator} from '@react-navigation/stack';
-import {Provider as PaperProvider, DefaultTheme} from 'react-native-paper';
-import {GestureHandlerRootView} from 'react-native-gesture-handler';
+import React from "react";
+import {StatusBar, LogBox, View, Text, ActivityIndicator, StyleSheet} from "react-native";
+import {NavigationContainer} from "@react-navigation/native";
+import {createStackNavigator} from "@react-navigation/stack";
+import {Provider as PaperProvider, DefaultTheme} from "react-native-paper";
+import {GestureHandlerRootView} from "react-native-gesture-handler";
+
+// Auth Provider
+import {AuthProvider, useAuth} from "./src/hooks/useAuth";
 
 // Screens
-import LoginScreen from './src/screens/LoginScreen';
-import CameraScreen from './src/screens/CameraScreen';
-import InvoiceListScreen from './src/screens/InvoiceListScreen';
+import LoginScreen from "./src/screens/LoginScreen";
+import HomeScreen from "./src/screens/HomeScreen";
+import CameraScreen from "./src/screens/CameraScreen";
+import InvoiceDetailScreen from "./src/screens/InvoiceDetailScreen";
 
-// Types & Config
-import {RootStackParamList} from './src/types/invoice';
-import {supabase, isAuthenticated} from './src/config/supabase';
-
-// Ignore specific warnings
 LogBox.ignoreLogs([
-  'Non-serializable values were found in the navigation state',
+  "Non-serializable values were found in the navigation state",
 ]);
 
-// Create Stack Navigator
+// Navigation types
+export type RootStackParamList = {
+  Login: undefined;
+  Home: undefined;
+  Camera: undefined;
+  InvoiceDetail: { facturaId: string };
+};
+
 const Stack = createStackNavigator<RootStackParamList>();
 
-// Custom theme
+// Tema con colores FacturaIA (cyan)
 const theme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    primary: '#1976d2',
-    accent: '#ff9800',
+    primary: "#22D3EE",    // cyan-400
+    accent: "#3B82F6",     // blue-500
+    background: "#0f172a", // slate-900
+    surface: "#1e293b",    // slate-800
   },
 };
 
-function App(): React.JSX.Element {
-  const [isAuthChecking, setIsAuthChecking] = useState(true);
-  const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
+// Splash Screen Component
+const SplashScreen = () => (
+  <View style={styles.splash}>
+    <Text style={styles.splashTitle}>Factura<Text style={styles.splashAccent}>IA</Text></Text>
+    <ActivityIndicator size="large" color="#22D3EE" style={{marginTop: 20}} />
+    <Text style={styles.splashText}>Cargando...</Text>
+  </View>
+);
 
-  // ==========================================
-  // Auth State Management
-  // ==========================================
+// Navigator con lógica de auth
+const AppNavigator = () => {
+  const {isLoading, isAuthenticated} = useAuth();
 
-  useEffect(() => {
-    // Check initial auth state
-    checkAuthState();
-
-    // Listen for auth changes
-    const {
-      data: {subscription},
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log('Auth state changed:', _event, session?.user?.id);
-      setIsUserAuthenticated(session !== null);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  const checkAuthState = async () => {
-    try {
-      const authenticated = await isAuthenticated();
-      setIsUserAuthenticated(authenticated);
-    } catch (error) {
-      console.error('Error checking auth state:', error);
-      setIsUserAuthenticated(false);
-    } finally {
-      setIsAuthChecking(false);
-    }
-  };
-
-  // ==========================================
-  // Render
-  // ==========================================
-
-  if (isAuthChecking) {
-    // You can show a splash screen here
-    return null;
+  // Mostrar splash mientras verifica auth
+  if (isLoading) {
+    return <SplashScreen />;
   }
 
   return (
-    <GestureHandlerRootView style={{flex: 1}}>
-      <PaperProvider theme={theme}>
-        <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-        <NavigationContainer>
-          <Stack.Navigator
-            initialRouteName={isUserAuthenticated ? 'InvoiceList' : 'Login'}
-            screenOptions={{
-              headerStyle: {
-                backgroundColor: theme.colors.primary,
-              },
-              headerTintColor: '#fff',
-              headerTitleStyle: {
-                fontWeight: 'bold',
-              },
-            }}>
-            {/* Login Screen */}
+    <NavigationContainer>
+      <Stack.Navigator
+        screenOptions={{
+          headerStyle: {backgroundColor: "#0f172a"},
+          headerTintColor: "#fff",
+          headerTitleStyle: {fontWeight: "bold"},
+        }}>
+        {!isAuthenticated ? (
+          // Stack de autenticación
+          <Stack.Screen
+            name="Login"
+            component={LoginScreen}
+            options={{headerShown: false}}
+          />
+        ) : (
+          // Stack autenticado
+          <>
             <Stack.Screen
-              name="Login"
-              component={LoginScreen}
+              name="Home"
+              component={HomeScreen}
               options={{
-                headerShown: false,
+                title: "FacturaIA",
+                headerLeft: () => null,
               }}
             />
-
-            {/* Invoice List Screen */}
-            <Stack.Screen
-              name="InvoiceList"
-              component={InvoiceListScreen}
-              options={{
-                title: 'My Invoices',
-                headerLeft: () => null, // Prevent going back to login
-              }}
-              initialParams={{groupId: 'default'}}
-            />
-
-            {/* Camera Screen */}
             <Stack.Screen
               name="Camera"
               component={CameraScreen}
               options={{
-                title: 'Scan Invoice',
-                headerStyle: {
-                  backgroundColor: '#000',
-                },
+                title: "Escanear Factura",
+                headerStyle: {backgroundColor: "#000"},
               }}
             />
-          </Stack.Navigator>
-        </NavigationContainer>
-      </PaperProvider>
+            <Stack.Screen
+              name="InvoiceDetail"
+              component={InvoiceDetailScreen}
+              options={{
+                title: "Detalle Factura",
+              }}
+            />
+          </>
+        )}
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+};
+
+function App(): React.JSX.Element {
+  return (
+    <GestureHandlerRootView style={{flex: 1}}>
+      <AuthProvider>
+        <PaperProvider theme={theme}>
+          <StatusBar barStyle="light-content" backgroundColor="#0f172a" />
+          <AppNavigator />
+        </PaperProvider>
+      </AuthProvider>
     </GestureHandlerRootView>
   );
 }
+
+const styles = StyleSheet.create({
+  splash: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#0f172a",
+  },
+  splashTitle: {
+    fontSize: 36,
+    fontWeight: "bold",
+    color: "#fff",
+  },
+  splashAccent: {
+    color: "#22D3EE",
+  },
+  splashText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: "#94a3b8",
+  },
+});
 
 export default App;

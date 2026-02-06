@@ -8,24 +8,21 @@ import {ProcessInvoiceResponse, OCRError} from '../types/invoice';
 // Backend en Contabo
 const RAILWAY_OCR_URL = 'http://217.216.48.91:8081';
 
-// Token JWT hardcodeado (expira 2027-01-12)
-const HARDCODED_JWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNTQzMWUzYWItZmM4Yi00ZTYwLTk2NWItNWIxYWViMjhmOThmIiwiZW1haWwiOiJhc2llckBnZXN0b3JpYS5jb20iLCJlbXByZXNhX2FsaWFzIjoiaHV5Z2h1IiwiZW1wcmVzYV9ub21icmUiOiJIdXlnaHUgJiBBc29jLiBTUkwiLCJyb2wiOiJhZG1pbiIsImlzcyI6ImZhY3R1cmFpYSIsImV4cCI6MTc5OTc2Mjg0N30.RSPhekibZVsHwGuo2ms5aLin8vhiXVNhVqrCjy6Jf-Q';
+// DEPRECATED: Este servicio ya no se usa. Usar facturasService.ts con authService
+const JWT_TOKEN = '';
 
 const apiClient: AxiosInstance = axios.create({
   baseURL: RAILWAY_OCR_URL,
   timeout: 60000,
   headers: {
     'Content-Type': 'multipart/form-data',
+    'Authorization': 'Bearer ' + JWT_TOKEN,
   },
 });
 
-// Interceptor - añade JWT a todas las requests
 apiClient.interceptors.request.use(
   config => {
-    console.log(`[API] ${config.method?.toUpperCase()} ${config.url}`);
-    if (config.url !== '/health') {
-      config.headers.Authorization = `Bearer ${HARDCODED_JWT}`;
-    }
+    console.log('[API] ' + config.method?.toUpperCase() + ' ' + config.url);
     return config;
   },
   error => {
@@ -36,12 +33,12 @@ apiClient.interceptors.request.use(
 
 apiClient.interceptors.response.use(
   response => {
-    console.log(`[API] Response ${response.status}`);
+    console.log('[API] Response ' + response.status);
     return response;
   },
   (error: AxiosError) => {
     if (error.response) {
-      console.error(`[API] Error ${error.response.status}:`, error.response.data);
+      console.error('[API] Error ' + error.response.status + ':', error.response.data);
     }
     return Promise.reject(error);
   },
@@ -60,7 +57,7 @@ export const processInvoice = async (
     formData.append('file', {
       uri: imageUri,
       type: 'image/jpeg',
-      name: `invoice_${Date.now()}.jpg`,
+      name: 'invoice_' + Date.now() + '.jpg',
     } as any);
 
     if (options?.aiProvider) {
@@ -86,7 +83,7 @@ export const processInvoice = async (
   } catch (error) {
     if (axios.isAxiosError(error)) {
       if (error.response) {
-        throw new OCRError(`Server error: ${error.response.status}`, error.response.data);
+        throw new OCRError('Server error: ' + error.response.status, error.response.data);
       }
       throw new OCRError('Network error - could not reach OCR service');
     }
@@ -99,26 +96,4 @@ export const checkServiceHealth = async () => {
   return response.data;
 };
 
-export const testConnection = async (): Promise<boolean> => {
-  try {
-    const health = await checkServiceHealth();
-    return health.status === 'healthy';
-  } catch {
-    return false;
-  }
-};
-
-export const getAPIConfig = () => ({
-  baseURL: RAILWAY_OCR_URL,
-  timeout: apiClient.defaults.timeout,
-  isConfigured: true,
-});
-
-export {apiClient};
-
-export default {
-  processInvoice,
-  checkServiceHealth,
-  testConnection,
-  getAPIConfig,
-};
+export default { processInvoice, checkServiceHealth };

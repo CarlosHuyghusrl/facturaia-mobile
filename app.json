@@ -6,7 +6,10 @@
     "slug": "facturascannerapp",
     "version": "1.0.4",
     "sdkVersion": "52.0.0",
-    "platforms": ["android", "ios"],
+    "platforms": [
+      "android",
+      "ios"
+    ],
     "icon": "./assets/icon.png",
     "splash": {
       "image": "./assets/splash.png",
@@ -39,7 +42,8 @@
         {
           "cameraPermissionText": "GestorIA RD necesita acceso a la cámara para escanear facturas"
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "extra": {
       "eas": {
