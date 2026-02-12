@@ -29,7 +29,7 @@ Plataforma SaaS para firmas contables en República Dominicana:
 | Componente | Tecnología |
 |------------|------------|
 | App Móvil | React Native + Expo |
-| Backend OCR | Go (facturaia-ocr v2.12.0) |
+| Backend OCR | Go (facturaia-ocr v2.12.2) |
 | AI OCR | Claude Opus 4.5 via CLIProxyAPI (localhost:8317) |
 | Base de Datos | PostgreSQL 16 + PgBouncer |
 | Storage | MinIO (4 buckets) |
@@ -194,13 +194,16 @@ go run main.go
 
 ---
 
-## ESTADO ACTUAL (11-Feb-2026)
+## ESTADO ACTUAL (12-Feb-2026)
 
-### Backend v2.12.1 - DESPLEGADO
-- **Docker:** `facturaia-ocr:v2.12.1` en puerto 8081 con `--init` (anti-zombie)
+### Backend v2.12.2 - DESPLEGADO
+- **Docker:** `facturaia-ocr:v2.12.2` en puerto 8081 con `--init` (anti-zombie)
 - **DGII Completo:** 13 campos fiscales con validación automática
-- **Validación Integrada:** POST /api/v1/invoices/validate con 9 reglas DGII
-  - NCF format, ITBIS 18%, propina legal 10%, retención ISR
+- **Validación Integrada:** POST /api/v1/invoices/validate con 9+ reglas DGII
+  - NCF format + tipos (B01, B02, B04, B14, B15, B16, E31-E45)
+  - ITBIS 18% normal o 16% zona franca
+  - ISR rates por tipo: 1-8 (10%, 25%, 27%)
+  - Propina legal 10%, telecom (ISC 10%, CDT 2%)
   - Tolerancia 5% para diferencias de redondeo
 - **Flujo OCR+Validación:** ProcessInvoice ahora valida y asigna extraction_status
   - validated: factura OK
@@ -235,7 +238,8 @@ docker run -d --name facturaia-ocr --restart unless-stopped --network host \
   -e MINIO_SECRET_KEY=mMG3F4M42vgcGggEpAhAQuZ349jBkl \
   -e MINIO_USE_SSL=false -e MINIO_BUCKET=facturas \
   -e JWT_SECRET=facturaia-jwt-secret-2025-production \
-  facturaia-ocr:v2.10.0
+  --init \
+  facturaia-ocr:v2.12.2
 ```
 
 ### Test User (App Movil)
@@ -245,7 +249,11 @@ docker run -d --name facturaia-ocr --restart unless-stopped --network host \
 
 ---
 
-## PROBLEMAS CONOCIDOS (30-Ene-2026)
+## PROBLEMAS CONOCIDOS (12-Feb-2026)
+
+### ✅ RESUELTO: Zombies en healthcheck
+- **Causa:** wget en healthcheck no se limpiaba
+- **Solución:** `--init` flag en docker run (tini como PID 1)
 
 ### Camara no funciona en APK actual
 - `react-native-image-picker` launchCamera no abre en APK debug
