@@ -29,7 +29,7 @@ Plataforma SaaS para firmas contables en República Dominicana:
 | Componente | Tecnología |
 |------------|------------|
 | App Móvil | React Native + Expo |
-| Backend OCR | Go (facturaia-ocr v2.12.2) |
+| Backend OCR | Go (facturaia-ocr v2.13.0) |
 | AI OCR | Claude Opus 4.5 via CLIProxyAPI (localhost:8317) |
 | Base de Datos | PostgreSQL 16 + PgBouncer |
 | Storage | MinIO (4 buckets) |
@@ -196,9 +196,15 @@ go run main.go
 
 ## ESTADO ACTUAL (12-Feb-2026)
 
-### Backend v2.12.2 - DESPLEGADO
-- **Docker:** `facturaia-ocr:v2.12.2` en puerto 8081 con `--init` (anti-zombie)
-- **DGII Completo:** 13 campos fiscales con validación automática
+### Backend v2.13.0 - DESPLEGADO
+- **Docker:** `facturaia-ocr:v2.13.0` en puerto 8081 con `--init` (anti-zombie)
+- **DGII Completo:** 20+ campos fiscales con extracción IA completa
+- **Campos de Impuestos DGII (v2.13.0):**
+  - ITBIS: itbis, itbisTasa, itbisRetenido, itbisExento, itbisProporcionalidad, itbisCosto
+  - ISR: isr, retencionIsrTipo (códigos 1-8)
+  - ISC: isc, iscCategoria (seguros 16%, telecom 10%, alcohol, tabaco, vehículos, combustibles)
+  - Otros: cdtMonto (2%), cargo911, propina (10%), otrosImpuestos, montoNoFacturable
+  - Base: subtotal, descuento
 - **Validación Integrada:** POST /api/v1/invoices/validate con 9+ reglas DGII
   - NCF format + tipos (B01, B02, B04, B14, B15, B16, E31-E45)
   - ITBIS 18% normal o 16% zona franca
@@ -239,7 +245,7 @@ docker run -d --name facturaia-ocr --restart unless-stopped --network host \
   -e MINIO_USE_SSL=false -e MINIO_BUCKET=facturas \
   -e JWT_SECRET=facturaia-jwt-secret-2025-production \
   --init \
-  facturaia-ocr:v2.12.2
+  facturaia-ocr:v2.13.0
 ```
 
 ### Test User (App Movil)
