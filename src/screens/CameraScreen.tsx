@@ -32,7 +32,11 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import DocumentScanner from 'react-native-document-scanner-plugin';
 import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
 
-import { subirFactura, Factura } from '../services/facturasService';
+import {
+  subirFacturaConValidacion,
+  InvoiceProcessResponse,
+  Factura,
+} from '../services/facturasService';
 import { RootStackParamList } from '../../App';
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
@@ -46,7 +50,7 @@ const ScannerScreen: React.FC = () => {
 
   const [state, setState] = useState<ScanState>('idle');
   const [imageUri, setImageUri] = useState<string | null>(null);
-  const [factura, setFactura] = useState<Factura | null>(null);
+  const [processResult, setProcessResult] = useState<InvoiceProcessResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({
@@ -152,7 +156,7 @@ const ScannerScreen: React.FC = () => {
     }
   };
 
-  // Procesar imagen con OCR
+  // Procesar imagen con OCR y validación
   const processImage = async () => {
     if (!imageUri) return;
 
@@ -160,17 +164,35 @@ const ScannerScreen: React.FC = () => {
       setState('processing');
       setError(null);
 
-      const result = await subirFactura(imageUri);
-      setFactura(result);
+      const result = await subirFacturaConValidacion(imageUri);
+      setProcessResult(result);
+
+      const factura = result.data;
       setEditData({
-        ncf: result.ncf || '',
-        emisor_nombre: result.emisor_nombre || '',
-        emisor_rnc: result.emisor_rnc || '',
-        subtotal: String(result.subtotal || 0),
-        itbis: String(result.itbis || 0),
-        total: String(result.total || 0),
+        ncf: factura.ncf || '',
+        emisor_nombre: factura.emisor_nombre || '',
+        emisor_rnc: factura.emisor_rnc || '',
+        subtotal: String(factura.subtotal || 0),
+        itbis: String(factura.itbis || 0),
+        total: String(factura.monto || 0),
       });
       setIsEditing(false);
+
+      // Si necesita revisión, ir directo a pantalla de revisión
+      if (result.extraction_status === 'review' || result.extraction_status === 'error') {
+        navigation.navigate('InvoiceReview', {
+          invoiceId: result.invoice_id,
+          imageUrl: result.image_url,
+          extractedData: factura,
+          validation: result.validation,
+          extractionStatus: result.extraction_status,
+        });
+        // Reset para próximo scan
+        setState('idle');
+        setImageUri(null);
+        return;
+      }
+
       setState('success');
     } catch (err: any) {
       console.error('[Scanner] Error procesando:', err);
@@ -183,14 +205,27 @@ const ScannerScreen: React.FC = () => {
   const reset = () => {
     setState('idle');
     setImageUri(null);
-    setFactura(null);
+    setProcessResult(null);
     setError(null);
   };
 
   // Ver detalle de factura
   const goToDetail = () => {
-    if (factura) {
-      navigation.navigate('InvoiceDetail', { facturaId: factura.id });
+    if (processResult) {
+      navigation.navigate('InvoiceDetail', { facturaId: processResult.invoice_id });
+    }
+  };
+
+  // Ir a pantalla de revisión
+  const goToReview = () => {
+    if (processResult) {
+      navigation.navigate('InvoiceReview', {
+        invoiceId: processResult.invoice_id,
+        imageUrl: processResult.image_url,
+        extractedData: processResult.data,
+        validation: processResult.validation,
+        extractionStatus: processResult.extraction_status,
+      });
     }
   };
 
@@ -490,6 +525,17 @@ const ScannerScreen: React.FC = () => {
             icon="file-document"
           >
             Ver Detalle Completo
+          </Button>
+
+          <Button
+            mode="contained"
+            onPress={goToReview}
+            style={styles.actionButton}
+            buttonColor="#3b82f6"
+            textColor="#fff"
+            icon="file-check"
+          >
+            Revisar Campos Fiscales
           </Button>
 
           <Button

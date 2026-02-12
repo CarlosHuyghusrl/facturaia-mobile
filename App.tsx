@@ -18,6 +18,7 @@ import LoginScreen from "./src/screens/LoginScreen";
 import HomeScreen from "./src/screens/HomeScreen";
 import CameraScreen from "./src/screens/CameraScreen";
 import InvoiceDetailScreen from "./src/screens/InvoiceDetailScreen";
+import InvoiceReviewScreen from "./src/screens/InvoiceReviewScreen";
 
 LogBox.ignoreLogs([
   "Non-serializable values were found in the navigation state",
@@ -29,6 +30,13 @@ export type RootStackParamList = {
   Home: undefined;
   Camera: undefined;
   InvoiceDetail: { facturaId: string };
+  InvoiceReview: {
+    invoiceId: string;
+    imageUrl: string;
+    extractedData: any;
+    validation: any;
+    extractionStatus: string;
+  };
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -102,6 +110,13 @@ const AppNavigator = () => {
               component={InvoiceDetailScreen}
               options={{
                 title: "Detalle Factura",
+              }}
+            />
+            <Stack.Screen
+              name="InvoiceReview"
+              component={InvoiceReviewScreen}
+              options={{
+                title: "Revisar Factura",
               }}
             />
           </>

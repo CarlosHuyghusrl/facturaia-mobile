@@ -29,7 +29,7 @@ Plataforma SaaS para firmas contables en República Dominicana:
 | Componente | Tecnología |
 |------------|------------|
 | App Móvil | React Native + Expo |
-| Backend OCR | Go (facturaia-ocr v2.9.0) |
+| Backend OCR | Go (facturaia-ocr v2.12.0) |
 | AI OCR | Claude Opus 4.5 via CLIProxyAPI (localhost:8317) |
 | Base de Datos | PostgreSQL 16 + PgBouncer |
 | Storage | MinIO (4 buckets) |
@@ -194,15 +194,30 @@ go run main.go
 
 ---
 
-## ESTADO ACTUAL (30-Ene-2026)
+## ESTADO ACTUAL (11-Feb-2026)
 
-### Backend v2.9.0 - DESPLEGADO
-- **Docker:** `facturaia-ocr:v2.9.0` en puerto 8081
+### Backend v2.12.1 - DESPLEGADO
+- **Docker:** `facturaia-ocr:v2.12.1` en puerto 8081 con `--init` (anti-zombie)
+- **DGII Completo:** 13 campos fiscales con validación automática
+- **Validación Integrada:** POST /api/v1/invoices/validate con 9 reglas DGII
+  - NCF format, ITBIS 18%, propina legal 10%, retención ISR
+  - Tolerancia 5% para diferencias de redondeo
+- **Flujo OCR+Validación:** ProcessInvoice ahora valida y asigna extraction_status
+  - validated: factura OK
+  - review: needs_review=true o confidence<0.85
+  - error: validación falló
 - **AI Provider:** Claude Opus 4.5 via CLIProxyAPI (openai-compatible)
 - **Vision Mode:** Habilitado para openai y gemini (imagen directa, sin Tesseract)
 - **Image Proxy:** `/api/facturas/{id}/imagen` sirve imagenes de MinIO al movil
-- **DB:** PostgreSQL via PgBouncer (localhost:5433)
+- **DB:** PostgreSQL via PgBouncer (localhost:5433) + extraction_status, review_notes
 - **Storage:** MinIO (gestoria_minio / localhost:9000)
+
+### App Móvil - InvoiceReviewScreen (NUEVO)
+- **Pantalla de revisión:** Campos editables con indicadores de validación
+- **Flujo automático:** extraction_status='review'/'error' → navega a InvoiceReview
+- **Indicadores visuales:** borde rojo=error, amarillo=warning, verde=válido
+- **Valores calculados:** base_gravada, itbis_esperado, total_esperado, propina_esperada
+- **Acciones:** Aprobar (→validated) o Corregir y Guardar (re-valida)
 
 ### Deploy Command (REFERENCIA)
 ```bash
@@ -220,7 +235,7 @@ docker run -d --name facturaia-ocr --restart unless-stopped --network host \
   -e MINIO_SECRET_KEY=mMG3F4M42vgcGggEpAhAQuZ349jBkl \
   -e MINIO_USE_SSL=false -e MINIO_BUCKET=facturas \
   -e JWT_SECRET=facturaia-jwt-secret-2025-production \
-  facturaia-ocr:v2.9.0
+  facturaia-ocr:v2.10.0
 ```
 
 ### Test User (App Movil)
@@ -256,10 +271,24 @@ docker run -d --name facturaia-ocr --restart unless-stopped --network host \
 - Pass: mMG3F4M42vgcGggEpAhAQuZ349jBkl
 - Bucket: facturas
 
-### CLIProxyAPI (Claude como API)
-- URL: http://localhost:8317/v1
-- Key: sk-7mFaCRaXj5sp1S5G82S17sF4ClsTzn0ObP1D8yzPEQYmZ
-- Modelo OCR: claude-opus-4-5-20251101
+### CLIProxyAPI - Proxy IA Multi-Proveedor (10-Feb-2026)
+- **URL:** http://localhost:8317/v1
+- **Key:** sk-7mFaCRaXj5sp1S5G82S17sF4ClsTzn0ObP1D8yzPEQYmZ
+
+**Proveedores OAuth disponibles:**
+| Proveedor | Cuenta | Modelos |
+|-----------|--------|---------|
+| Claude | radelqui@gmail.com | claude-opus-4-5-*, claude-sonnet-4-*, claude-haiku-* |
+| Gemini Pro | carlos@huyghusrl.com | gemini-2.5-pro, gemini-2.5-flash |
+
+**Modelo OCR recomendado:** claude-opus-4-5-20251101
+
+**Uso Gemini (tareas rápidas):**
+```bash
+curl http://localhost:8317/v1/chat/completions \
+  -H "Authorization: Bearer sk-7mFaCRaXj5sp..." \
+  -d '{"model":"gemini-2.5-flash", "messages":[...]}'
+```
 
 ---
 
