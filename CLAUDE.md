@@ -194,10 +194,11 @@ go run main.go
 
 ---
 
-## ESTADO ACTUAL (12-Feb-2026)
+## ESTADO ACTUAL (14-Feb-2026)
 
-### Backend v2.13.0 - DESPLEGADO
-- **Docker:** `facturaia-ocr:v2.13.0` en puerto 8081 con `--init` (anti-zombie)
+### Backend v2.14.0 - DESPLEGADO
+- **Docker:** `facturaia-ocr:v2.14.0` en puerto 8081 con `--init` (anti-zombie)
+- **NUEVO:** Endpoint POST /api/facturas/{id}/reprocesar para corregir facturas antiguas
 - **DGII Completo:** 20+ campos fiscales con extracción IA completa
 - **Campos de Impuestos DGII (v2.13.0):**
   - ITBIS: itbis, itbisTasa, itbisRetenido, itbisExento, itbisProporcionalidad, itbisCosto
@@ -245,7 +246,7 @@ docker run -d --name facturaia-ocr --restart unless-stopped --network host \
   -e MINIO_USE_SSL=false -e MINIO_BUCKET=facturas \
   -e JWT_SECRET=facturaia-jwt-secret-2025-production \
   --init \
-  facturaia-ocr:v2.13.0
+  facturaia-ocr:v2.14.0
 ```
 
 ### Test User (App Movil)
@@ -255,7 +256,14 @@ docker run -d --name facturaia-ocr --restart unless-stopped --network host \
 
 ---
 
-## PROBLEMAS CONOCIDOS (12-Feb-2026)
+## PROBLEMAS CONOCIDOS (14-Feb-2026)
+
+### ⚠️ ISC=0 en facturas antiguas (pre-v2.13.2)
+- **Afecta:** 23 de 26 facturas en BD
+- **Causa:** Faltaba `&inv.ISCCategoria` en Scan de GetClientInvoiceByID
+- **Fix:** v2.13.2 corrige nuevas facturas, v2.14.0 añade endpoint /reprocesar
+- **Solución:** Usar POST /api/facturas/{id}/reprocesar para corregir cada factura
+- **Pendiente:** Plan-003 para reprocesar las 23 facturas en lote
 
 ### ✅ RESUELTO: Zombies en healthcheck
 - **Causa:** wget en healthcheck no se limpiaba

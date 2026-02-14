@@ -24,8 +24,6 @@ import {
   Surface,
   ActivityIndicator,
   IconButton,
-  Divider,
-  TextInput,
 } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -52,13 +50,10 @@ const ScannerScreen: React.FC = () => {
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [processResult, setProcessResult] = useState<InvoiceProcessResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
+  // Datos básicos para mostrar en éxito
   const [editData, setEditData] = useState({
     ncf: '',
     emisor_nombre: '',
-    emisor_rnc: '',
-    subtotal: '',
-    itbis: '',
     total: '',
   });
 
@@ -171,12 +166,8 @@ const ScannerScreen: React.FC = () => {
       setEditData({
         ncf: factura.ncf || '',
         emisor_nombre: factura.emisor_nombre || '',
-        emisor_rnc: factura.emisor_rnc || '',
-        subtotal: String(factura.subtotal || 0),
-        itbis: String(factura.itbis || 0),
         total: String(factura.monto || 0),
       });
-      setIsEditing(false);
 
       // Si necesita revisión, ir directo a pantalla de revisión
       if (result.extraction_status === 'review' || result.extraction_status === 'error') {
@@ -213,19 +204,6 @@ const ScannerScreen: React.FC = () => {
   const goToDetail = () => {
     if (processResult) {
       navigation.navigate('InvoiceDetail', { facturaId: processResult.invoice_id });
-    }
-  };
-
-  // Ir a pantalla de revisión
-  const goToReview = () => {
-    if (processResult) {
-      navigation.navigate('InvoiceReview', {
-        invoiceId: processResult.invoice_id,
-        imageUrl: processResult.image_url,
-        extractedData: processResult.data,
-        validation: processResult.validation,
-        extractionStatus: processResult.extraction_status,
-      });
     }
   };
 
@@ -365,200 +343,62 @@ const ScannerScreen: React.FC = () => {
     );
   }
 
-  // Render: Éxito - mostrar datos extraídos
+  // Render: Éxito - flujo rápido con confirmación breve
+  const factura = processResult?.data;
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.successHeader}>
-          <IconButton icon="check-circle" size={40} iconColor="#22c55e" />
-          <Text style={styles.successTitle}>Factura procesada</Text>
-        </View>
-
-        {/* Thumbnail */}
-        {imageUri && (
-          <Surface style={styles.thumbnailContainer}>
-            <Image
-              source={{ uri: imageUri }}
-              style={styles.thumbnail}
-              resizeMode="cover"
-            />
-          </Surface>
-        )}
-
-        {/* Datos extraídos */}
-        <Surface style={styles.dataCard}>
-          <View style={styles.cardHeader}>
-            <Text style={styles.cardTitle}>Datos Extraídos</Text>
-            <Button
-              mode="text"
-              onPress={() => setIsEditing(!isEditing)}
-              textColor={isEditing ? '#22c55e' : '#f59e0b'}
-              compact
-              icon={isEditing ? 'check' : 'pencil'}
-            >
-              {isEditing ? 'Listo' : 'Editar'}
-            </Button>
-          </View>
-
-          {isEditing ? (
-            <View>
-              <TextInput
-                label="NCF"
-                value={editData.ncf}
-                onChangeText={(t) => setEditData({ ...editData, ncf: t })}
-                style={styles.editInput}
-                mode="outlined"
-                outlineColor="#334155"
-                activeOutlineColor="#22D3EE"
-                textColor="#fff"
-                theme={{ colors: { onSurfaceVariant: '#94a3b8' }}}
-              />
-              <TextInput
-                label="Emisor (Vendedor)"
-                value={editData.emisor_nombre}
-                onChangeText={(t) => setEditData({ ...editData, emisor_nombre: t })}
-                style={styles.editInput}
-                mode="outlined"
-                outlineColor="#334155"
-                activeOutlineColor="#22D3EE"
-                textColor="#fff"
-                theme={{ colors: { onSurfaceVariant: '#94a3b8' }}}
-              />
-              <TextInput
-                label="RNC Emisor"
-                value={editData.emisor_rnc}
-                onChangeText={(t) => setEditData({ ...editData, emisor_rnc: t })}
-                style={styles.editInput}
-                mode="outlined"
-                outlineColor="#334155"
-                activeOutlineColor="#22D3EE"
-                textColor="#fff"
-                keyboardType="numeric"
-                theme={{ colors: { onSurfaceVariant: '#94a3b8' }}}
-              />
-              <TextInput
-                label="Subtotal"
-                value={editData.subtotal}
-                onChangeText={(t) => setEditData({ ...editData, subtotal: t })}
-                style={styles.editInput}
-                mode="outlined"
-                outlineColor="#334155"
-                activeOutlineColor="#22D3EE"
-                textColor="#fff"
-                keyboardType="decimal-pad"
-                theme={{ colors: { onSurfaceVariant: '#94a3b8' }}}
-              />
-              <TextInput
-                label="ITBIS (18%)"
-                value={editData.itbis}
-                onChangeText={(t) => setEditData({ ...editData, itbis: t })}
-                style={styles.editInput}
-                mode="outlined"
-                outlineColor="#334155"
-                activeOutlineColor="#22D3EE"
-                textColor="#fff"
-                keyboardType="decimal-pad"
-                theme={{ colors: { onSurfaceVariant: '#94a3b8' }}}
-              />
-              <TextInput
-                label="Total"
-                value={editData.total}
-                onChangeText={(t) => setEditData({ ...editData, total: t })}
-                style={styles.editInput}
-                mode="outlined"
-                outlineColor="#334155"
-                activeOutlineColor="#22D3EE"
-                textColor="#fff"
-                keyboardType="decimal-pad"
-                theme={{ colors: { onSurfaceVariant: '#94a3b8' }}}
-              />
-            </View>
-          ) : (
-            <View>
-              <View style={styles.dataRow}>
-                <Text style={styles.dataLabel}>NCF:</Text>
-                <Text style={styles.dataValueHighlight}>{editData.ncf || 'No detectado'}</Text>
-              </View>
-
-              <View style={styles.dataRow}>
-                <Text style={styles.dataLabel}>Emisor:</Text>
-                <Text style={styles.dataValue}>{editData.emisor_nombre || 'No detectado'}</Text>
-              </View>
-
-              <View style={styles.dataRow}>
-                <Text style={styles.dataLabel}>RNC Emisor:</Text>
-                <Text style={styles.dataValue}>{editData.emisor_rnc || 'No detectado'}</Text>
-              </View>
-
-              <Divider style={styles.divider} />
-
-              <View style={styles.dataRow}>
-                <Text style={styles.dataLabel}>Subtotal:</Text>
-                <Text style={styles.dataValue}>{formatMoney(parseFloat(editData.subtotal) || 0)}</Text>
-              </View>
-
-              <View style={styles.dataRow}>
-                <Text style={styles.dataLabel}>ITBIS (18%):</Text>
-                <Text style={[styles.dataValue, styles.itbisValue]}>
-                  {formatMoney(parseFloat(editData.itbis) || 0)}
-                </Text>
-              </View>
-
-              <Divider style={styles.divider} />
-
-              <View style={styles.dataRow}>
-                <Text style={styles.totalLabel}>TOTAL:</Text>
-                <Text style={styles.totalValue}>{formatMoney(parseFloat(editData.total) || 0)}</Text>
-              </View>
-            </View>
-          )}
+      <View style={styles.centered}>
+        {/* Checkmark animado */}
+        <Surface style={styles.successCircle}>
+          <IconButton icon="check" size={60} iconColor="#22c55e" />
         </Surface>
 
-        {/* Botones de acción */}
-        <View style={styles.actionButtons}>
+        <Text style={styles.successTitle}>¡Guardada!</Text>
+
+        {/* Info breve de la factura */}
+        <Surface style={styles.quickInfo}>
+          <Text style={styles.quickNCF}>{factura?.ncf || editData.ncf}</Text>
+          <Text style={styles.quickProveedor}>{factura?.emisor_nombre || editData.emisor_nombre}</Text>
+          <Text style={styles.quickTotal}>{formatMoney(factura?.monto || parseFloat(editData.total) || 0)}</Text>
+        </Surface>
+
+        {/* Dos botones principales */}
+        <View style={styles.quickActions}>
           <Button
             mode="contained"
-            onPress={goToDetail}
-            style={styles.actionButton}
+            onPress={reset}
+            style={styles.primaryAction}
+            contentStyle={styles.buttonContent}
             buttonColor="#22D3EE"
             textColor="#0f172a"
-            icon="file-document"
-          >
-            Ver Detalle Completo
-          </Button>
-
-          <Button
-            mode="contained"
-            onPress={goToReview}
-            style={styles.actionButton}
-            buttonColor="#3b82f6"
-            textColor="#fff"
-            icon="file-check"
-          >
-            Revisar Campos Fiscales
-          </Button>
-
-          <Button
-            mode="outlined"
-            onPress={reset}
-            style={styles.actionButton}
-            textColor="#22D3EE"
             icon="camera"
           >
             Escanear Otra
           </Button>
 
           <Button
-            mode="text"
-            onPress={goHome}
-            style={styles.actionButton}
-            textColor="#94a3b8"
-            icon="home"
+            mode="contained"
+            onPress={() => navigation.navigate('InvoiceList')}
+            style={styles.secondaryAction}
+            contentStyle={styles.buttonContent}
+            buttonColor="#3b82f6"
+            textColor="#fff"
+            icon="format-list-bulleted"
           >
-            Volver al Inicio
+            Ver Lista
           </Button>
         </View>
-      </ScrollView>
+
+        {/* Link pequeño para ver detalle si necesita editar */}
+        <Button
+          mode="text"
+          onPress={goToDetail}
+          textColor="#64748b"
+          compact
+        >
+          Ver detalle / editar
+        </Button>
+      </View>
     </View>
   );
 };
@@ -665,93 +505,61 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     textAlign: 'center',
   },
-  successHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  // Éxito - flujo rápido
+  successCircle: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: '#1e293b',
     justifyContent: 'center',
-    marginBottom: 16,
+    alignItems: 'center',
+    marginBottom: 24,
+    borderWidth: 4,
+    borderColor: '#22c55e',
   },
   successTitle: {
-    fontSize: 20,
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#22c55e',
+    marginBottom: 24,
   },
-  thumbnailContainer: {
-    borderRadius: 12,
-    overflow: 'hidden',
-    backgroundColor: '#1e293b',
-    marginBottom: 16,
-  },
-  thumbnail: {
-    width: '100%',
-    height: 120,
-  },
-  dataCard: {
+  quickInfo: {
     padding: 20,
-    borderRadius: 12,
+    borderRadius: 16,
     backgroundColor: '#1e293b',
-    marginBottom: 20,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 32,
+    minWidth: 280,
   },
-  cardTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#22D3EE',
-    textTransform: 'uppercase',
-  },
-  editInput: {
-    backgroundColor: '#0f172a',
-    marginBottom: 10,
-    fontSize: 14,
-  },
-  dataRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  dataLabel: {
-    fontSize: 14,
-    color: '#94a3b8',
-  },
-  dataValue: {
-    fontSize: 14,
-    color: '#fff',
-    fontWeight: '500',
-  },
-  dataValueHighlight: {
-    fontSize: 14,
+  quickNCF: {
+    fontSize: 16,
+    fontFamily: 'monospace',
     color: '#22D3EE',
     fontWeight: '600',
-    fontFamily: 'monospace',
+    marginBottom: 8,
   },
-  itbisValue: {
-    color: '#22D3EE',
+  quickProveedor: {
+    fontSize: 14,
+    color: '#94a3b8',
+    marginBottom: 8,
+    textAlign: 'center',
   },
-  divider: {
-    backgroundColor: '#334155',
-    marginVertical: 12,
-  },
-  totalLabel: {
-    fontSize: 16,
+  quickTotal: {
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#fff',
   },
-  totalValue: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#22D3EE',
-  },
-  actionButtons: {
+  quickActions: {
     gap: 12,
+    width: '100%',
+    paddingHorizontal: 24,
+    marginBottom: 16,
   },
-  actionButton: {
-    borderRadius: 8,
+  primaryAction: {
+    borderRadius: 12,
+  },
+  secondaryAction: {
+    borderRadius: 12,
   },
 });
 
