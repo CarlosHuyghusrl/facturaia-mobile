@@ -322,6 +322,47 @@ curl http://localhost:8317/v1/chat/completions \
 - Build local SIEMPRE antes de EAS
 - NUNCA npm install sin --ignore-scripts
 - Probar en dispositivo real antes de EAS production
+- Rama de trabajo: `main`
+
+---
+
+## SINCRONIZACION AUTOMATICA (git = transporte unico)
+
+### Al iniciar sesion (OBLIGATORIO):
+```bash
+git pull origin main
+```
+Luego leer:
+1. `.brain/task.md` - Estado actual (fuente de verdad)
+2. `plans/results/` - Resultados nuevos de CLI
+3. Decidir siguiente paso
+
+### Al terminar ciclo (Arquitecto Code Desktop):
+```bash
+# 1. Actualizar estado
+# Editar .brain/task.md y .brain/history.md
+
+# 2. Commit y push
+git add .brain/ plans/
+git commit -m "[ARCH] descripcion del ciclo"
+git push origin main
+```
+
+### Despues de cada tarea (CLI en VPS):
+```bash
+# Guardar resultados
+# Escribir en plans/results/
+
+# Commit y push
+bash ~/scripts/auto-push.sh ~/eas-builds/FacturaScannerApp "descripcion tarea"
+```
+
+### Flujo completo:
+```
+Desktop abre → git pull → lee .brain/ → crea plan → push
+CLI en VPS → git pull → lee plan → ejecuta → push resultados
+Desktop abre → git pull → ve resultados → siguiente ciclo
+```
 
 
 ## 🔄 DELEGACIÓN A GEMINI (Ahorro de Tokens)
