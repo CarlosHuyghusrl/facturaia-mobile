@@ -314,3 +314,54 @@ curl http://localhost:8317/v1/chat/completions \
 - Build local SIEMPRE antes de EAS
 - NUNCA npm install sin --ignore-scripts
 - Probar en dispositivo real antes de EAS production
+
+
+## 🔄 DELEGACIÓN A GEMINI (Ahorro de Tokens)
+
+### Endpoint
+- URL: http://localhost:8317/v1/chat/completions
+- Auth: Bearer sk-7mFaCRaXj5sp1S5G82S17sF4ClsTzn0ObP1D8yzPEQYmZ
+- Script helper: ~/scripts/ask-gemini.sh
+
+### Cuándo delegar automáticamente a Gemini
+| Tipo de tarea | Acción | Modelo |
+|---------------|--------|--------|
+| Búsquedas, investigación, "qué dice la ley", "últimas noticias" | Delegar | gemini-2.5-flash |
+| Resumir documentos, traducir, extraer datos de texto largo | Delegar | gemini-2.5-flash |
+| Analizar PDFs o documentos complejos | Delegar | gemini-2.5-pro |
+| Comparar información, tablas de datos | Delegar | gemini-2.5-flash |
+| Escribir código, diseñar arquitectura, debug, decisiones técnicas | NO delegar (usar mis tokens) | - |
+| Tareas con contexto del proyecto que Gemini no tiene | NO delegar | - |
+
+### Cómo delegar
+```bash
+# Opción 1: Script helper
+~/scripts/ask-gemini.sh "tu pregunta" > resultado.md
+
+# Opción 2: Con modelo específico
+~/scripts/ask-gemini.sh "análisis complejo" --model gemini-2.5-pro
+
+# Opción 3: Via pipe (para archivos)
+cat documento.txt | ~/scripts/ask-gemini.sh "resume en 300 palabras"
+
+# Opción 4: Curl directo (si necesitas más control)
+curl -s http://localhost:8317/v1/chat/completions \
+  -H "Authorization: Bearer sk-7mFaCRaXj5sp1S5G82S17sF4ClsTzn0ObP1D8yzPEQYmZ" \
+  -H "Content-Type: application/json" \
+  --max-time 120 \
+  -d @<(jq -n --arg prompt "TU PREGUNTA" '{model:"gemini-2.5-flash",messages:[{role:"user",content:$prompt}]}') \
+  | jq -r '.choices[0].message.content'
+```
+
+### Tags en planes de Cowork
+Cuando Carlos envíe planes via git con estas tags, ejecutar así:
+- [GEMINI] → delegar a gemini-2.5-flash
+- [GEMINI:pro] → delegar a gemini-2.5-pro
+- [CLAUDE:agente] → ejecutar con sub-agente indicado
+- Sin tag → yo decido según el contenido
+
+### Reglas importantes
+1. SIEMPRE guardar resultados de Gemini en plans/results/ para trazabilidad
+2. NUNCA enviar código fuente del proyecto a Gemini (solo preguntas/documentos)
+3. Si Gemini falla o da timeout, reportar a Carlos y continuar con mis tokens
+4. Loguear cada delegación: "🔄 Delegado a Gemini: [descripción corta]"
