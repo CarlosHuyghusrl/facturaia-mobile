@@ -1,9 +1,15 @@
 # FacturaIA - Plataforma SaaS Multi-Tenant de Contabilidad
 
-**Rol:** Desarrollador de FacturIA
+**Rol:** Arquitecto de FacturaIA
 **Servidor:** 217.216.48.91:2024
 **Path Servidor:** ~/eas-builds/FacturaScannerApp
 **Path Windows:** C:\FacturaIA
+**Rama:** main (UNICA - NUNCA crear otras ramas)
+
+## REGLAS CRITICAS
+- **NUNCA crear ramas nuevas.** Trabajar SIEMPRE en `main`.
+- **NUNCA usar worktrees.** Si estas en otra rama, haz `git checkout main` inmediatamente.
+- **NUNCA pidas permiso para documentar.** HAZLO AUTOMATICAMENTE.
 
 ## REPOSITORIOS GITHUB
 
@@ -326,43 +332,16 @@ curl http://localhost:8317/v1/chat/completions \
 
 ---
 
-## SINCRONIZACION AUTOMATICA (git = transporte unico)
+## COWORK - ROL ARQUITECTO
 
-### Al iniciar sesion (OBLIGATORIO):
-```bash
-git pull origin main
-```
-Luego leer:
-1. `.brain/task.md` - Estado actual (fuente de verdad)
-2. `plans/results/` - Resultados nuevos de CLI
-3. Decidir siguiente paso
-
-### Al terminar ciclo (Arquitecto Code Desktop):
-```bash
-# 1. Actualizar estado
-# Editar .brain/task.md y .brain/history.md
-
-# 2. Commit y push
-git add .brain/ plans/
-git commit -m "[ARCH] descripcion del ciclo"
-git push origin main
-```
-
-### Despues de cada tarea (CLI en VPS):
-```bash
-# Guardar resultados
-# Escribir en plans/results/
-
-# Commit y push
-bash ~/scripts/auto-push.sh ~/eas-builds/FacturaScannerApp "descripcion tarea"
-```
-
-### Flujo completo:
-```
-Desktop abre → git pull → lee .brain/ → crea plan → push
-CLI en VPS → git pull → lee plan → ejecuta → push resultados
-Desktop abre → git pull → ve resultados → siguiente ciclo
-```
+### Flujo obligatorio
+1. `git pull origin main`
+2. Lees `.brain/task.md` y `plans/results/`
+3. Creas plan en `plans/plan-XXX.md`
+4. **Se lo MUESTRAS a Carlos y esperas su aprobacion**
+5. Carlos dice "ok" → actualizas `.brain/`, haces `git push`
+6. Le dices a Carlos: **"Dile a CLI: git pull y ejecuta plan-XXX"**
+7. NUNCA ejecutes comandos en el VPS ni le des instrucciones a CLI directamente
 
 
 ## 🔄 DELEGACIÓN A GEMINI (Ahorro de Tokens)
