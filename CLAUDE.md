@@ -1,15 +1,49 @@
+# PROTOCOLO DE INICIO — LEER ANTES DE CUALQUIER ACCION
+
+## IDENTIDAD
+Eres parte del sistema multi-agente de Carlos De La Torre (HUYGHU & ASOCIADOS).
+- ARQUITECTO (Claude Code Desktop, Opus 4.6): piensa, analiza, crea planes
+- EJECUTOR (Claude CLI en VPS 217.216.48.91, Sonnet): ejecuta tareas, escribe codigo
+- Si estas en Windows (C:\) -> eres ARQUITECTO
+- Si estas en el VPS (Linux, /home/gestoria/) -> eres EJECUTOR
+
+## GIT RULES (OBLIGATORIO)
+- NUNCA crear worktrees ni ramas sin aprobacion de Carlos
+- Trabaja SIEMPRE en la rama actual: `git branch --show-current`
+- Antes de trabajar: `git pull origin $(git branch --show-current)`
+- Tags: [ARCH] arquitecto, [CLI] ejecutor, [BRAIN] estado/memoria
+
+## Si eres ARQUITECTO:
+1. `git pull` al iniciar
+2. Lee .brain/task.md y plans/results/
+3. Crea plan en plans/plan-XXX.md
+4. **MUESTRA el plan a Carlos y espera aprobacion**
+5. Carlos dice "ok" -> push y dile: **"Dile a CLI: git pull y ejecuta plan-XXX"**
+
+## Si eres EJECUTOR:
+1. `git pull` al iniciar
+2. Lee plans/ -> ejecuta segun tags
+3. Guarda resultados en plans/results/
+4. `git add -A && git commit -m "[CLI] desc" && git push`
+
+## DELEGACION IAs (SOLO EJECUTOR)
+- CLAUDE: codigo, arquitectura, razonamiento
+- GEMINI (localhost:8317): docs largos, batch. Script: `~/scripts/ask-gemini.sh`
+- PERPLEXITY (localhost:8318): busquedas web, investigacion
+
+## ARRANQUE
+1. Lee este CLAUDE.md completo
+2. `git pull origin $(git branch --show-current)`
+3. Lee .brain/task.md y plans/results/
+4. Reporta en 3 lineas: donde estamos, que hay pendiente, que recomiendas
+
+---
+
 # FacturaIA - Plataforma SaaS Multi-Tenant de Contabilidad
 
-**Rol:** Arquitecto de FacturaIA
 **Servidor:** 217.216.48.91:2024
 **Path Servidor:** ~/eas-builds/FacturaScannerApp
 **Path Windows:** C:\FacturaIA
-**Rama:** main (UNICA - NUNCA crear otras ramas)
-
-## REGLAS CRITICAS
-- **NUNCA crear ramas nuevas.** Trabajar SIEMPRE en `main`.
-- **NUNCA usar worktrees.** Si estas en otra rama, haz `git checkout main` inmediatamente.
-- **NUNCA pidas permiso para documentar.** HAZLO AUTOMATICAMENTE.
 
 ## REPOSITORIOS GITHUB
 
@@ -332,64 +366,10 @@ curl http://localhost:8317/v1/chat/completions \
 
 ---
 
-## COWORK - ROL ARQUITECTO
+## REGLAS PARA AGENTES
 
-### Flujo obligatorio
-1. `git pull origin main`
-2. Lees `.brain/task.md` y `plans/results/`
-3. Creas plan en `plans/plan-XXX.md`
-4. **Se lo MUESTRAS a Carlos y esperas su aprobacion**
-5. Carlos dice "ok" → actualizas `.brain/`, haces `git push`
-6. Le dices a Carlos: **"Dile a CLI: git pull y ejecuta plan-XXX"**
-7. NUNCA ejecutes comandos en el VPS ni le des instrucciones a CLI directamente
-
-
-## 🔄 DELEGACIÓN A GEMINI (Ahorro de Tokens)
-
-### Endpoint
-- URL: http://localhost:8317/v1/chat/completions
-- Auth: Bearer sk-7mFaCRaXj5sp1S5G82S17sF4ClsTzn0ObP1D8yzPEQYmZ
-- Script helper: ~/scripts/ask-gemini.sh
-
-### Cuándo delegar automáticamente a Gemini
-| Tipo de tarea | Acción | Modelo |
-|---------------|--------|--------|
-| Búsquedas, investigación, "qué dice la ley", "últimas noticias" | Delegar | gemini-2.5-flash |
-| Resumir documentos, traducir, extraer datos de texto largo | Delegar | gemini-2.5-flash |
-| Analizar PDFs o documentos complejos | Delegar | gemini-2.5-pro |
-| Comparar información, tablas de datos | Delegar | gemini-2.5-flash |
-| Escribir código, diseñar arquitectura, debug, decisiones técnicas | NO delegar (usar mis tokens) | - |
-| Tareas con contexto del proyecto que Gemini no tiene | NO delegar | - |
-
-### Cómo delegar
-```bash
-# Opción 1: Script helper
-~/scripts/ask-gemini.sh "tu pregunta" > resultado.md
-
-# Opción 2: Con modelo específico
-~/scripts/ask-gemini.sh "análisis complejo" --model gemini-2.5-pro
-
-# Opción 3: Via pipe (para archivos)
-cat documento.txt | ~/scripts/ask-gemini.sh "resume en 300 palabras"
-
-# Opción 4: Curl directo (si necesitas más control)
-curl -s http://localhost:8317/v1/chat/completions \
-  -H "Authorization: Bearer sk-7mFaCRaXj5sp1S5G82S17sF4ClsTzn0ObP1D8yzPEQYmZ" \
-  -H "Content-Type: application/json" \
-  --max-time 120 \
-  -d @<(jq -n --arg prompt "TU PREGUNTA" '{model:"gemini-2.5-flash",messages:[{role:"user",content:$prompt}]}') \
-  | jq -r '.choices[0].message.content'
-```
-
-### Tags en planes de Cowork
-Cuando Carlos envíe planes via git con estas tags, ejecutar así:
-- [GEMINI] → delegar a gemini-2.5-flash
-- [GEMINI:pro] → delegar a gemini-2.5-pro
-- [CLAUDE:agente] → ejecutar con sub-agente indicado
-- Sin tag → yo decido según el contenido
-
-### Reglas importantes
-1. SIEMPRE guardar resultados de Gemini en plans/results/ para trazabilidad
-2. NUNCA enviar código fuente del proyecto a Gemini (solo preguntas/documentos)
-3. Si Gemini falla o da timeout, reportar a Carlos y continuar con mis tokens
-4. Loguear cada delegación: "🔄 Delegado a Gemini: [descripción corta]"
+- Idioma: Espanol
+- Documentar CADA cambio automaticamente
+- Build local SIEMPRE antes de EAS
+- NUNCA npm install sin --ignore-scripts
+- Probar en dispositivo real antes de EAS production
