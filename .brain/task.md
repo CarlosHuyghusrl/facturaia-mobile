@@ -1,7 +1,7 @@
 # Task - FacturaIA
 
 **Fecha**: 26-Feb-2026
-**Estado**: plan-003-cleanup COMPLETADO — Backend v2.15.0 desplegado
+**Estado**: plan-004-devengos COMPLETADO — Backend v2.16.0 desplegado
 **Proyecto**: FacturaIA (App movil + Backend OCR)
 
 ---
@@ -25,13 +25,14 @@
 
 ## ESTADO REAL (14-Feb-2026)
 
-### Backend OCR - OPERATIVO v2.15.0
-- **Version**: v2.15.0 (Docker: facturaia-ocr, healthy)
+### Backend OCR - OPERATIVO v2.16.0
+- **Version**: v2.16.0 (Docker: facturaia-ocr, healthy)
 - **Go**: 1.24
 - **AI**: Claude Opus 4.5 via CLIProxyAPI (localhost:8317)
 - **Puerto**: 8081
-- **Commit**: b43d6f4 (tag v2.15.0 en GitHub)
-- **Fixes v2.15.0**: confidence score real (no hardcodeado), validador DGII completo
+- **Commit**: ff68e78 (tag v2.16.0 en GitHub)
+- **v2.15.0**: confidence score real, validador campos completos
+- **v2.16.0**: prompts unificados, 8 columnas BD nuevas, 5 reglas validador, montoServicios/montoBienes separados
 - **Endpoints activos (9)**:
   - POST /api/login (RNC+PIN → JWT)
   - POST /api/process-invoice (upload + OCR)
@@ -79,19 +80,31 @@
 - Validador DGII: ahora recibe ISC/CDT/Cargo911/Descuento y 7 campos mas
 - CameraScreen.tsx legacy eliminado
 - Docker rebuild v2.15.0 deployed y healthy
-- BD: solo 1 factura (datos historicos fueron limpiados, bug ISC=0 ya no aplica)
+
+### plan-004-devengos ✅ (26-Feb-2026)
+- Prompts IA: buildPromptDGII unificado con buildPromptVision (emisor/receptor, ISC por categoria)
+- Campos nuevos: montoServicios, montoBienes, ncfModifica, itbisRetenidoPorcentaje, fechaPago
+- BD: 8 columnas nuevas (itbis_tasa, fecha_pago, ncf_modifica, tipo_id_emisor/receptor, monto_servicios/bienes, itbis_retenido_porcentaje)
+- Validador: 5 reglas nuevas (ISC seguros 16%, nota credito, exportaciones, gubernamentales, ITBIS retenido %)
+- Handler: conecta todos los campos nuevos a validador y BD con fallback subtotal
+- Docker rebuild v2.16.0 deployed y healthy
 
 ---
 
 ## RUTA DE TRABAJO
 
-### Siguiente: Decidir con Carlos
-El flujo core (escanear → OCR → BD) funciona completo.
-Opciones:
-- Mejorar la app movil (UI, UX, bugs camara)
+### Siguiente: Test con facturas reales
+Probar el flujo completo con distintos tipos de factura:
+- Supermercado (B01) → ITBIS 18%
+- Telecom (Claro/Altice) → ISC 10%, CDT 2%, Cargo 911
+- Seguros → ISC 16%
+- Nota credito (B04) → ncfModifica
+- Restaurante → Propina 10%
+
+### Despues: Decidir con Carlos
+- Mejorar app movil (UI, UX, bugs camara)
 - Multi-tenant para firmas contables
 - Dashboard web para contadores
-- Mas pruebas end-to-end con facturas reales
 
 ---
 
@@ -118,7 +131,7 @@ Opciones:
 
 ### Repos GitHub
 - App: CarlosHuyghusrl/facturaia-mobile
-- Backend: CarlosHuyghusrl/facturaia-ocr (tag v2.15.0)
+- Backend: CarlosHuyghusrl/facturaia-ocr (tag v2.16.0)
 
 ---
 
@@ -133,6 +146,7 @@ Opciones:
 | plan-001 | Discovery estado real | COMPLETADO |
 | plan-002 | Stabilize + /reprocesar + v2.14.0 | COMPLETADO |
 | plan-003 | Cleanup + confidence real + v2.15.0 | COMPLETADO |
+| plan-004 | Devengos completos + v2.16.0 | COMPLETADO |
 | 10 | Arquitectura OCR-n8n para DGII | PENDIENTE |
 
 ---
