@@ -1,7 +1,7 @@
 # Task - FacturaIA
 
-**Fecha**: 14-Feb-2026
-**Estado**: plan-002 COMPLETADO — Listo para plan-003-isc-fix
+**Fecha**: 26-Feb-2026
+**Estado**: plan-003-cleanup COMPLETADO — Backend v2.15.0 desplegado
 **Proyecto**: FacturaIA (App movil + Backend OCR)
 
 ---
@@ -25,12 +25,13 @@
 
 ## ESTADO REAL (14-Feb-2026)
 
-### Backend OCR - OPERATIVO v2.14.0
-- **Version**: v2.14.0 (Docker: facturaia-ocr, container 840edf5a8e51, healthy)
+### Backend OCR - OPERATIVO v2.15.0
+- **Version**: v2.15.0 (Docker: facturaia-ocr, healthy)
 - **Go**: 1.24
 - **AI**: Claude Opus 4.5 via CLIProxyAPI (localhost:8317)
 - **Puerto**: 8081
-- **Commit**: 8716c94 (tag v2.14.0 en GitHub)
+- **Commit**: b43d6f4 (tag v2.15.0 en GitHub)
+- **Fixes v2.15.0**: confidence score real (no hardcodeado), validador DGII completo
 - **Endpoints activos (9)**:
   - POST /api/login (RNC+PIN → JWT)
   - POST /api/process-invoice (upload + OCR)
@@ -55,19 +56,9 @@
 - CLIProxyAPI (puerto 8317)
 
 ### Base de Datos
-- **facturas_clientes**: 26 registros
-  - 23 con ISC=0 (bug pre-v2.13.2) → PENDIENTE reprocesar
-  - 3 con ISC correcto
-  - 1 ya reprocesada como prueba (ISC=1200, MULTISEGUROS)
-
----
-
-## BUG CONOCIDO
-
-**ISC=0 en facturas antiguas**: 23 de 26 facturas tienen ISC=0.
-Endpoint /reprocesar YA EXISTE y funciona. Falta ejecutar en lote (plan-003).
-
-**Prueba exitosa**: Factura 5523641b (MULTISEGUROS) — ISC paso de 0 → 1200 ✅
+- **facturas_clientes**: 1 registro (BD fue limpiada post 14-Feb)
+- Bug ISC=0 ya no aplica (datos historicos eliminados)
+- Nuevas facturas usaran confidence score real + validador completo
 
 ---
 
@@ -81,21 +72,26 @@ Endpoint /reprocesar YA EXISTE y funciona. Falta ejecutar en lote (plan-003).
 - CLAUDE.md backend actualizado
 - Endpoint /reprocesar implementado y probado
 - Docker rebuild v2.14.0 deployed
-- Commit 8716c94 + tag v2.14.0 en GitHub
 - Resultado: `plans/results/stabilize-result.md`
+
+### plan-003-cleanup ✅ (26-Feb-2026)
+- Confidence score: de hardcodeado 0.85 → calculo real basado en campos extraidos
+- Validador DGII: ahora recibe ISC/CDT/Cargo911/Descuento y 7 campos mas
+- CameraScreen.tsx legacy eliminado
+- Docker rebuild v2.15.0 deployed y healthy
+- BD: solo 1 factura (datos historicos fueron limpiados, bug ISC=0 ya no aplica)
 
 ---
 
 ## RUTA DE TRABAJO
 
-### Siguiente: plan-003-isc-fix
-- Script que reprocesa las 23 facturas con ISC=0 usando POST /reprocesar
-- NO reprocesar toda la BD, solo las que tienen ISC=0
-- Verificar que ningun otro campo se rompa
-
-### Despues: plan-004-dgii-606
-- Generar formato DGII 606 (compras) a partir de facturas corregidas
-- El feature diferenciador de la app
+### Siguiente: Decidir con Carlos
+El flujo core (escanear → OCR → BD) funciona completo.
+Opciones:
+- Mejorar la app movil (UI, UX, bugs camara)
+- Multi-tenant para firmas contables
+- Dashboard web para contadores
+- Mas pruebas end-to-end con facturas reales
 
 ---
 
@@ -122,7 +118,7 @@ Endpoint /reprocesar YA EXISTE y funciona. Falta ejecutar en lote (plan-003).
 
 ### Repos GitHub
 - App: CarlosHuyghusrl/facturaia-mobile
-- Backend: CarlosHuyghusrl/facturaia-ocr (tag v2.14.0)
+- Backend: CarlosHuyghusrl/facturaia-ocr (tag v2.15.0)
 
 ---
 
@@ -136,6 +132,7 @@ Endpoint /reprocesar YA EXISTE y funciona. Falta ejecutar en lote (plan-003).
 | 13 | Image Proxy (MinIO→Backend→App) | COMPLETADO |
 | plan-001 | Discovery estado real | COMPLETADO |
 | plan-002 | Stabilize + /reprocesar + v2.14.0 | COMPLETADO |
+| plan-003 | Cleanup + confidence real + v2.15.0 | COMPLETADO |
 | 10 | Arquitectura OCR-n8n para DGII | PENDIENTE |
 
 ---

@@ -270,7 +270,7 @@ go run main.go
 ## ESTADO ACTUAL (14-Feb-2026)
 
 ### Backend v2.14.0 - DESPLEGADO
-- **Docker:** `facturaia-ocr:v2.14.0` en puerto 8081 con `--init` (anti-zombie)
+- **Docker:** `facturaia-ocr:v2.15.0` en puerto 8081 con `--init` (anti-zombie)
 - **NUEVO:** Endpoint POST /api/facturas/{id}/reprocesar para corregir facturas antiguas
 - **DGII Completo:** 20+ campos fiscales con extracción IA completa
 - **Campos de Impuestos DGII (v2.13.0):**
@@ -319,7 +319,7 @@ docker run -d --name facturaia-ocr --restart unless-stopped --network host \
   -e MINIO_USE_SSL=false -e MINIO_BUCKET=facturas \
   -e JWT_SECRET=facturaia-jwt-secret-2025-production \
   --init \
-  facturaia-ocr:v2.14.0
+  facturaia-ocr:v2.15.0
 ```
 
 ### Test User (App Movil)
