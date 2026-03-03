@@ -1,7 +1,7 @@
 # Task - FacturaIA
 
-**Fecha**: 26-Feb-2026
-**Estado**: plan-004-devengos COMPLETADO — Backend v2.16.0 desplegado
+**Fecha**: 03-Mar-2026
+**Estado**: plan-005/006/007 COMPLETADOS — Backend v2.16.1, APK nuevo con fix cámara, Plan n8n DGII
 **Proyecto**: FacturaIA (App movil + Backend OCR)
 
 ---
@@ -25,14 +25,14 @@
 
 ## ESTADO REAL (14-Feb-2026)
 
-### Backend OCR - OPERATIVO v2.16.0
-- **Version**: v2.16.0 (Docker: facturaia-ocr, healthy)
+### Backend OCR - OPERATIVO v2.16.1
+- **Version**: v2.16.1 (Docker: facturaia-ocr, healthy)
 - **Go**: 1.24
 - **AI**: Claude Opus 4.5 via CLIProxyAPI (localhost:8317)
 - **Puerto**: 8081
-- **Commit**: ff68e78 (tag v2.16.0 en GitHub)
 - **v2.15.0**: confidence score real, validador campos completos
 - **v2.16.0**: prompts unificados, 8 columnas BD nuevas, 5 reglas validador, montoServicios/montoBienes separados
+- **v2.16.1**: fix tipoIdEmisor/Receptor acepta number o string de la IA (interface{} con type switch)
 - **Endpoints activos (9)**:
   - POST /api/login (RNC+PIN → JWT)
   - POST /api/process-invoice (upload + OCR)
@@ -45,9 +45,10 @@
   - GET /health
 
 ### App Movil - OPERATIVA
-- **APK Release**: 67MB (compilado 12-Feb-2026)
+- **APK Release**: 67MB (compilado 03-Mar-2026) — con fix FileProvider cámara
 - **Stack**: React Native 0.76.9, Expo SDK 52, TypeScript
 - **Scanner**: react-native-document-scanner-plugin 2.0.4
+- **Fix cámara**: FileProvider configurado (file_provider_paths.xml + AndroidManifest.xml)
 - **Test user**: RNC 130-309094, PIN 1234 (Acela Associates)
 
 ### Infraestructura - UP
@@ -89,22 +90,37 @@
 - Handler: conecta todos los campos nuevos a validador y BD con fallback subtotal
 - Docker rebuild v2.16.0 deployed y healthy
 
+### plan-005: fix tipoIdEmisor ✅ (03-Mar-2026)
+- Bug: IA devuelve tipoIdEmisor como número (1), struct Go esperaba string
+- Fix: interface{} con type switch (nil, string, float64) en extractor.go
+- Docker rebuild v2.16.1 deployed y healthy
+
+### plan-006: fix cámara + nuevo APK ✅ (03-Mar-2026)
+- Bug: launchCamera() no abría en Android 7+ con react-native-image-picker v7
+- Causa: FileProvider no configurado (requerido para URIs content://)
+- Fix: crear file_provider_paths.xml + agregar FileProvider en AndroidManifest.xml + intent IMAGE_CAPTURE en queries
+- APK rebuild: 67MB, 03-Mar-2026
+
+### plan-007: arquitectura n8n DGII ✅ (03-Mar-2026)
+- n8n corriendo en puerto 5678
+- plan-007-n8n-dgii.md creado con queries SQL completas para 606/607
+- 3 workflows n8n: automático mensual (día 20), bajo demanda (webhook), notificaciones revisión
+- Campos BD cubiertos: 23/23 para 606, 16/16 para 607 (faltan 3 menores: expense_type, itbis_percibido, isr_percibido)
+
 ---
 
 ## RUTA DE TRABAJO
 
-### Siguiente: Test con facturas reales
-Probar el flujo completo con distintos tipos de factura:
-- Supermercado (B01) → ITBIS 18%
-- Telecom (Claro/Altice) → ISC 10%, CDT 2%, Cargo 911
-- Seguros → ISC 16%
-- Nota credito (B04) → ncfModifica
-- Restaurante → Propina 10%
+### Siguiente: Test en dispositivo real
+1. Descargar nuevo APK (03-Mar-2026) con fix de cámara:
+   `scp -P 2024 gestoria@217.216.48.91:~/eas-builds/FacturaScannerApp/android/app/build/outputs/apk/release/app-release.apk C:\FacturaIA\`
+2. Instalar y probar launchCamera() — debe abrir cámara nativa ahora
+3. Escanear facturas reales para validar extracción plan-004 con v2.16.1
 
-### Despues: Decidir con Carlos
-- Mejorar app movil (UI, UX, bugs camara)
-- Multi-tenant para firmas contables
-- Dashboard web para contadores
+### Después: Implementar plan-007 (n8n DGII)
+- Wave 1: Endpoints backend /api/reportes/606 y /api/reportes/607
+- Wave 2: Workflows n8n (mensual automático + webhook bajo demanda)
+- Wave 3: Botón "Generar Reporte" en app móvil
 
 ---
 
@@ -147,7 +163,9 @@ Probar el flujo completo con distintos tipos de factura:
 | plan-002 | Stabilize + /reprocesar + v2.14.0 | COMPLETADO |
 | plan-003 | Cleanup + confidence real + v2.15.0 | COMPLETADO |
 | plan-004 | Devengos completos + v2.16.0 | COMPLETADO |
-| 10 | Arquitectura OCR-n8n para DGII | PENDIENTE |
+| plan-005 | Fix tipoIdEmisor + v2.16.1 | COMPLETADO |
+| plan-006 | Fix cámara FileProvider + APK nuevo | COMPLETADO |
+| plan-007 | Arquitectura n8n DGII 606/607 (plan creado) | IMPLEMENTACIÓN PENDIENTE |
 
 ---
 
