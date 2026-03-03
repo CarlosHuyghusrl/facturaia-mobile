@@ -169,21 +169,6 @@ const ScannerScreen: React.FC = () => {
         total: String(factura.monto || 0),
       });
 
-      // Si necesita revisión, ir directo a pantalla de revisión
-      if (result.extraction_status === 'review' || result.extraction_status === 'error') {
-        navigation.navigate('InvoiceReview', {
-          invoiceId: result.invoice_id,
-          imageUrl: result.image_url,
-          extractedData: factura,
-          validation: result.validation,
-          extractionStatus: result.extraction_status,
-        });
-        // Reset para próximo scan
-        setState('idle');
-        setImageUri(null);
-        return;
-      }
-
       setState('success');
     } catch (err: any) {
       console.error('[Scanner] Error procesando:', err);
@@ -354,6 +339,14 @@ const ScannerScreen: React.FC = () => {
         </Surface>
 
         <Text style={styles.successTitle}>¡Guardada!</Text>
+
+        {processResult?.extraction_status !== 'validated' && (
+          <View style={{ backgroundColor: '#78350f', padding: 10, borderRadius: 8, marginBottom: 12 }}>
+            <Text style={{ color: '#fbbf24', fontSize: 12, textAlign: 'center' }}>
+              ⚠️ Algunos campos necesitan revisión. Ve al detalle para verificar.
+            </Text>
+          </View>
+        )}
 
         {/* Info breve de la factura */}
         <Surface style={styles.quickInfo}>
