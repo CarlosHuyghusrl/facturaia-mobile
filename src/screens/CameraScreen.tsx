@@ -207,19 +207,19 @@ const ScannerScreen: React.FC = () => {
           </Surface>
           <Text style={styles.title}>Escanear Factura</Text>
           <Text style={styles.subtitle}>
-            Toma una foto de la factura o selecciona una imagen guardada
+            Escanea la factura con encuadre automático o selecciona una imagen
           </Text>
           <View style={styles.idleButtons}>
             <Button
               mode="contained"
-              onPress={takePhoto}
+              onPress={startScanner}
               style={styles.mainButton}
               contentStyle={styles.buttonContent}
               buttonColor="#22D3EE"
               textColor="#0f172a"
-              icon="camera"
+              icon="document-scanner"
             >
-              Tomar Foto
+              Escanear Factura
             </Button>
             <Button
               mode="contained"
@@ -234,13 +234,13 @@ const ScannerScreen: React.FC = () => {
             </Button>
             <Button
               mode="outlined"
-              onPress={startScanner}
+              onPress={takePhoto}
               style={styles.mainButton}
               contentStyle={styles.buttonContent}
               textColor="#94a3b8"
-              icon="document-scanner"
+              icon="camera"
             >
-              Escáner Documentos
+              Foto Manual
             </Button>
           </View>
         </View>

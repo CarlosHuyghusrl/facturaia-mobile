@@ -188,7 +188,7 @@ const InvoiceDetailScreen: React.FC = () => {
           <Text style={styles.sectionTitle}>Emisor</Text>
           <View style={styles.row}>
             <Text style={styles.label}>Nombre:</Text>
-            <Text style={styles.value}>{factura.emisor_nombre || 'No identificado'}</Text>
+            <Text style={styles.value}>{factura.emisor_nombre || factura.proveedor || 'No identificado'}</Text>
           </View>
           <View style={styles.row}>
             <Text style={styles.label}>RNC:</Text>
@@ -201,7 +201,7 @@ const InvoiceDetailScreen: React.FC = () => {
           <Text style={styles.sectionTitle}>Fechas</Text>
           <View style={styles.row}>
             <Text style={styles.label}>Emisión:</Text>
-            <Text style={styles.value}>{formatDate(factura.fecha_emision)}</Text>
+            <Text style={styles.value}>{formatDate(factura.fecha_documento || factura.created_at)}</Text>
           </View>
           {factura.fecha_vencimiento && (
             <View style={styles.row}>
@@ -218,16 +218,97 @@ const InvoiceDetailScreen: React.FC = () => {
             <Text style={styles.label}>Subtotal:</Text>
             <Text style={styles.value}>{formatMoney(factura.subtotal)}</Text>
           </View>
-          <View style={styles.row}>
-            <Text style={styles.label}>ITBIS (18%):</Text>
-            <Text style={[styles.value, styles.itbis]}>{formatMoney(factura.itbis)}</Text>
-          </View>
+          {factura.descuento > 0 && (
+            <View style={styles.row}>
+              <Text style={styles.label}>Descuento:</Text>
+              <Text style={[styles.value, {color: '#f59e0b'}]}>-{formatMoney(factura.descuento)}</Text>
+            </View>
+          )}
+          {factura.itbis > 0 && (
+            <View style={styles.row}>
+              <Text style={styles.label}>ITBIS (18%):</Text>
+              <Text style={[styles.value, styles.itbis]}>{formatMoney(factura.itbis)}</Text>
+            </View>
+          )}
+          {factura.itbis_retenido > 0 && (
+            <View style={styles.row}>
+              <Text style={styles.label}>ITBIS Retenido:</Text>
+              <Text style={[styles.value, {color: '#f97316'}]}>{formatMoney(factura.itbis_retenido)}</Text>
+            </View>
+          )}
+          {factura.itbis_exento > 0 && (
+            <View style={styles.row}>
+              <Text style={styles.label}>ITBIS Exento:</Text>
+              <Text style={styles.value}>{formatMoney(factura.itbis_exento)}</Text>
+            </View>
+          )}
+          {factura.isc > 0 && (
+            <View style={styles.row}>
+              <Text style={styles.label}>ISC ({factura.isc_categoria || 'Selectivo'}):</Text>
+              <Text style={[styles.value, {color: '#a855f7'}]}>{formatMoney(factura.isc)}</Text>
+            </View>
+          )}
+          {factura.propina > 0 && (
+            <View style={styles.row}>
+              <Text style={styles.label}>Propina Legal (10%):</Text>
+              <Text style={styles.value}>{formatMoney(factura.propina)}</Text>
+            </View>
+          )}
+          {factura.cdt_monto > 0 && (
+            <View style={styles.row}>
+              <Text style={styles.label}>CDT (2%):</Text>
+              <Text style={styles.value}>{formatMoney(factura.cdt_monto)}</Text>
+            </View>
+          )}
+          {factura.cargo_911 > 0 && (
+            <View style={styles.row}>
+              <Text style={styles.label}>Cargo 911:</Text>
+              <Text style={styles.value}>{formatMoney(factura.cargo_911)}</Text>
+            </View>
+          )}
+          {factura.isr > 0 && (
+            <View style={styles.row}>
+              <Text style={styles.label}>ISR Retención:</Text>
+              <Text style={[styles.value, {color: '#ef4444'}]}>{formatMoney(factura.isr)}</Text>
+            </View>
+          )}
+          {factura.otros_impuestos > 0 && (
+            <View style={styles.row}>
+              <Text style={styles.label}>Otros Impuestos:</Text>
+              <Text style={styles.value}>{formatMoney(factura.otros_impuestos)}</Text>
+            </View>
+          )}
           <Divider style={styles.divider} />
           <View style={styles.row}>
             <Text style={styles.labelTotal}>TOTAL:</Text>
-            <Text style={styles.total}>{formatMoney(factura.total)}</Text>
+            <Text style={styles.total}>{formatMoney(factura.monto || factura.total || 0)}</Text>
           </View>
         </Surface>
+
+        {/* Clasificación Fiscal */}
+        {(factura.forma_pago || factura.tipo_bien_servicio || factura.tipo_ncf) && (
+          <Surface style={styles.section}>
+            <Text style={styles.sectionTitle}>Clasificación Fiscal</Text>
+            {factura.tipo_ncf && (
+              <View style={styles.row}>
+                <Text style={styles.label}>Tipo NCF:</Text>
+                <Text style={styles.value}>{factura.tipo_ncf}</Text>
+              </View>
+            )}
+            {factura.tipo_bien_servicio && (
+              <View style={styles.row}>
+                <Text style={styles.label}>Tipo Bien/Servicio:</Text>
+                <Text style={styles.value}>{factura.tipo_bien_servicio}</Text>
+              </View>
+            )}
+            {factura.forma_pago && (
+              <View style={styles.row}>
+                <Text style={styles.label}>Forma de Pago:</Text>
+                <Text style={styles.value}>{factura.forma_pago}</Text>
+              </View>
+            )}
+          </Surface>
+        )}
 
         {/* Confianza OCR */}
         {factura.confidence_score !== undefined && (
