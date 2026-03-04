@@ -3022,3 +3022,35 @@ APK: android/app/build/outputs/apk/release/app-release.apk
 - Gemini 2.5 Flash con modo visión por defecto
 - Respuesta incluye TODOS los campos DGII
 - Prompt estricto para NO inventar datos emisor/receptor
+
+---
+
+### 04-Mar-2026 - CLI (Sonnet 4.6) - PATCH react-native-svg + New Architecture + Plugin v2.0.4
+**Estado**: COMPLETADO
+
+**Resumen**:
+Restauracion del auto-framing en el escaner de documentos. Se parcheó react-native-svg@15.15.3 para compatibilidad con New Architecture en RN 0.76.9 (yoga::StyleSizeLength → yoga::StyleLength). Se habilitó New Architecture y se actualizó el plugin scanner a v2.0.4 con ML Kit stable.
+
+**Problema resuelto**:
+- react-native-svg@15.15.3 usa `yoga::StyleSizeLength` que fue renombrado a `yoga::StyleLength` en Yoga 3.x (RN 0.76+)
+- El plugin react-native-document-scanner-plugin@1.0.1 usaba ML Kit beta (v16.0.0-beta1)
+- Old Architecture limitaba funcionalidades nativas
+
+**Cambios realizados**:
+1. `package.json`: react-native-document-scanner-plugin@2.0.4, react-native-svg@15.15.3, postinstall patch-package
+2. `android/gradle.properties`: newArchEnabled=true (New Architecture habilitada)
+3. `patches/react-native-svg+15.15.3.patch`: parche StyleSizeLength→StyleLength en RNSVGLayoutableShadowNode.cpp
+
+**Archivos modificados**:
+- `package.json`
+- `package-lock.json`
+- `android/gradle.properties`
+- `patches/react-native-svg+15.15.3.patch` (nuevo)
+
+**Build resultado**:
+- BUILD SUCCESSFUL en 9m 3s (1221 tareas, 200 ejecutadas, 1021 up-to-date)
+- APK generado: 80MB en android/app/build/outputs/apk/release/app-release.apk
+- Commit: 19efd9b6
+
+**Pendiente**:
+- Probar en dispositivo real que el auto-framing (Google ML Kit Document Scanner) funciona correctamente
