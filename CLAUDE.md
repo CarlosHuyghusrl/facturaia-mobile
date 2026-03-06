@@ -406,3 +406,9 @@ curl http://localhost:8317/v1/chat/completions \
 - Build local SIEMPRE antes de EAS
 - NUNCA npm install sin --ignore-scripts
 - Probar en dispositivo real antes de EAS production
+
+## Errores Conocidos
+- NUNCA usar EAS Build directo para probar — build local con gradlew primero
+- APK release en: android/app/build/outputs/apk/release/app-release.apk
+- Build local tarda 3-5 min, EAS tarda 2 horas (free tier)
+- Si un agente comete un error, AÑADIRLO aquí inmediatamente antes de continuar
