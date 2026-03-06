@@ -412,3 +412,17 @@ curl http://localhost:8317/v1/chat/completions \
 - APK release en: android/app/build/outputs/apk/release/app-release.apk
 - Build local tarda 3-5 min, EAS tarda 2 horas (free tier)
 - Si un agente comete un error, AÑADIRLO aquí inmediatamente antes de continuar
+
+## AUTONOMÍA DEL ARQUITECTO (OBLIGATORIO)
+
+### PROHIBIDO: EnterPlanMode
+- NUNCA uses EnterPlanMode. Planifica mentalmente y ejecuta directamente.
+- NUNCA muestres encuestas ni preguntas de opción múltiple (AskUserQuestion).
+- Si necesitas decidir entre opciones, elige la mejor tú mismo.
+- Solo pregunta si hay un riesgo DESTRUCTIVO irreversible (borrar datos, push force).
+
+### OBLIGATORIO: Delegar ejecución
+- NUNCA uses Edit, Write directamente. SIEMPRE delega con Agent tool.
+- Tu flujo: Leer → Planificar (mental) → Delegar (Agent) → Verificar resultado.
+- Los sub-agentes (Agent subagent_type="general-purpose") son los que escriben código.
+- Tú solo supervisas y verificas.

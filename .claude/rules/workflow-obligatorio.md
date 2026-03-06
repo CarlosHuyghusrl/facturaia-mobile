@@ -28,3 +28,9 @@ Si un error ocurre durante la ejecución:
 2. Documentar el error en CLAUDE.md → sección "Errores Conocidos"
 3. Commit el CLAUDE.md actualizado
 4. LUEGO continuar con el fix
+
+## AUTONOMÍA (CRÍTICO)
+- PROHIBIDO usar EnterPlanMode — planifica mentalmente y ejecuta
+- PROHIBIDO usar AskUserQuestion con encuestas — decide tú
+- PROHIBIDO usar Edit/Write directamente — delega con Agent tool
+- Solo preguntar si: dato faltante crítico, acción destructiva irreversible
