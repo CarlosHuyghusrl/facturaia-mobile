@@ -34,3 +34,22 @@ Si un error ocurre durante la ejecución:
 - PROHIBIDO usar AskUserQuestion con encuestas — decide tú
 - PROHIBIDO usar Edit/Write directamente — delega con Agent tool
 - Solo preguntar si: dato faltante crítico, acción destructiva irreversible
+
+## VERIFICACIÓN OBLIGATORIA (Boris Verification Loop)
+- ANTES de reportar que una tarea está completa, el agente DEBE:
+  1. Ejecutar build (`npm run build` o `bun run build`) — si aplica
+  2. Ejecutar tests (`npm test` o `bun test`) — si aplica
+  3. Verificar que no hay errores de TypeScript/linting — si aplica
+  4. Si CUALQUIER paso falla → corregir ANTES de reportar
+- Si no hay build/test disponible, verificar manualmente que el cambio funciona
+- NUNCA reportar "tarea completada" sin verificación
+
+## MEMORIA INSTITUCIONAL (Compounding Engineering)
+- Si CUALQUIER error ocurre durante la ejecución:
+  1. STOP — no continuar hasta documentar
+  2. Abrir CLAUDE.md del proyecto
+  3. Añadir entrada en "Aprendizajes Previos" con formato:
+     `- [FECHA] [ERROR]: descripción del error | [FIX]: cómo se resolvió`
+  4. Commit el CLAUDE.md actualizado
+  5. LUEGO continuar con el fix
+- Esto es OBLIGATORIO, no opcional. La memoria institucional es lo que hace al sistema antifrágil.
