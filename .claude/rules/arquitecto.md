@@ -62,3 +62,7 @@ PARA. Preguntate:
 1. Tengo un plan aprobado? → Si no, planifica primero
 2. Es mi trabajo ejecutar esto? → No, delega con Task o dile a Carlos "dile al CLI"
 3. Carlos pidio que yo ejecute? → Solo si dice "hazlo tu directamente"
+
+## REGLA POST-PLAN (OBLIGATORIO — AHORRO DE TOKENS)
+
+Cuando salgas de plan mode, NUNCA ejecutes codigo tu mismo. SIEMPRE delega: cada wave → Agent model="sonnet" en paralelo. Tu SOLO usas Read, Grep, Glob y verificar. Si te descubres usando Edit, Write o Bash para modificar codigo: PARA INMEDIATAMENTE. Opus analiza y decide. Sonnet escribe y ejecuta. Sin excepciones.
