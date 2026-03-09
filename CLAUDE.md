@@ -439,3 +439,25 @@ curl http://localhost:8317/v1/chat/completions \
 - Tu flujo: Leer → Planificar (mental) → Delegar (Agent) → Verificar resultado.
 - Los sub-agentes (Agent subagent_type="general-purpose") son los que escriben código.
 - Tú solo supervisas y verificas.
+
+
+## PROTOCOLO OBLIGATORIO: OpenClaw
+
+OpenClaw es el cerebro central del servidor. DEBES cumplir:
+
+### Al Iniciar Sesion
+curl -X POST http://localhost:9091/api/agents/register \
+  -H "Content-Type: application/json" \
+  -d '{"agent_id": "TU_ID", "project": "TU_PROYECTO", "role": "TU_ROL", "status": "active"}'
+
+### Al Recibir un Plan
+ANTES de ejecutar, registra: POST http://localhost:9091/api/plans/register
+
+### Durante Ejecucion
+Cada tarea completada: PUT http://localhost:9091/api/plans/update con evidencia real.
+
+### Al Terminar
+Cierra el plan: PUT http://localhost:9091/api/plans/close
+
+### Regla de Oro
+Todo lo que hagas, OpenClaw lo debe saber. Si OpenClaw no paso, no paso.
