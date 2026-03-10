@@ -305,6 +305,7 @@ go run main.go
 - **AI Provider:** Claude Opus 4.5 via CLIProxyAPI (openai-compatible)
 - **Vision Mode:** Habilitado para openai y gemini (imagen directa, sin Tesseract)
 - **Image Proxy:** `/api/facturas/{id}/imagen` sirve imagenes de MinIO al movil
+- **SharePoint Queue:** GET `/api/admin/sharepoint-queue` (estado cola sync SharePoint)
 - **DB:** PostgreSQL via PgBouncer (localhost:5433) + extraction_status, review_notes
 - **Storage:** MinIO (gestoria_minio / localhost:9000)
 
@@ -332,7 +333,7 @@ docker run -d --name facturaia-ocr --restart unless-stopped --network host \
   -e MINIO_USE_SSL=false -e MINIO_BUCKET=facturas \
   -e JWT_SECRET=facturaia-jwt-secret-2025-production \
   --init \
-  facturaia-ocr:v2.19.0
+  facturaia-ocr:v2.20.0
 ```
 
 ### Test User (App Movil)

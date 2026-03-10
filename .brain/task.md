@@ -1,7 +1,7 @@
 # Task - FacturaIA
 
 **Fecha**: 10-Mar-2026
-**Estado**: Backend v2.19.0 deployed con fix parseo JSON AI + Docker autoheal — App movil con auth headers corregidos
+**Estado**: Backend v2.20.0 deployed con SharePoint sync + mensajes amigables — App movil con auth headers corregidos
 **Proyecto**: FacturaIA (App movil + Backend OCR)
 
 ---
@@ -24,12 +24,12 @@
 
 ## ESTADO REAL (10-Mar-2026)
 
-### Backend OCR - OPERATIVO v2.19.0
-- **Docker**: facturaia-ocr:v2.19.0 (healthy, deployed 10-Mar-2026)
+### Backend OCR - OPERATIVO v2.20.0
+- **Docker**: facturaia-ocr:v2.20.0 (healthy, deployed 10-Mar-2026)
 - **Go**: 1.24, Alpine multi-stage
 - **AI**: Claude Opus 4.5 via CLIProxyAPI (localhost:8317)
 - **Puerto**: 8081
-- **Fixes v2.18.0-v2.19.0** (8 bugs criticos):
+- **Fixes v2.18.0-v2.20.0** (11 mejoras):
   1. Retry BD con backoff exponencial (5 intentos: 2s/4s/8s/16s/32s) — PROBADO y funciona
   2. JWT expiracion 24h (antes: nunca expiraban)
   3. JWT_SECRET obligatorio (eliminado fallback hardcodeado)
@@ -38,7 +38,10 @@
   6. System message JSON-only para AI provider OpenAI (fix parseo)
   7. Fallback extracción JSON de texto mixto en respuestas AI
   8. Docker autoheal para restart automático de containers unhealthy
-- **Endpoints activos (9)**:
+  9. Tabla sharepoint_sync_queue + INSERT non-blocking en ProcessInvoice
+  10. api/errors.go con 9 error codes estructurados + user_message
+  11. GET /api/admin/sharepoint-queue endpoint de monitoreo
+- **Endpoints activos (10)**:
   - POST /api/clientes/login/ (RNC+PIN → JWT con exp 24h)
   - POST /api/process-invoice (upload + OCR)
   - GET /api/facturas/mis-facturas/
@@ -47,6 +50,7 @@
   - DELETE /api/facturas/{id}
   - GET /api/facturas/resumen
   - POST /api/facturas/{id}/reprocesar
+  - GET /api/admin/sharepoint-queue (estado cola sync SharePoint)
   - GET /health
 
 ### App Movil - OPERATIVA (necesita rebuild APK)
@@ -65,7 +69,7 @@
 - Coolify (orquestacion Docker)
 
 ### Docker - Limpio
-- facturaia-ocr:v2.19.0 (activo)
+- facturaia-ocr:v2.20.0 (activo)
 - autoheal (willfarrell/autoheal, monitoring containers unhealthy cada 30s)
 - v2.17.2 eliminada (10-Mar-2026)
 - 1 imagen Coolify 2.66GB en uso activo (no eliminable)
@@ -85,6 +89,11 @@
 ### Resueltos en v2.19.0
 - ~~AI responde texto en vez de JSON~~ → System message + fallback extracción JSON
 - ~~Docker no reinicia containers unhealthy~~ → Autoheal container monitoring
+
+### Resueltos en v2.20.0
+- ~~Sin sync a SharePoint~~ → Tabla cola + worker Python + cron cada 2 min
+- ~~Errores técnicos sin mensaje amigable~~ → api/errors.go con 9 códigos + user_message
+- ~~Sin cola offline en app~~ → offlineQueue.ts + NetInfo check + UI UploadStatusCard
 
 ### Pendientes (no criticos)
 - CameraScreen navega a 'InvoiceList' inexistente (crash) — debe ser 'Home'
@@ -114,8 +123,8 @@
 
 ### Inmediato: Rebuild APK
 1. Build local: `cd android && ./gradlew assembleRelease`
-2. Descargar y probar en dispositivo real
-3. Verificar InvoiceReviewScreen con auth headers
+2. Descargar y probar: mensajes amigables, cola offline, NetInfo check
+3. Verificar SharePoint sync con factura real
 
 ### Siguiente: Fix bugs no-criticos
 1. CameraScreen: cambiar 'InvoiceList' → 'Home'

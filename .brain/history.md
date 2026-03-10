@@ -17,6 +17,44 @@
 
 ## Registro de Cambios
 
+### 10-Mar-2026 - Arquitecto FacturaIA — SharePoint sync + mensajes amigables (7 waves)
+
+**Estado**: Completado
+**Version backend**: v2.20.0 (deployed)
+
+**Tarea 1 — SharePoint Sync (3 waves)**:
+- Wave 1: Tabla sharepoint_sync_queue en PostgreSQL + INSERT non-blocking en ProcessInvoice + GET /api/admin/sharepoint-queue
+- Wave 2: Worker Python sharepoint_sync_worker.py (reutiliza sharepoint_service.py existente, MinIO→SharePoint)
+- Wave 3: Cron cada 2 min + script de monitoreo sharepoint_monitor.sh
+
+**Tarea 2 — Mensajes Amigables (4 waves)**:
+- Wave 1: api/errors.go con 9 error codes + user_message en todos los handlers Go
+- Wave 2: errorMessages.ts + apiClient.ts usa getUserMessage() + CameraScreen mensajes amigables
+- Wave 3: offlineQueue.ts con AsyncStorage (max 50 items, 5 retries) + check NetInfo antes de upload
+- Wave 4: UploadStatusCard.tsx (7 estados) + OfflineQueueBadge.tsx en HomeScreen
+
+**Archivos creados**:
+- api/errors.go (backend Go)
+- scripts/sharepoint_sync_worker.py
+- scripts/sharepoint_monitor.sh
+- src/utils/errorMessages.ts
+- src/utils/offlineQueue.ts
+- src/components/UploadStatusCard.tsx
+- src/components/OfflineQueueBadge.tsx
+
+**Archivos modificados**:
+- api/handler.go, api/client_handlers.go (backend Go)
+- src/utils/apiClient.ts
+- src/screens/CameraScreen.tsx
+- src/screens/HomeScreen.tsx
+
+**Verificación**:
+- Go build sin errores
+- Backend v2.20.0 healthy (DB, MinIO, AI OK)
+- Endpoint /api/admin/sharepoint-queue funcional
+- Worker Python: dry run OK (0 pending items)
+- Cron activo: */2 * * * *
+
 ### 10-Mar-2026 - Arquitecto FacturaIA — Fix critico parseo JSON AI + Docker autoheal
 
 **Estado**: Completado
