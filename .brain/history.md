@@ -3054,3 +3054,76 @@ Restauracion del auto-framing en el escaner de documentos. Se parcheó react-nat
 
 **Pendiente**:
 - Probar en dispositivo real que el auto-framing (Google ML Kit Document Scanner) funciona correctamente
+
+---
+
+### 2026-03-10 - Arquitecto FacturaIA — Mejora stack MCP
+**Estado**: Completado
+**Cambios realizados**:
+1. **MCP MinIO (mcp-server-s3)**: Instalado y configurado como `minio` en settings.json. Endpoint localhost:9000, credenciales gestoria_minio. Permite list_buckets, list_objects, get_object, put_object, delete_object, presigned_url directo desde Claude Code.
+2. **GitHub Actions toolset**: Habilitado `--toolsets=default,actions` en GitHub MCP server. Añade tools para listar workflow runs, trigger workflows, ver logs de CI/CD.
+3. **Prometheus MCP**: NO instalado — no hay Prometheus corriendo en el servidor (puerto 9090 es Chisel tunnel). No tiene sentido sin Prometheus.
+4. **Perplexity MCP**: Detectada API key expirada (401 Unauthorized). Proxy local (:8318) también falla. Pendiente renovar key.
+**Archivos modificados**: /home/gestoria/.claude/settings.json
+**Verificación**: JSON validado con node, ambas entradas correctas
+**Pendiente**: Reiniciar Claude Code para activar nuevos MCPs. Renovar API key Perplexity.
+
+### 10-Mar-2026 - Arquitecto (Opus 4.6) — FIX: Auth service unavailable
+**Estado**: RESUELTO
+**Síntoma**: APK mostraba "Servicio de autenticación no disponible" al intentar login
+**Causa raíz**: Container facturaia-ocr se reinició el 09-Mar-2026 12:30:43 cuando PgBouncer estaba temporalmente caído. El código Go intenta conectar a BD UNA vez al inicio — si falla, entra en "OCR-only mode" permanente (sin BD, sin persistencia). Sin BD, el endpoint /api/clientes/login/ no puede validar credenciales.
+**Fix aplicado**: `docker restart facturaia-ocr` — reconectó BD (PgBouncer ya estaba healthy)
+**Verificación**:
+- Health: database.available=true, storage.available=true
+- Login test user (RNC 130309094/PIN 1234): JWT generado OK, cliente "Acela Associates"
+**Bug de diseño pendiente**: Backend Go no reintenta conexión a BD si falla al inicio. Si PgBouncer hiccups durante restart del container, queda en modo degradado permanente. Requiere fix en facturaia-ocr (retry con backoff).
+
+### 10-Mar-2026 - Arquitecto (Opus 4.6) — INVESTIGACIÓN COMPLETA DE ARQUITECTURA
+**Estado**: Completado
+**Método**: Wave 1 (4 sub-agentes Sonnet en paralelo) + Wave 2 (DeepSeek V3 + Perplexity) + Wave 3 (síntesis)
+**Documento generado**: `.brain/ARQUITECTURA-FACTURAIA.md` (928 líneas)
+**Hallazgos críticos descubiertos**:
+1. "PgBouncer" es en realidad Supavisor (supabase-pooler) y facturaia-ocr lo BYPASEA conectando directo a supabase-db:5433
+2. JWTs no tienen expiración — tokens válidos para siempre
+3. Hardcoded fallback JWT secret: "dev_secret_change_in_production_32chars!"
+4. CameraScreen navega a 'InvoiceList' que NO existe en el navigator (crash bug)
+5. Base URL hardcodeada en 3 archivos diferentes
+6. RequireRole middleware existe pero NO está aplicado en ninguna ruta
+7. BD compartida (97 tablas) entre FacturaIA y GestoriaRD sin aislamiento
+8. MinIO sin healthcheck configurado
+9. Backend sin retry en conexión a BD ni graceful shutdown
+**Agentes ejecutados**: 4 Sonnet (backend Go, RN app, Docker infra, PostgreSQL)
+**Modelos IA consultados**: DeepSeek V3 (resiliencia), Perplexity Sonar (best practices)
+**Archivos modificados**: Ninguno (solo restart de container)
+
+### 10-Mar-2026 - Arquitecto (Opus 4.6) — FIX 5 BUGS CRITICOS
+
+**Estado**: Completado
+**Tag retorno**: pre-fix-criticos
+**Commits**:
+- facturaia-ocr f9489ab: retry BD con backoff exponencial (main.go)
+- facturaia-ocr 77cd2e7: JWT expiración 24h + JWT_SECRET obligatorio (jwt.go)
+- facturaia-ocr ef039fb: image proxy valida cliente_id con JWT (client_handlers.go)
+- facturaia-mobile a074509: Authorization header en InvoiceReviewScreen (InvoiceReviewScreen.tsx)
+
+**Archivos modificados**:
+- Backend Go: cmd/server/main.go, internal/auth/jwt.go, api/client_handlers.go
+- App Móvil: src/screens/InvoiceReviewScreen.tsx
+
+**Cambios realizados**:
+1. **Retry BD**: db.Init() ahora reintenta 5 veces con backoff 2s/4s/8s/16s/32s antes de OCR-only mode
+2. **JWT Expiry**: Tokens expiran en 24h (antes: nunca). Agrega IssuedAt
+3. **JWT Secret**: Eliminado fallback hardcodeado. JWT_SECRET env var obligatoria (min 32 chars)
+4. **Auth Headers**: InvoiceReviewScreen agrega Bearer token a 3 handlers (4 fetch calls)
+5. **Image Proxy**: Valida cliente_id cuando JWT presente. Log warning para acceso sin JWT
+
+**Verificación**:
+- go vet y go build pasaron sin errores en backend
+- Archivos TypeScript verificados (import getToken correcto)
+- Commits individuales por cada fix
+
+**Pendiente**:
+- Rebuild Docker image facturaia-ocr:v2.18.0 con los fixes
+- Re-deploy container con nueva imagen
+- Probar login (JWT_SECRET ya configurado en docker run)
+- Verificar que tokens existentes expiran correctamente
