@@ -27,6 +27,7 @@ import {
   Divider,
 } from 'react-native-paper';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
+import { getToken } from '../services/authService';
 
 const API_BASE_URL = 'http://217.216.48.91:8081';
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -151,9 +152,13 @@ const InvoiceReviewScreen: React.FC = () => {
   const handleRevalidate = async () => {
     setIsRevalidating(true);
     try {
+      const token = await getToken();
       const response = await fetch(`${API_BASE_URL}/api/v1/invoices/validate`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify(formData),
       });
       const result = await response.json();
@@ -171,9 +176,13 @@ const InvoiceReviewScreen: React.FC = () => {
   const handleApprove = async () => {
     setIsSubmitting(true);
     try {
+      const token = await getToken();
       const response = await fetch(`${API_BASE_URL}/api/facturas/${params.invoiceId}/approve`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({
           ...formData,
           extraction_status: 'validated',
@@ -194,10 +203,14 @@ const InvoiceReviewScreen: React.FC = () => {
   const handleCorrectAndSave = async () => {
     setIsSubmitting(true);
     try {
+      const token = await getToken();
       // Primero revalidar
       const validateResponse = await fetch(`${API_BASE_URL}/api/v1/invoices/validate`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify(formData),
       });
       const validateResult = await validateResponse.json();
@@ -222,7 +235,10 @@ const InvoiceReviewScreen: React.FC = () => {
       // Guardar con el nuevo status
       const saveResponse = await fetch(`${API_BASE_URL}/api/facturas/${params.invoiceId}/update`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({
           ...formData,
           extraction_status: newStatus,
