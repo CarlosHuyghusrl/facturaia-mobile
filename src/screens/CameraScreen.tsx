@@ -36,6 +36,7 @@ import {
   Factura,
 } from '../services/facturasService';
 import { getNetworkErrorMessage } from '../utils/errorMessages';
+import { addToQueue, isOnline } from '../utils/offlineQueue';
 import { RootStackParamList } from '../../App';
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
@@ -155,6 +156,20 @@ const ScannerScreen: React.FC = () => {
   // Procesar imagen con OCR y validación
   const processImage = async () => {
     if (!imageUri) return;
+
+    // Check internet before uploading
+    const online = await isOnline();
+    if (!online) {
+      // Save to offline queue
+      await addToQueue(imageUri);
+      setError(null);
+      Alert.alert(
+        'Sin conexión',
+        'No hay conexión a internet. La imagen se guardó localmente y se procesará cuando vuelva la conexión.',
+        [{ text: 'OK' }],
+      );
+      return;
+    }
 
     try {
       setState('processing');
