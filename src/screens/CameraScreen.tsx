@@ -35,6 +35,7 @@ import {
   InvoiceProcessResponse,
   Factura,
 } from '../services/facturasService';
+import { getNetworkErrorMessage } from '../utils/errorMessages';
 import { RootStackParamList } from '../../App';
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
@@ -172,7 +173,8 @@ const ScannerScreen: React.FC = () => {
       setState('success');
     } catch (err: any) {
       console.error('[Scanner] Error procesando:', err);
-      setError(err.message || 'Error al procesar la factura');
+      const friendlyMessage = err.userMessage || err.message || getNetworkErrorMessage(err instanceof Error ? err : new Error(String(err)));
+      setError(friendlyMessage || 'Error al procesar la factura. Intenta de nuevo.');
       setState('error');
     }
   };

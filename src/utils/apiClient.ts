@@ -8,6 +8,7 @@
 
 import { Alert } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
+import { getUserMessage, getNetworkErrorMessage } from './errorMessages';
 
 const API_BASE_URL = 'http://217.216.48.91:8081';
 const TOKEN_KEY = 'auth_token';
@@ -134,7 +135,7 @@ export const apiClient = async <T = any>(
       // Manejar otros errores HTTP
       if (!response.ok) {
         const errorBody = await response.json().catch(() => ({}));
-        const errorMessage = errorBody.error || errorBody.message || `Error ${response.status}`;
+        const errorMessage = getUserMessage(errorBody) || errorBody.error || errorBody.message || `Error ${response.status}`;
 
         // Si es error de servidor, puede ser retryable
         if (isRetryableError(new Error(), response.status) && attempt < MAX_RETRIES && !skipRetry) {
@@ -144,7 +145,10 @@ export const apiClient = async <T = any>(
           continue;
         }
 
-        throw new Error(errorMessage);
+        const err = new Error(errorMessage) as any;
+        err.errorCode = errorBody.error_code;
+        err.userMessage = errorMessage;
+        throw err;
       }
 
       // Parsear respuesta
@@ -168,10 +172,17 @@ export const apiClient = async <T = any>(
       // Error final
       console.error(`[apiClient] Error en ${endpoint}:`, error.message);
 
+      // Enriquecer errores de red con mensaje amigable si no tienen uno ya
+      if (!error.userMessage && !error.errorCode) {
+        const friendlyMessage = getNetworkErrorMessage(error);
+        error.userMessage = friendlyMessage;
+        error.message = friendlyMessage;
+      }
+
       if (showErrorAlert && error.message !== 'Sesión expirada. Por favor inicie sesión nuevamente.') {
         Alert.alert(
           'Error de conexión',
-          error.message || 'No se pudo conectar con el servidor. Verifique su conexión a internet.',
+          error.userMessage || error.message || 'No se pudo conectar con el servidor. Verifique su conexión a internet.',
           [{ text: 'OK' }]
         );
       }
@@ -239,14 +250,22 @@ export const api = {
 
       if (!response.ok) {
         const errorBody = await response.json().catch(() => ({}));
-        throw new Error(errorBody.error || errorBody.message || `Error ${response.status}`);
+        const friendlyMessage = getUserMessage(errorBody) || errorBody.error || errorBody.message || `Error ${response.status}`;
+        const err = new Error(friendlyMessage) as any;
+        err.errorCode = errorBody.error_code;
+        err.userMessage = friendlyMessage;
+        throw err;
       }
 
       return await response.json();
     } catch (error: any) {
       console.error(`[apiClient] Upload error:`, error.message);
+      // Enriquecer errores de red si no tienen mensaje amigable
+      if (!error.userMessage) {
+        error.userMessage = getNetworkErrorMessage(error);
+      }
       if (showErrorAlert) {
-        Alert.alert('Error', error.message || 'Error al subir archivo');
+        Alert.alert('Error', error.userMessage || error.message || 'Error al subir archivo');
       }
       throw error;
     }
