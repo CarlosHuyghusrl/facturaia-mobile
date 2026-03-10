@@ -1,7 +1,7 @@
 # Task - FacturaIA
 
 **Fecha**: 10-Mar-2026
-**Estado**: Backend v2.18.0 deployed con 5 fixes criticos — App movil con auth headers corregidos
+**Estado**: Backend v2.19.0 deployed con fix parseo JSON AI + Docker autoheal — App movil con auth headers corregidos
 **Proyecto**: FacturaIA (App movil + Backend OCR)
 
 ---
@@ -24,17 +24,20 @@
 
 ## ESTADO REAL (10-Mar-2026)
 
-### Backend OCR - OPERATIVO v2.18.0
-- **Docker**: facturaia-ocr:v2.18.0 (healthy, deployed 10-Mar-2026)
+### Backend OCR - OPERATIVO v2.19.0
+- **Docker**: facturaia-ocr:v2.19.0 (healthy, deployed 10-Mar-2026)
 - **Go**: 1.24, Alpine multi-stage
 - **AI**: Claude Opus 4.5 via CLIProxyAPI (localhost:8317)
 - **Puerto**: 8081
-- **Fixes v2.18.0** (5 bugs criticos):
+- **Fixes v2.18.0-v2.19.0** (8 bugs criticos):
   1. Retry BD con backoff exponencial (5 intentos: 2s/4s/8s/16s/32s) — PROBADO y funciona
   2. JWT expiracion 24h (antes: nunca expiraban)
   3. JWT_SECRET obligatorio (eliminado fallback hardcodeado)
   4. Image proxy valida cliente_id cuando JWT presente
   5. InvoiceReviewScreen con Authorization headers (app movil)
+  6. System message JSON-only para AI provider OpenAI (fix parseo)
+  7. Fallback extracción JSON de texto mixto en respuestas AI
+  8. Docker autoheal para restart automático de containers unhealthy
 - **Endpoints activos (9)**:
   - POST /api/clientes/login/ (RNC+PIN → JWT con exp 24h)
   - POST /api/process-invoice (upload + OCR)
@@ -62,7 +65,8 @@
 - Coolify (orquestacion Docker)
 
 ### Docker - Limpio
-- facturaia-ocr:v2.18.0 (149MB, activo)
+- facturaia-ocr:v2.19.0 (activo)
+- autoheal (willfarrell/autoheal, monitoring containers unhealthy cada 30s)
 - v2.17.2 eliminada (10-Mar-2026)
 - 1 imagen Coolify 2.66GB en uso activo (no eliminable)
 - Total imagenes: 12.57GB, 12.24GB reclaimable
@@ -77,6 +81,10 @@
 - ~~JWT fallback secret hardcodeado~~ → JWT_SECRET obligatorio (min 32 chars)
 - ~~InvoiceReviewScreen sin Authorization~~ → 4 fetch calls con Bearer token
 - ~~Image proxy sin validar cliente_id~~ → Valida ownership con JWT
+
+### Resueltos en v2.19.0
+- ~~AI responde texto en vez de JSON~~ → System message + fallback extracción JSON
+- ~~Docker no reinicia containers unhealthy~~ → Autoheal container monitoring
 
 ### Pendientes (no criticos)
 - CameraScreen navega a 'InvoiceList' inexistente (crash) — debe ser 'Home'

@@ -17,6 +17,28 @@
 
 ## Registro de Cambios
 
+### 10-Mar-2026 - Arquitecto FacturaIA — Fix critico parseo JSON AI + Docker autoheal
+
+**Estado**: Completado
+**Version**: v2.19.0 (deployed)
+
+**Problema 1 (CRITICO)**: AI respondía con texto narrativo en vez de JSON
+- Causa: OpenAI provider no forzaba formato JSON (ResponseFormat removido por compatibilidad CLIProxyAPI)
+- Fix en providers.go: System message que fuerza respuesta JSON-only
+- Fix en extractor.go: Fallback que extrae JSON de texto mixto (busca primer { y último })
+- Archivos: internal/ai/providers.go, internal/ai/extractor.go
+
+**Problema 2**: Docker no reiniciaba containers unhealthy automáticamente
+- Causa: Docker restart policy solo reinicia si el proceso muere, NO si healthcheck falla
+- Fix: Desplegado container willfarrell/autoheal que monitorea y reinicia containers unhealthy cada 30s
+- Script: ~/scripts/setup-autoheal.sh
+
+**Verificación**:
+- Backend v2.19.0 healthy (health check OK)
+- Autoheal container running y healthy
+- Go build sin errores
+- Commit y push a GitHub (facturaia-ocr master)
+
 ### 14-Feb-2026 - Arquitecto (Opus 4.6) - DISCOVERY + SINCRONIZACION
 **Estado**: COMPLETADO
 

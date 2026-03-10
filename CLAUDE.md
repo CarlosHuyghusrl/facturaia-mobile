@@ -332,7 +332,7 @@ docker run -d --name facturaia-ocr --restart unless-stopped --network host \
   -e MINIO_USE_SSL=false -e MINIO_BUCKET=facturas \
   -e JWT_SECRET=facturaia-jwt-secret-2025-production \
   --init \
-  facturaia-ocr:v2.16.0
+  facturaia-ocr:v2.19.0
 ```
 
 ### Test User (App Movil)
@@ -342,7 +342,39 @@ docker run -d --name facturaia-ocr --restart unless-stopped --network host \
 
 ---
 
-## PROBLEMAS CONOCIDOS (14-Feb-2026)
+## PROBLEMAS CONOCIDOS (10-Mar-2026)
+
+### ⚠️ Backend "OCR-only mode" — sin reconexión BD (10-Mar-2026)
+- **Afecta:** TODO el sistema (auth, facturas, storage)
+- **Síntoma:** "Servicio de autenticación no disponible" en la app
+- **Causa:** Si facturaia-ocr arranca cuando PgBouncer está caído, entra en "OCR-only mode" permanente
+- **Diagnóstico rápido:** `curl localhost:8081/health` → si `database.available: false` → este bug
+- **Fix rápido:** `docker restart facturaia-ocr` (solo si PgBouncer ya está UP)
+- **Fix definitivo pendiente:** Agregar retry con backoff exponencial en facturaia-ocr/cmd/server/main.go
+
+### ⚠️ InvoiceReviewScreen sin Authorization header (10-Mar-2026)
+- **Afecta:** Pantalla de revisión post-OCR completa
+- **Síntoma:** Approve, Update y Validate retornan 401 silenciosamente
+- **Causa:** 3 fetch() calls directos sin Authorization header (no usan apiClient.ts)
+- **Fix:** Reemplazar fetch() con apiClient en InvoiceReviewScreen.tsx
+
+### ⚠️ HomeScreen field name mismatch (10-Mar-2026)
+- **Afecta:** Lista de facturas en pantalla principal
+- **Síntoma:** Campos emisor_nombre, fecha_emision, total aparecen como undefined
+- **Causa:** Factura type (facturasService.ts) define proveedor, fecha_documento, monto pero HomeScreen usa nombres diferentes
+- **Fix:** Alinear nombres de campos entre type y screen
+
+### ⚠️ CameraScreen navega a 'InvoiceList' inexistente (10-Mar-2026)
+- **Afecta:** Botón "Ver Lista" después de escanear factura
+- **Síntoma:** Crash de la app
+- **Causa:** CameraScreen.tsx:374 navega a 'InvoiceList' que no existe en el navigator (App.tsx)
+- **Fix:** Cambiar a navigation.navigate('Home')
+
+### ⚠️ JWT sin expiración + fallback secret hardcodeado (10-Mar-2026)
+- **Afecta:** Seguridad de autenticación
+- **Síntoma:** Tokens válidos para siempre; secret por defecto en código
+- **Causa:** GenerateToken() no pone ExpiresAt; fallback "dev_secret_change_in_production_32chars!"
+- **Fix:** Agregar ExpiresAt (24h) y eliminar fallback secret en jwt.go
 
 ### ⚠️ ISC=0 en facturas antiguas (pre-v2.13.2)
 - **Afecta:** 23 de 26 facturas en BD
@@ -354,6 +386,14 @@ docker run -d --name facturaia-ocr --restart unless-stopped --network host \
 ### ✅ RESUELTO: Zombies en healthcheck
 - **Causa:** wget en healthcheck no se limpiaba
 - **Solución:** `--init` flag en docker run (tini como PID 1)
+
+### ✅ RESUELTO: AI responde texto narrativo en vez de JSON (10-Mar-2026)
+- **Causa:** OpenAI provider no forzaba formato JSON (ResponseFormat removido por CLIProxyAPI)
+- **Solución:** System message JSON-only + fallback extracción JSON en extractor.go (v2.19.0)
+
+### ✅ RESUELTO: Docker no reinicia containers unhealthy (10-Mar-2026)
+- **Causa:** Docker restart policy no actúa sobre healthcheck failures, solo process death
+- **Solución:** Container autoheal (willfarrell/autoheal) monitorea y reinicia cada 30s
 
 ### Camara no funciona en APK actual
 - `react-native-image-picker` launchCamera no abre en APK debug
