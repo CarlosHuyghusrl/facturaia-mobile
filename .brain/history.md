@@ -3127,3 +3127,26 @@ Restauracion del auto-framing en el escaner de documentos. Se parcheó react-nat
 - Re-deploy container con nueva imagen
 - Probar login (JWT_SECRET ya configurado en docker run)
 - Verificar que tokens existentes expiran correctamente
+
+### 10-Mar-2026 - Arquitecto (Opus 4.6) — DEPLOY facturaia-ocr:v2.18.0
+
+**Estado**: Completado
+**Dependencia**: Fix 5 bugs criticos (misma sesion)
+
+**Acciones**:
+1. Docker build facturaia-ocr:v2.18.0 (~90s)
+2. Stop + rm container anterior (v2.17.2)
+3. Docker run nuevo container con --init y mismos env vars
+4. Verificacion completa
+
+**Verificacion**:
+- Health: status=healthy, database.available=true, storage.available=true
+- JWT: token tiene exp (expira 2026-03-11T17:14:51) y iat (emitido 2026-03-10T17:14:51)
+- JWT_SECRET obligatorio: Init() ya no acepta secret vacio
+- BD: conexion exitosa al primer intento (no necesito retry)
+- Login test: success=true para Acela Associates
+
+**Pendiente**:
+- Probar retry BD simulando PgBouncer caido al arranque
+- Probar InvoiceReviewScreen en APK (necesita nuevo build movil)
+- Limpiar imagen Docker antigua v2.17.2
