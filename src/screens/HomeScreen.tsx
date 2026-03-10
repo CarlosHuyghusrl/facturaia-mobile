@@ -10,6 +10,7 @@ import {
   FlatList,
   RefreshControl,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import {
   Text,
@@ -31,6 +32,8 @@ import {
   obtenerResumen,
 } from '../services/facturasService';
 import { RootStackParamList } from '../types/invoice';
+import OfflineQueueBadge from '../components/OfflineQueueBadge';
+import { api } from '../utils/apiClient';
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
 
@@ -119,6 +122,42 @@ const HomeScreen: React.FC = () => {
       default: return '#6b7280';
     }
   };
+
+  // Función de subida para la cola offline
+  const uploadFacturaOffline = async (imageUri: string): Promise<any> => {
+    const formData = new FormData();
+    formData.append('file', {
+      uri: imageUri,
+      type: 'image/jpeg',
+      name: 'factura.jpg',
+    } as any);
+    return api.upload('/api/facturas/upload', formData);
+  };
+
+  // Renderizar header de la lista (badge offline + resumen)
+  const renderListHeader = () => (
+    <>
+      <OfflineQueueBadge
+        uploadFn={uploadFacturaOffline}
+        onSyncComplete={(results) => {
+          if (results.success > 0) {
+            Alert.alert(
+              'Sincronización completa',
+              `${results.success} factura${results.success > 1 ? 's' : ''} subida${results.success > 1 ? 's' : ''} exitosamente.`,
+            );
+            loadData(true);
+          }
+          if (results.failed > 0) {
+            Alert.alert(
+              'Algunas facturas fallaron',
+              `${results.failed} factura${results.failed > 1 ? 's' : ''} no se pudo${results.failed > 1 ? 'ron' : ''} subir. Intenta de nuevo más tarde.`,
+            );
+          }
+        }}
+      />
+      {renderResumen()}
+    </>
+  );
 
   // Renderizar card de resumen
   const renderResumen = () => (
@@ -211,7 +250,7 @@ const HomeScreen: React.FC = () => {
         data={facturas}
         keyExtractor={(item) => item.id}
         renderItem={renderFactura}
-        ListHeaderComponent={renderResumen}
+        ListHeaderComponent={renderListHeader}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>No hay facturas aún</Text>
