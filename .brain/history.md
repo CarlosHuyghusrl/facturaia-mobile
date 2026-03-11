@@ -17,6 +17,61 @@
 
 ## Registro de Cambios
 
+### 11-Mar-2026 - Arquitecto FacturaIA — Fix 5 bugs + 3 variantes logo
+
+**Estado**: Completado
+**Tag retorno**: pre-fix-5-bugs
+
+**Cambios realizados:**
+
+#### Fix 1: CameraScreen crash (app movil)
+- Archivo: src/screens/CameraScreen.tsx:391
+- Cambio: navigation.navigate('InvoiceList') → navigation.navigate('Home')
+- Razon: 'InvoiceList' no existia en el navigator, causaba crash
+- Commit: 7735cba9
+
+#### Fix 2: Centralizar Base URL (app movil)
+- Nuevo: src/config/api.ts con API_BASE_URL centralizada
+- Actualizados: authService.ts, apiClient.ts, api.ts, InvoiceDetailScreen.tsx, InvoiceReviewScreen.tsx
+- Eliminadas todas las URLs hardcodeadas 217.216.48.91:8081
+- Commit: 7735cba9
+
+#### Fix 3: RequireRole middleware (backend Go)
+- Archivo: facturaia-ocr/api/handler.go (SetupRoutes)
+- /api/admin/sharepoint-queue → RequireRole("admin")
+- /api/facturas/{id}/reprocesar → RequireRole("admin", "contador")
+- Commit: 83eb94c (repo facturaia-ocr, rama master)
+
+#### Fix 4: MinIO healthcheck Docker
+- Container MinIO recreado con healthcheck: curl -sf http://localhost:9000/minio/health/live
+- Intervalo: 30s, timeout: 10s, retries: 3
+- Estado: healthy
+
+#### Fix 5: Rebuild Docker image v2.21.0
+- facturaia-ocr:v2.21.0 deployed con RequireRole middleware
+- Health: healthy, DB: available, Storage: available
+- Verificado: /api/admin/sharepoint-queue devuelve 401 sin token
+
+#### Logo FacturaIA — 3 variantes SVG
+- logo-v1.svg: "Scan Document" (documento con lineas de escaneo)
+- logo-v2.svg: "AI Spark" (estrella 5 puntas asimetrica, unica de FacturaIA)
+- logo-v3.svg: "Neural Lens" (lente/ojo con crosshair vision)
+- logo-configurator.html: actualizado con variante AI Spark
+- Commit: c08000ec
+
+**Verificacion:**
+- App movil: zero references a InvoiceList, zero hardcoded URLs
+- Backend: curl 127.0.0.1:8081/health → healthy, DB y Storage OK
+- Admin route: 401 sin token (RequireRole funciona)
+- MinIO: docker inspect → healthcheck healthy
+- Logos: 3 SVGs standalone validos con colores brand
+
+**Pendiente:**
+- Rebuild APK para incluir todos los fixes de app movil
+- Carlos elige variante de logo preferida
+
+---
+
 ### 11-Mar-2026 - Arquitecto FacturaIA — RequireRole middleware en rutas admin
 
 **Estado**: Completado
