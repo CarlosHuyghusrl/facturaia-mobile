@@ -1,0 +1,40 @@
+<!-- FacturaIA Logo — Variante B: Document Scan -->
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="mainGrad" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#22D3EE" />
+      <stop offset="100%" stop-color="#3B82F6" />
+    </linearGradient>
+    <linearGradient id="darkSide" x1="0" y1="0" x2="100" y2="0">
+      <stop offset="0%" stop-color="#0F172A" />
+      <stop offset="100%" stop-color="#1E293B" />
+    </linearGradient>
+  </defs>
+
+  <!-- SOMBRA (F oscura detrás) -->
+  <g style="opacity: 0.72;" transform="translate(14, 14)">
+    <path d="M20 20 H70 C75.5 20 80 24.5 80 30 V98" stroke="url(#darkSide)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <rect x="20" y="46" width="53" height="12" rx="6" fill="url(#darkSide)"/>
+    <g><circle cx="70" cy="70" r="10" fill="url(#darkSide)"/></g>
+  </g>
+
+  <!-- CARA FRONTAL (F cyan) -->
+  <g>
+    <path d="M20 20 H70 C75.5 20 80 24.5 80 30 V98" stroke="url(#mainGrad)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <rect x="20" y="46" width="53" height="12" rx="6" fill="url(#mainGrad)"/>
+    <g transform="translate(70, 70)">
+      <circle r="10" fill="#3B82F6"/>
+      <!-- Esquinas de encuadre (brackets) -->
+      <!-- Esquina superior izquierda -->
+      <path d="M-4 -2 L-4 -5 L-1 -5" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <!-- Esquina superior derecha -->
+      <path d="M4 -2 L4 -5 L1 -5" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <!-- Esquina inferior izquierda -->
+      <path d="M-4 2 L-4 5 L-1 5" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <!-- Esquina inferior derecha -->
+      <path d="M4 2 L4 5 L1 5" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <!-- Línea de escaneo horizontal -->
+      <line x1="-3" y1="0" x2="3" y2="0" stroke="white" stroke-width="0.8" stroke-opacity="0.8"/>
+    </g>
+  </g>
+</svg>
