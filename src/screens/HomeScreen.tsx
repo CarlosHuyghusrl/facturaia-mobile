@@ -372,12 +372,15 @@ const styles = StyleSheet.create({
     fontFamily: 'monospace',
   },
   estadoBadge: {
-    height: 24,
+    height: 28,
+    justifyContent: 'center',
   },
   estadoText: {
-    fontSize: 10,
+    fontSize: 11,
+    fontWeight: '700',
     color: '#fff',
     textTransform: 'uppercase',
+    lineHeight: 14,
   },
   divider: {
     marginVertical: 12,
