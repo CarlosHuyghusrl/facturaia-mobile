@@ -21,7 +21,7 @@ import {
   ActivityIndicator,
   Divider,
 } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 
 import { useAuth } from '../hooks/useAuth';
@@ -97,9 +97,12 @@ const HomeScreen: React.FC = () => {
     }
   }, [page, hasMore, isLoadingMore]);
 
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  // Recargar datos cada vez que la pantalla recibe foco (ej: volver de CameraScreen)
+  useFocusEffect(
+    useCallback(() => {
+      loadData(true);
+    }, [])
+  );
 
   // Formatear moneda
   const formatMoney = (amount: number) => {
@@ -191,7 +194,7 @@ const HomeScreen: React.FC = () => {
         <View style={styles.facturaHeader}>
           <View style={styles.facturaInfo}>
             <Text style={styles.facturaEmisor} numberOfLines={1}>
-              {item.emisor_nombre || 'Sin nombre'}
+              {item.proveedor || 'Sin nombre'}
             </Text>
             <Text style={styles.facturaNcf}>{item.ncf}</Text>
           </View>
@@ -207,11 +210,11 @@ const HomeScreen: React.FC = () => {
 
         <View style={styles.facturaFooter}>
           <View>
-            <Text style={styles.facturaFecha}>{formatDate(item.fecha_emision)}</Text>
+            <Text style={styles.facturaFecha}>{formatDate(item.fecha_documento)}</Text>
             <Text style={styles.facturaRnc}>RNC: {item.emisor_rnc}</Text>
           </View>
           <View style={styles.facturaMontos}>
-            <Text style={styles.facturaTotal}>{formatMoney(item.total)}</Text>
+            <Text style={styles.facturaTotal}>{formatMoney(item.monto)}</Text>
             <Text style={styles.facturaItbis}>ITBIS: {formatMoney(item.itbis)}</Text>
           </View>
         </View>

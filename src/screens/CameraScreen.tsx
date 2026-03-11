@@ -365,6 +365,14 @@ const ScannerScreen: React.FC = () => {
           </View>
         )}
 
+        {processResult?.warning ? (
+          <View style={{ backgroundColor: '#7c2d12', padding: 10, borderRadius: 8, marginBottom: 12 }}>
+            <Text style={{ color: '#fb923c', fontSize: 12, textAlign: 'center' }}>
+              ⚠️ {processResult.warning}
+            </Text>
+          </View>
+        ) : null}
+
         {/* Info breve de la factura */}
         <Surface style={styles.quickInfo}>
           <Text style={styles.quickNCF}>{factura?.ncf || editData.ncf}</Text>
