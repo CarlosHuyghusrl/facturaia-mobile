@@ -17,6 +17,20 @@
 
 ## Registro de Cambios
 
+### 11-Mar-2026 - Arquitecto FacturaIA — RequireRole middleware en rutas admin
+
+**Estado**: Completado
+**Repo**: facturaia-ocr (backend Go)
+**Archivo modificado**: api/handler.go
+**Cambios realizados**:
+- POST /api/facturas/{id}/reprocesar: ahora requiere rol "admin" o "contador" via auth.RequireRole
+- GET /api/admin/sharepoint-queue: ahora requiere rol "admin" via auth.RequireRole
+- Build verificado (go build ./... limpio)
+**Commit**: 83eb94c [SEC] Apply RequireRole middleware to admin routes
+**Pendiente**: Rebuild imagen Docker facturaia-ocr para que el cambio entre en produccion
+
+---
+
 ### 11-Mar-2026 - Arquitecto FacturaIA — Cierre sesion 100326
 
 **Estado**: Sesion cerrada
