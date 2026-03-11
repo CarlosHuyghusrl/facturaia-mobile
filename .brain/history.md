@@ -17,6 +17,27 @@
 
 ## Registro de Cambios
 
+### 11-Mar-2026 - Arquitecto FacturaIA — Cierre sesion 100326
+
+**Estado**: Sesion cerrada
+**Actividad**: Continuacion de sesion anterior (context recovery)
+- Commit pendiente: documentacion v2.20.0 (history.md, task.md, CLAUDE.md, package.json)
+- Push a origin main completado
+- Memoria actualizada con estado v2.20.0 completo
+- Archivos untracked de sesiones previas commiteados (.brain/ARQUITECTURA-FACTURAIA.md, agents, planes 606)
+
+**Commits realizados**:
+- 115e57a1 [BRAIN] Documentar deploy v2.20.0 + SharePoint sync + error messages
+- [este commit] Cierre sesion: archivos pendientes + history
+
+**Pendiente para proxima sesion**:
+1. Rebuild APK con todo lo nuevo (errors, offline queue, auth headers)
+2. Test end-to-end en dispositivo real
+3. Fix CameraScreen: 'InvoiceList' → 'Home'
+4. Centralizar Base URL en config
+
+---
+
 ### 10-Mar-2026 - Arquitecto FacturaIA — SharePoint sync + mensajes amigables (7 waves)
 
 **Estado**: Completado
