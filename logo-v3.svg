@@ -1,0 +1,33 @@
+<!-- FacturaIA Logo — Variante 3: "Neural Lens" -->
+<!-- Icono en dotGroup: lente/ojo con punto central, representa vision por computadora -->
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="mainGrad" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#22D3EE" />
+      <stop offset="100%" stop-color="#3B82F6" />
+    </linearGradient>
+  </defs>
+
+  <!-- Document frame (esquina de documento en L) -->
+  <path d="M20 20 H70 C75.5 20 80 24.5 80 30 V80" stroke="url(#mainGrad)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- Text line bar -->
+  <rect x="20" y="55" width="40" height="12" rx="6" fill="url(#mainGrad)"/>
+
+  <!-- AI dot con icono Neural Lens (lente/ojo con marcas de cruz) -->
+  <g transform="translate(70, 70)">
+    <circle r="10" fill="#3B82F6"/>
+    <!-- Circulo exterior (lente) -->
+    <circle cx="0" cy="0" r="4.5" stroke="white" stroke-width="1.2" fill="none"/>
+    <!-- Punto central (pupila) -->
+    <circle cx="0" cy="0" r="1.5" fill="white"/>
+    <!-- Marcas de cruz — arriba -->
+    <line x1="0" y1="-4.5" x2="0" y2="-3" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
+    <!-- Marcas de cruz — abajo -->
+    <line x1="0" y1="4.5" x2="0" y2="3" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
+    <!-- Marcas de cruz — izquierda -->
+    <line x1="-4.5" y1="0" x2="-3" y2="0" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
+    <!-- Marcas de cruz — derecha -->
+    <line x1="4.5" y1="0" x2="3" y2="0" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
+  </g>
+</svg>

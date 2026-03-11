@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurador FacturaIA - Star Edition con IA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .squircle {
+            border-radius: 22.37%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.9);
+        }
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 18px;
+            width: 18px;
+            border-radius: 50%;
+            background: #22D3EE;
+            cursor: pointer;
+            margin-top: -7px;
+            box-shadow: 0 0 10px rgba(34, 211, 238, 0.6);
+            border: 2px solid #fff;
+            transition: transform 0.1s;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #334155;
+            border-radius: 2px;
+        }
+        .control-group {
+            background: rgba(15, 23, 42, 0.6);
+            padding: 14px;
+            border-radius: 10px;
+            border: 1px solid rgba(51, 65, 85, 0.5);
+            margin-bottom: 10px;
+        }
+        #inputHue::-webkit-slider-thumb {
+            background: #ffffff;
+            box-shadow: none;
+        }
+        #inputHue::-webkit-slider-runnable-track {
+            background: linear-gradient(to right, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #0f172a; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        
+        @keyframes pulse-cyan {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .ai-loading { animation: pulse-cyan 1.5s infinite; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-200 min-h-screen flex flex-col md:flex-row">
+
+    <!-- VISOR (Izquierda) -->
+    <div class="flex-1 flex flex-col items-center justify-center p-8 bg-slate-900 border-r border-slate-800 relative overflow-hidden">
+        <div class="absolute inset-0 opacity-20" style="background-image: linear-gradient(#1e293b 1px, transparent 1px), linear-gradient(90deg, #1e293b 1px, transparent 1px); background-size: 20px 20px;"></div>
+        
+        <div class="relative z-10 text-center space-y-8 w-full max-w-md">
+            <div class="flex justify-between items-center px-4">
+                 <span class="text-[10px] font-mono text-cyan-400 tracking-widest uppercase bg-cyan-950/40 px-3 py-1 rounded-full border border-cyan-800">FacturaIA Brand v5.2</span>
+                 <div class="flex gap-2 bg-slate-800/50 p-1 rounded-full border border-slate-700">
+                     <button onclick="setBg('dark')" class="w-6 h-6 rounded-full bg-slate-900 border border-slate-500 focus:ring-2 ring-cyan-500 transition-transform hover:scale-110"></button>
+                     <button onclick="setBg('light')" class="w-6 h-6 rounded-full bg-slate-100 border border-slate-300 focus:ring-2 ring-cyan-500 transition-transform hover:scale-110"></button>
+                 </div>
+            </div>
+            
+            <div id="iconContainer" class="squircle mx-auto w-72 h-72 bg-slate-900 border border-slate-700 flex items-center justify-center relative overflow-hidden transition-all duration-300 group">
+                <div id="iconBg" class="absolute inset-0 bg-gradient-to-br from-slate-800 via-slate-900 to-black transition-colors duration-500"></div>
+                
+                <svg id="dynamicLogo" width="190" height="190" viewBox="0 0 100 100" fill="none" class="relative z-10 filter drop-shadow-2xl">
+                    <defs>
+                        <linearGradient id="mainGrad" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+                            <stop id="stop1" offset="0%" stop-color="#22D3EE" />
+                            <stop id="stop2" offset="100%" stop-color="#3B82F6" />
+                        </linearGradient>
+                         <linearGradient id="darkSide" x1="0" y1="0" x2="100" y2="0">
+                            <stop offset="0%" stop-color="#0F172A" />
+                            <stop offset="100%" stop-color="#1E293B" />
+                        </linearGradient>
+                        <linearGradient id="beamGrad" x1="0" y1="0" x2="1" y2="0">
+                            <stop id="beam1" offset="0%" stop-color="#22D3EE" stop-opacity="0" />
+                            <stop id="beam2" offset="50%" stop-color="#FFFFFF" stop-opacity="1" />
+                            <stop id="beam3" offset="100%" stop-color="#22D3EE" stop-opacity="0" />
+                        </linearGradient>
+                    </defs>
+                    
+                    <g id="shadowGroup" style="display:none; opacity: 0.5;">
+                        <path id="shadowFrame" d="M20 20 H70 C75.5 20 80 24.5 80 30 V80" stroke="url(#darkSide)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                        <rect id="shadowBar" x="20" y="55" width="40" height="12" rx="6" fill="url(#darkSide)"/>
+                        <g id="shadowDotGroup"><circle id="shadowDot" cx="70" cy="70" r="10" fill="url(#darkSide)"/></g>
+                    </g>
+
+                    <g id="faceGroup">
+                        <path id="mainFrame" d="M20 20 H70 C75.5 20 80 24.5 80 30 V80" stroke="url(#mainGrad)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                        <rect id="mainBar" x="20" y="55" width="40" height="12" rx="6" fill="url(#mainGrad)"/>
+                        <g id="dotGroup" transform="translate(70, 70)">
+                            <circle id="mainDot" r="10" fill="#3B82F6"/>
+                            <path d="M0 -6 L1.5 -2 L5.5 -1.5 L2.5 1 L3.5 5.5 L0 3 L-3.5 5.5 L-2.5 1 L-5.5 -1.5 L-1.5 -2 Z" fill="white" id="starShape"/>
+                        </g>
+                    </g>
+                    
+                     <rect id="svgScanner" x="5" y="45" width="90" height="2" fill="url(#beamGrad)" rx="1" opacity="0" class="animate-[scan_3s_ease-in-out_infinite]" style="pointer-events: none; mix-blend-mode: screen;" />
+                </svg>
+            </div>
+
+            <div class="flex justify-center items-end gap-8 opacity-80 pt-4">
+                <div class="flex flex-col items-center gap-2">
+                    <div id="miniIcon" class="w-14 h-14 rounded-[22%] bg-slate-900 overflow-hidden relative shadow-lg border border-white/10 transition-transform hover:scale-105"></div>
+                    <span class="text-[10px] text-slate-500 font-medium">App Icon</span>
+                </div>
+                 <div class="flex flex-col items-center gap-2">
+                    <div id="microIcon" class="w-8 h-8 rounded-[22%] bg-slate-900 overflow-hidden relative shadow-md border border-white/10 transition-transform hover:scale-105"></div>
+                    <span class="text-[10px] text-slate-500 font-medium">Notificación</span>
+                </div>
+            </div>
+        </div>
+
+        <button onclick="copySVG()" class="absolute bottom-8 flex items-center gap-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white px-8 py-3 rounded-xl text-sm font-bold shadow-xl shadow-cyan-900/50 transition-all transform hover:scale-105 active:scale-95 z-30">
+            <i data-lucide="download"></i> COPIAR SVG FINAL
+        </button>
+    </div>
+
+    <!-- CONTROLES (Derecha) -->
+    <div class="w-full md:w-[440px] bg-slate-950 p-6 md:p-8 overflow-y-auto border-l border-slate-800 shadow-2xl z-20 custom-scrollbar">
+        <div class="flex items-center justify-between mb-8">
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                <i data-lucide="palette" class="w-5 h-5 text-cyan-400"></i> Diseño Maestro
+            </h2>
+            <button onclick="resetDefaults()" class="text-xs text-slate-500 hover:text-white transition flex items-center gap-1"><i data-lucide="rotate-ccw" class="w-3 h-3"></i> Reset</button>
+        </div>
+
+        <div class="space-y-6">
+            
+            <!-- SECCIÓN 1: FORMA -->
+            <div class="space-y-3">
+                <div class="flex items-center gap-2 text-xs font-bold text-cyan-400 uppercase tracking-widest mb-1">
+                    <i data-lucide="move" class="w-3 h-3"></i> Estructura
+                </div>
+                <div class="control-group">
+                    <div class="flex justify-between text-xs text-cyan-200 mb-2 font-bold">
+                        <span>Largo del Palo (Palo Extendido)</span>
+                        <span id="valStemHeight">80</span>
+                    </div>
+                    <input type="range" id="inputStemHeight" min="70" max="98" value="80" oninput="updateLogo()">
+                </div>
+                <div class="control-group">
+                    <div class="flex justify-between text-xs text-slate-400 mb-2 font-semibold">
+                        <span>Posición Barra Media</span>
+                        <span id="valBarY">55</span>
+                    </div>
+                    <input type="range" id="inputBarY" min="45" max="85" value="55" oninput="updateLogo()">
+                </div>
+                <div class="control-group">
+                     <div class="flex justify-between text-xs text-slate-400 mb-2 font-semibold">
+                        <span>Ancho Barra Media</span>
+                        <span id="valBarW">40</span>
+                    </div>
+                    <input type="range" id="inputBarW" min="20" max="60" value="40" oninput="updateLogo()">
+                </div>
+            </div>
+
+            <!-- SECCIÓN 2: ACABADO -->
+            <div class="space-y-3 pt-2">
+                 <div class="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">
+                    <i data-lucide="box" class="w-3 h-3"></i> Acabado
+                </div>
+                <div class="control-group">
+                    <div class="flex justify-between text-xs text-slate-400 mb-2">
+                        <span>Profundidad 3D</span>
+                        <span id="valDepth">8</span>
+                    </div>
+                    <input type="range" id="inputDepth" min="0" max="30" value="8" oninput="updateLogo()">
+                </div>
+                <div class="control-group">
+                    <div class="flex justify-between text-xs text-slate-400 mb-2">
+                        <span>Color (Matiz)</span>
+                        <span id="valHue">Cyan</span>
+                    </div>
+                    <input type="range" id="inputHue" min="0" max="360" value="180" step="5" oninput="updateLogo()">
+                </div>
+            </div>
+
+            <!-- ✨ NUEVA SECCIÓN: ASISTENTE DE MARCA CON IA ✨ -->
+            <div class="space-y-3 pt-4 border-t border-slate-800">
+                <div class="flex items-center gap-2 text-xs font-bold text-yellow-400 uppercase tracking-widest mb-2">
+                    <i data-lucide="sparkles" class="w-3 h-3"></i> Asistente de Marca con IA
+                </div>
+                <div class="bg-yellow-400/5 border border-yellow-400/20 rounded-xl p-4 space-y-4">
+                    <p class="text-[11px] text-slate-400 leading-tight">
+                        Genera una narrativa profesional para este diseño basada en los parámetros actuales.
+                    </p>
+                    <button onclick="generateBrandNarrative()" id="aiBtn" class="w-full bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-bold py-2 px-4 rounded-lg text-xs transition-all flex items-center justify-center gap-2 shadow-lg shadow-yellow-500/20">
+                        <span>Generar Manifiesto ✨</span>
+                    </button>
+                    
+                    <div id="aiOutput" class="hidden mt-4 text-[12px] text-slate-300 italic leading-relaxed border-t border-white/5 pt-3 max-h-48 overflow-y-auto custom-scrollbar bg-black/20 p-2 rounded">
+                        <!-- El texto de la IA aparecerá aquí -->
+                    </div>
+                    
+                    <div id="aiError" class="hidden text-[10px] text-red-400 text-center">
+                        No se pudo conectar con el cerebro de Gemini. Reintenta.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        const apiKey = ""; // La clave API se inyecta automáticamente
+
+        function setBg(mode) {
+            const bg = document.getElementById('iconBg');
+            const iconContainer = document.getElementById('iconContainer');
+            if (mode === 'light') {
+                bg.className = "absolute inset-0 bg-gradient-to-br from-slate-100 to-white";
+                iconContainer.classList.remove('border-slate-700');
+                iconContainer.classList.add('border-slate-200');
+            } else {
+                bg.className = "absolute inset-0 bg-gradient-to-br from-slate-800 to-black";
+                iconContainer.classList.add('border-slate-700');
+                iconContainer.classList.remove('border-slate-200');
+            }
+        }
+
+        function resetDefaults() {
+            document.getElementById('inputStemHeight').value = 80;
+            document.getElementById('inputBarY').value = 55;
+            document.getElementById('inputBarW').value = 40;
+            document.getElementById('inputDepth').value = 8;
+            document.getElementById('inputHue').value = 180;
+            updateLogo();
+        }
+
+        function updateLogo() {
+            const stemH = parseInt(document.getElementById('inputStemHeight').value);
+            const barY = parseInt(document.getElementById('inputBarY').value);
+            const barW = parseInt(document.getElementById('inputBarW').value);
+            const d = parseInt(document.getElementById('inputDepth').value);
+            const hue = parseInt(document.getElementById('inputHue').value);
+
+            document.getElementById('valStemHeight').innerText = stemH;
+            document.getElementById('valBarY').innerText = barY;
+            document.getElementById('valBarW').innerText = barW;
+            document.getElementById('valDepth').innerText = d;
+            
+            const c1 = `hsl(${hue}, 100%, 50%)`;
+            const c2 = `hsl(${hue + 40}, 100%, 60%)`;
+            
+            document.getElementById('stop1').setAttribute('stop-color', c1);
+            document.getElementById('stop2').setAttribute('stop-color', c2);
+            document.getElementById('beam1').setAttribute('stop-color', c1);
+            document.getElementById('beam3').setAttribute('stop-color', c1);
+            
+            const framePathStr = `M20 20 H70 C75.5 20 80 24.5 80 30 V${stemH}`;
+            document.getElementById('mainFrame').setAttribute('d', framePathStr);
+            document.getElementById('shadowFrame').setAttribute('d', framePathStr);
+
+            document.getElementById('mainBar').setAttribute('y', barY);
+            document.getElementById('mainBar').setAttribute('width', barW);
+            document.getElementById('shadowBar').setAttribute('y', barY);
+            document.getElementById('shadowBar').setAttribute('width', barW);
+
+            const shadowGroup = document.getElementById('shadowGroup');
+            if (d > 0) {
+                shadowGroup.setAttribute('transform', `translate(${d}, ${d})`);
+                shadowGroup.style.display = 'block';
+                shadowGroup.style.opacity = Math.max(0.3, 1 - (d/50));
+            } else {
+                shadowGroup.style.display = 'none';
+            }
+
+            updateMiniPreviews();
+        }
+
+        function updateMiniPreviews() {
+            const svgHTML = document.getElementById('dynamicLogo').outerHTML;
+            const bgClass = "absolute inset-0 bg-gradient-to-br from-slate-800 to-black";
+            const mini = document.getElementById('miniIcon');
+            mini.innerHTML = `<div class="${bgClass}"></div>` + svgHTML;
+            mini.querySelector('svg').setAttribute('width', '100%');
+            mini.querySelector('svg').setAttribute('height', '100%');
+            
+            const micro = document.getElementById('microIcon');
+            micro.innerHTML = `<div class="${bgClass}"></div>` + svgHTML;
+            micro.querySelector('svg').setAttribute('width', '100%');
+            micro.querySelector('svg').setAttribute('height', '100%');
+        }
+
+        async function generateBrandNarrative() {
+            const aiBtn = document.getElementById('aiBtn');
+            const aiOutput = document.getElementById('aiOutput');
+            const aiError = document.getElementById('aiError');
+
+            const stemH = document.getElementById('inputStemHeight').value;
+            const depth = document.getElementById('inputDepth').value;
+            const hue = document.getElementById('inputHue').value;
+
+            aiBtn.disabled = true;
+            aiBtn.innerHTML = "Consultando... ✨";
+            aiOutput.classList.add('hidden');
+            aiError.classList.add('hidden');
+
+            const prompt = `Eres un experto en branding minimalista para apps fintech.
+            Analiza los siguientes parámetros de diseño de un logo para la app "FacturaIA" (que ayuda a contadores en RD a escanear facturas):
+            - Largo del palo vertical (escala 70-100): ${stemH} (un valor alto significa mucha altura).
+            - Profundidad 3D: ${depth} (un valor alto significa mucho volumen físico).
+            - Matiz de color (0-360): ${hue} grados en el círculo cromático.
+            
+            Escribe un párrafo corto (máximo 4 líneas) en español que justifique por qué esta combinación visual es ideal para una app de contabilidad dominicana profesional. Sé inspirador y técnico.`;
+
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+                systemInstruction: { parts: [{ text: "Responde como un director de arte senior. Usa un tono sofisticado y corporativo." }] }
+            };
+
+            // Implementación de reintentos con backoff exponencial
+            const callGemini = async (delay = 1000, attempt = 1) => {
+                try {
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    if (!response.ok) throw new Error("API Error");
+                    
+                    const result = await response.json();
+                    const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                    
+                    if (text) {
+                        aiOutput.innerText = text;
+                        aiOutput.classList.remove('hidden');
+                    } else {
+                        throw new Error("Respuesta vacía");
+                    }
+                } catch (error) {
+                    if (attempt < 5) {
+                        setTimeout(() => callGemini(delay * 2, attempt + 1), delay);
+                    } else {
+                        aiError.classList.remove('hidden');
+                    }
+                } finally {
+                    if (attempt === 1 || attempt === 5) {
+                        aiBtn.disabled = false;
+                        aiBtn.innerHTML = "Generar Manifiesto ✨";
+                    }
+                }
+            };
+
+            callGemini();
+        }
+
+        function copySVG() {
+            const svgContent = document.getElementById('iconContainer').innerHTML;
+            const textArea = document.createElement("textarea");
+            textArea.value = svgContent;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                const btn = document.querySelector('button[onclick="copySVG()"]');
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = `<i data-lucide="check-circle" class="w-5 h-5"></i> ¡Copiado!`;
+                btn.classList.add('bg-green-600');
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                    btn.classList.remove('bg-green-600');
+                    lucide.createIcons();
+                }, 2000);
+            } catch (err) {
+                console.error('Error al copiar:', err);
+            }
+            document.body.removeChild(textArea);
+        }
+
+        updateLogo();
+        
+        const styleSheet = document.createElement("style");
+        styleSheet.innerText = `
+            @keyframes scan {
+                0%, 100% { transform: translateY(0); opacity: 0; }
+                10% { opacity: 1; }
+                90% { opacity: 1; }
+                50% { transform: translateY(35px); }
+            }
+        `;
+        document.head.appendChild(styleSheet);
+    </script>
+</body>
+</html>

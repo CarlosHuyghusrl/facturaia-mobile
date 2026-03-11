@@ -1,0 +1,31 @@
+<!-- FacturaIA Logo — Variante 1: "Scan Document" -->
+<!-- Icono en dotGroup: mini documento con lineas de texto y rayo de escaneo diagonal -->
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="mainGrad" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#22D3EE" />
+      <stop offset="100%" stop-color="#3B82F6" />
+    </linearGradient>
+  </defs>
+
+  <!-- Document frame (esquina de documento en L) -->
+  <path d="M20 20 H70 C75.5 20 80 24.5 80 30 V80" stroke="url(#mainGrad)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- Text line bar -->
+  <rect x="20" y="55" width="40" height="12" rx="6" fill="url(#mainGrad)"/>
+
+  <!-- AI dot con icono Scan Document -->
+  <g transform="translate(70, 70)">
+    <circle r="10" fill="#3B82F6"/>
+    <!-- Documento con esquina doblada -->
+    <path d="M-3 -5 H2 L4 -3 V5 H-3 Z" fill="white"/>
+    <!-- Esquina doblada del documento -->
+    <path d="M2 -5 L4 -3 H2 Z" fill="#3B82F6"/>
+    <!-- Linea de texto 1 -->
+    <line x1="-1.8" y1="-1" x2="2" y2="-1" stroke="#3B82F6" stroke-width="0.8" stroke-linecap="round"/>
+    <!-- Linea de texto 2 -->
+    <line x1="-1.8" y1="1.5" x2="1.2" y2="1.5" stroke="#3B82F6" stroke-width="0.8" stroke-linecap="round"/>
+    <!-- Rayo de escaneo diagonal -->
+    <line x1="-3.5" y1="3.5" x2="3.5" y2="-3.5" stroke="white" stroke-width="0.9" stroke-linecap="round" opacity="0.8"/>
+  </g>
+</svg>

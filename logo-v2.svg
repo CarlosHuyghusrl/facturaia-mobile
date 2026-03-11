@@ -1,0 +1,23 @@
+<!-- FacturaIA Logo — Variante 2: "AI Spark" -->
+<!-- Icono en dotGroup: estrella de 5 puntas asimetrica, representa chispa/rayo de IA -->
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="mainGrad" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#22D3EE" />
+      <stop offset="100%" stop-color="#3B82F6" />
+    </linearGradient>
+  </defs>
+
+  <!-- Document frame (esquina de documento en L) -->
+  <path d="M20 20 H70 C75.5 20 80 24.5 80 30 V80" stroke="url(#mainGrad)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- Text line bar -->
+  <rect x="20" y="55" width="40" height="12" rx="6" fill="url(#mainGrad)"/>
+
+  <!-- AI dot con icono AI Spark (estrella 5 puntas asimetrica) -->
+  <g transform="translate(70, 70)">
+    <circle r="10" fill="#3B82F6"/>
+    <!-- Chispa/rayo de 5 puntas con proporciones diferentes a Gemini -->
+    <path d="M0 -6 L1.5 -2 L5.5 -1.5 L2.5 1 L3.5 5.5 L0 3 L-3.5 5.5 L-2.5 1 L-5.5 -1.5 L-1.5 -2 Z" fill="white"/>
+  </g>
+</svg>
