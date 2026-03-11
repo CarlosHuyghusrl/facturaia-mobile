@@ -9,8 +9,8 @@
 import { Alert } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { getUserMessage, getNetworkErrorMessage } from './errorMessages';
+import { API_BASE_URL } from '../config/api';
 
-const API_BASE_URL = 'http://217.216.48.91:8081';
 const TOKEN_KEY = 'auth_token';
 
 // Configuración de retry

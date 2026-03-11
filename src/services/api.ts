@@ -4,15 +4,13 @@
 
 import axios, {AxiosInstance, AxiosError} from 'axios';
 import {ProcessInvoiceResponse, OCRError} from '../types/invoice';
-
-// Backend en Contabo
-const RAILWAY_OCR_URL = 'http://217.216.48.91:8081';
+import { API_BASE_URL } from '../config/api';
 
 // DEPRECATED: Este servicio ya no se usa. Usar facturasService.ts con authService
 const JWT_TOKEN = '';
 
 const apiClient: AxiosInstance = axios.create({
-  baseURL: RAILWAY_OCR_URL,
+  baseURL: API_BASE_URL,
   timeout: 60000,
   headers: {
     'Content-Type': 'multipart/form-data',

@@ -28,8 +28,7 @@ import {
 } from 'react-native-paper';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { getToken } from '../services/authService';
-
-const API_BASE_URL = 'http://217.216.48.91:8081';
+import { API_BASE_URL } from '../config/api';
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 // Tipos para validación

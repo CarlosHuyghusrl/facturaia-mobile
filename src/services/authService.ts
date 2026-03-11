@@ -1,11 +1,11 @@
 /**
  * authService.ts - Autenticación de clientes
- * Backend: http://217.216.48.91:8081
+ * Backend: Usa API_BASE_URL de config/api.ts
  */
 
 import * as SecureStore from 'expo-secure-store';
+import { API_BASE_URL } from '../config/api';
 
-const API_BASE_URL = 'http://217.216.48.91:8081';
 const TOKEN_KEY = 'auth_token';
 const CLIENTE_KEY = 'cliente_data';
 

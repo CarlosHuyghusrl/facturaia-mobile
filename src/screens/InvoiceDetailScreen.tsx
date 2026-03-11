@@ -25,8 +25,7 @@ import {
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 
 import { Factura, obtenerFactura, reprocesarFactura } from '../services/facturasService';
-
-const API_BASE_URL = 'http://217.216.48.91:8081';
+import { API_BASE_URL } from '../config/api';
 
 type RouteParams = {
   InvoiceDetail: { facturaId: string };

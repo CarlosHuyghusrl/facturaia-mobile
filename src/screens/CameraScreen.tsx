@@ -388,7 +388,7 @@ const ScannerScreen: React.FC = () => {
 
           <Button
             mode="contained"
-            onPress={() => navigation.navigate('InvoiceList')}
+            onPress={() => navigation.navigate('Home')}
             style={styles.secondaryAction}
             contentStyle={styles.buttonContent}
             buttonColor="#3b82f6"
