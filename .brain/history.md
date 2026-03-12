@@ -6,6 +6,87 @@
 
 ---
 
+### 12-Mar-2026 - Arquitecto FacturaIA — Sesión completa: Duplicados, Estado, Warning DGII, APK rebuild
+
+**Estado**: Completado
+**Backend**: v2.23.0 → v2.23.3 (4 releases)
+**APK**: Rebuild exitoso (80MB)
+**Commits**:
+- facturaia-ocr: 1773fa8, d5ced8c, f33a515 (3 commits en master)
+- facturaia-mobile: cfc331a0 (1 commit en main)
+
+**Cambios Backend (facturaia-ocr v2.23.0-v2.23.3):**
+
+1. **v2.23.0 - Detección duplicados por hora de factura (sin NCF)**
+   - Nuevo campo `horaFactura` en prompt OCR (vision y texto) — extrae HH:MM
+   - Nueva columna `hora_factura varchar(5)` en tabla `facturas_clientes`
+   - Reescritura completa de `CheckDuplicateByAmount`:
+     * Con fecha+hora: compara datos DE LA FACTURA (no ventana de upload)
+     * Misma hora+fecha+RNC+monto = DUPLICADA
+     * Hora diferente = factura REAL distinta (acepta)
+     * Sin fecha: fallback a ventana 10 min (comportamiento anterior)
+   - Archivos: models/invoice.go, ai/extractor.go, db/client_invoices.go, handler.go, client_handlers.go
+
+2. **v2.23.1 - Estado siempre "procesado"**
+   - Toda factura escaneada = estado "procesado" (antes: "pendiente" si validación fallaba)
+   - El usuario no puede editar nada, "pendiente" no tenía sentido para él
+   - extraction_status y review_notes guardan detalles internos para el contador
+   - Archivo: handler.go
+
+3. **v2.23.2 - RNC receptor: advertir en vez de rechazar**
+   - Antes: si RNC receptor no coincidía → HTTP 400 + rechazo (factura perdida)
+   - Ahora: guarda la factura + envía campo `warning` en respuesta JSON
+   - La app muestra banner naranja con el warning
+   - Archivo: handler.go
+
+4. **v2.23.3 - Warning DGII mejorado**
+   - Sin RNC receptor: "no podrá devengar impuestos en la DGII"
+   - RNC diferente: muestra ambos RNC + aviso DGII personalizado
+   - Factura siempre se guarda (puede ser error de IA, técnico revisa después)
+   - Archivo: handler.go
+
+**Cambios App Móvil (facturaia-mobile):**
+
+5. **HomeScreen campos corregidos**
+   - `item.emisor_nombre` → `item.proveedor`
+   - `item.fecha_emision` → `item.fecha_documento`
+   - `item.total` → `item.monto`
+   - Nota: el backend envía AMBOS nombres, pero se alineó con el tipo Factura
+
+6. **HomeScreen auto-refresh**
+   - Cambio de `useEffect` a `useFocusEffect` de React Navigation
+   - Ahora recarga automáticamente al volver del CameraScreen
+   - Antes: había que pull-to-refresh manualmente
+
+7. **CameraScreen warning RNC**
+   - Nuevo bloque que muestra `processResult.warning` del backend
+   - Banner naranja-oscuro cuando RNC no coincide o falta
+
+**APK rebuild**: 80MB, BUILD SUCCESSFUL en 14 min
+**Backup Docker**: facturaia-ocr-backup-20260311
+
+**Aprendizajes clave:**
+- La detección de duplicados debe usar datos DE LA FACTURA, no ventana temporal de upload
+- Estado "pendiente" no tiene sentido si el usuario no puede editar — siempre "procesado"
+- Nunca rechazar facturas por validación — guardar + advertir (puede ser error de IA)
+- Todas las facturas DGII necesitan RNC receptor para devengar impuestos
+- useFocusEffect es obligatorio para refrescar datos al volver de otra pantalla en React Navigation
+
+**Verificación:**
+- Backend healthy: curl localhost:8081/health ✓
+- BD: hora_factura column exists ✓
+- Go build: sin errores ✓
+- APK build: BUILD SUCCESSFUL ✓
+- Factura Larimar: hora_factura=13:33 extraído correctamente ✓
+- Duplicados: detectó factura repetida correctamente ✓
+
+**Pendiente:**
+- Icono viejo en pantalla de Login
+- Probar APK nuevo en dispositivo con todos los cambios
+- Test end-to-end: escanear factura de otro RNC → verificar warning naranja
+
+---
+
 ## Instrucciones para Agentes
 
 **AL TERMINAR cualquier tarea en este proyecto:**
