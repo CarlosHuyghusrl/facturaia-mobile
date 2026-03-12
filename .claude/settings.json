@@ -1,19 +1,99 @@
 {
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/bash .claude/hooks/boris-session-start.sh"
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/bash .claude/hooks/boris-pre-compact.sh"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/bash .claude/hooks/boris-verification-gate.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/bash .claude/hooks/boris-protect-files.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/bash .claude/hooks/boris-stop.sh"
+          }
+        ]
+      }
+    ]
+  },
   "permissions": {
     "allow": [
-      "Bash",
-      "Edit",
-      "Write",
-      "Read",
-      "Glob",
-      "Grep",
-      "Task",
-      "TodoWrite",
+      "Bash(git *)",
+      "Bash(ssh *)",
+      "Bash(curl *)",
+      "Bash(cat *)",
+      "Bash(ls *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(grep *)",
+      "Bash(find *)",
+      "Bash(echo *)",
+      "Bash(mkdir *)",
+      "Bash(wc *)",
+      "Bash(stat *)",
+      "Bash(npm *)",
+      "Bash(python *)",
+      "Bash(python3 *)",
+      "Bash(pytest *)",
+      "Bash(pip *)",
+      "Bash(cargo *)",
+      "Bash(docker *)",
+      "Bash(systemctl *)",
+      "Bash(bash *)",
+      "Read(*)",
+      "Edit(*)",
+      "Write(*)",
+      "Glob(*)",
+      "Grep(*)",
       "mcp__*"
     ],
     "deny": [
-      "Bash(rm -rf /)"
+      "Bash(rm -rf *)",
+      "Bash(sudo reboot*)",
+      "Write(.env*)",
+      "Edit(.env*)",
+      "Edit(.claude/hooks/*)",
+      "Write(.claude/hooks/*)",
+      "Edit(.claude/settings.json)",
+      "Write(.claude/settings.json)"
     ]
-  },
-  "includeCoAuthoredBy": true
+  }
 }

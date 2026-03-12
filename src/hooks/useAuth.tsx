@@ -127,8 +127,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Login
   const login = useCallback(async (params: LoginParams) => {
     try {
-      setState(prev => ({ ...prev, isLoading: true }));
-
       const result = await authLogin(params);
 
       if (result.success && result.cliente) {

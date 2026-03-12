@@ -53,3 +53,33 @@ Si un error ocurre durante la ejecución:
   4. Commit el CLAUDE.md actualizado
   5. LUEGO continuar con el fix
 - Esto es OBLIGATORIO, no opcional. La memoria institucional es lo que hace al sistema antifrágil.
+
+## VERIFICACIÓN VISUAL OBLIGATORIA (Boris Verification Loop)
+- NINGÚN trabajo se considera terminado hasta que lo VERIFICAS visualmente
+- Para CADA cambio que toque UI, API, o funcionalidad:
+  1. Despliega el cambio
+  2. Conéctate via Chrome MCP (browser_navigate) a la app
+  3. Navega las páginas afectadas, haz clicks, comprueba que no hay errores
+  4. Verifica la base de datos — que los datos están bien
+  5. SOLO después de verificar visualmente puedes hacer commit y decir listo
+- Si no verificas con Chrome, el trabajo NO está hecho. Punto.
+
+## TAG DE RETORNO OBLIGATORIO
+- ANTES de tocar código: git tag pre-[tarea] -m 'Punto de retorno' && git push origin pre-[tarea]
+- Si algo sale mal: git reset --hard pre-[tarea]
+- Sin tag de retorno = NO empiezas a trabajar
+
+## GUARDAR EN MEMORIA OBLIGATORIO
+- Después de CADA tarea completada:
+  1. Documentar en .brain/history.md — fecha, archivos, cambios, pendiente
+  2. Actualizar .brain/task.md si cambió el estado del proyecto
+  3. git add .brain/ && git commit -m '[BRAIN] sesion [fecha]: [resumen]' && git push
+- Sin documentación = trabajo no reconocido
+
+## BACKUP ANTES DE DEPLOY (OBLIGATORIO)
+- ANTES de hacer swap/restart/rebuild de un container Docker:
+  1. `docker commit [container-actual] [nombre]-backup-[fecha]`
+  2. Verificar que la imagen backup existe: `docker images | grep backup`
+  3. SOLO después hacer el deploy/swap
+  4. Si falla → restaurar: `docker run` con la imagen backup
+- Sin backup = NO haces deploy. Punto.

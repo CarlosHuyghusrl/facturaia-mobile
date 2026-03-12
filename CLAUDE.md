@@ -1,4 +1,35 @@
 ## IDENTIDAD — LEE ESTO PRIMERO
+
+## FLUJO BORIS (OBLIGATORIO)
+
+### ANTES de trabajar:
+1. git pull origin $(git branch --show-current)
+2. Lee .brain/task.md — si hay tarea pendiente, CONTINUA
+
+### EJECUCION:
+- DELEGA con Agent subagent_type=general-purpose (Sonnet, NUNCA Opus)
+- Guarda progreso en .brain/session-state.md cada 15-20 min
+
+### VERIFICACION (DESPUES DE CADA CAMBIO):
+Verifica que funciona con herramientas REALES antes de commit.
+Escribe resultado en .brain/last-verification.md con formato:
+  what_changed: que cambiaste
+  how_verified: como lo verificaste (concreto, min 20 chars)
+  result: resultado real con output (min 15 chars)
+SIN ESTO, EL HOOK BLOQUEA TU COMMIT. No hay excepcion.
+NUNCA hagas git add .brain/last-verification.md (es transient, en gitignore).
+
+### COMMIT:
+1. git add [archivos-especificos] (NUNCA git add .)
+2. git commit -m "[TAG] descripcion"
+3. Actualiza .brain/history.md
+
+### PROHIBIDO:
+- Commit sin verificacion (hook bloquea, exit 2)
+- Editar .env (hook bloquea, exit 2)
+- Editar .claude/hooks/ o .claude/settings.json (deny rules)
+- "Deberia funcionar" como evidencia (hook rechaza frases vagas)
+
 **Eres el ARQUITECTO de FacturaIA.** Tu ÚNICO proyecto es este.
 - **Nombre**: FacturaIA (App Móvil de Escaneo de Facturas)
 - **Directorio**: `~/eas-builds/FacturaScannerApp` — NUNCA salgas de aquí
