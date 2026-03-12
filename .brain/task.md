@@ -1,7 +1,7 @@
 # Task - FacturaIA
 
-**Fecha**: 10-Mar-2026
-**Estado**: Backend v2.20.0 deployed con SharePoint sync + mensajes amigables — App movil con auth headers corregidos
+**Fecha**: 12-Mar-2026
+**Estado**: Backend v2.23.3 deployed — App movil APK rebuild 80MB con todos los fixes
 **Proyecto**: FacturaIA (App movil + Backend OCR)
 
 ---
@@ -22,51 +22,40 @@
 
 ---
 
-## ESTADO REAL (10-Mar-2026)
+## ESTADO REAL (12-Mar-2026)
 
-### Backend OCR - OPERATIVO v2.20.0
-- **Docker**: facturaia-ocr:v2.20.0 (healthy, deployed 10-Mar-2026)
+### Backend OCR - OPERATIVO v2.23.3
+- **Docker**: facturaia-ocr:v2.23.3 (healthy, deployed 12-Mar-2026)
 - **Go**: 1.24, Alpine multi-stage
 - **AI**: Claude Opus 4.5 via CLIProxyAPI (localhost:8317)
 - **Puerto**: 8081
-- **Fixes v2.18.0-v2.20.0** (11 mejoras):
-  1. Retry BD con backoff exponencial (5 intentos: 2s/4s/8s/16s/32s) — PROBADO y funciona
-  2. JWT expiracion 24h (antes: nunca expiraban)
-  3. JWT_SECRET obligatorio (eliminado fallback hardcodeado)
-  4. Image proxy valida cliente_id cuando JWT presente
-  5. InvoiceReviewScreen con Authorization headers (app movil)
-  6. System message JSON-only para AI provider OpenAI (fix parseo)
-  7. Fallback extracción JSON de texto mixto en respuestas AI
-  8. Docker autoheal para restart automático de containers unhealthy
-  9. Tabla sharepoint_sync_queue + INSERT non-blocking en ProcessInvoice
-  10. api/errors.go con 9 error codes estructurados + user_message
-  11. GET /api/admin/sharepoint-queue endpoint de monitoreo
-- **Endpoints activos (10)**:
-  - POST /api/clientes/login/ (RNC+PIN → JWT con exp 24h)
-  - POST /api/process-invoice (upload + OCR)
-  - GET /api/facturas/mis-facturas/
-  - GET /api/facturas/{id}
-  - GET /api/facturas/{id}/imagen (proxy MinIO, valida cliente_id)
-  - DELETE /api/facturas/{id}
-  - GET /api/facturas/resumen
-  - POST /api/facturas/{id}/reprocesar
-  - GET /api/admin/sharepoint-queue (estado cola sync SharePoint)
-  - GET /health
+- **Releases sesion 12-Mar**:
+  - v2.23.0: horaFactura en OCR + dedup por datos de factura (no ventana upload)
+  - v2.23.1: estado siempre "procesado" (nunca "pendiente")
+  - v2.23.2: RNC receptor no coincide → warning (antes: rechazo)
+  - v2.23.3: Warning DGII mejorado (sin RNC receptor + RNC diferente)
+- **Endpoints activos (10)**: login, process-invoice, mis-facturas, detalle, imagen, delete, resumen, reprocesar, sharepoint-queue, health
 
-### App Movil - OPERATIVA (necesita rebuild APK)
-- **Ultimo APK**: 67MB (03-Mar-2026) — NO incluye fix auth headers
+### App Movil - APK REBUILD 12-Mar-2026 (80MB)
 - **Stack**: React Native 0.76.9, Expo SDK 52, TypeScript
 - **Scanner**: react-native-document-scanner-plugin 2.0.4
-- **Fix reciente**: InvoiceReviewScreen ahora envia Authorization header en 4 fetch calls
+- **Fixes incluidos en APK**:
+  - HomeScreen: campos corregidos (proveedor, fecha_documento, monto)
+  - HomeScreen: auto-refresh con useFocusEffect al volver de CameraScreen
+  - CameraScreen: warning RNC receptor del backend (banner naranja)
+  - InvoiceReviewScreen: auth headers corregidos
+  - CameraScreen: navega a 'Home' (antes: 'InvoiceList' crash)
+  - Base URL centralizada en src/config/api.ts
+  - Cola offline + mensajes error amigables
 - **Test user**: RNC 130-309094, PIN 1234 (Acela Associates)
-- **Pendiente**: Rebuild APK para incluir fix de auth headers
 
 ### Infraestructura - UP
-- PostgreSQL 16 (supabase-db, puerto 5433 directo — NO usa pooler)
+- PostgreSQL 16 (supabase-db, puerto 5433 directo)
 - MinIO (puerto 9000) - bucket: facturas
 - n8n (puerto 5678, localhost only)
 - CLIProxyAPI v6.7.32 (puerto 8317, 40+ modelos)
 - Coolify (orquestacion Docker)
+- Autoheal (monitorea containers unhealthy cada 30s)
 
 ### Docker - Limpio
 - facturaia-ocr:v2.20.0 (activo)
@@ -95,12 +84,17 @@
 - ~~Errores técnicos sin mensaje amigable~~ → api/errors.go con 9 códigos + user_message
 - ~~Sin cola offline en app~~ → offlineQueue.ts + NetInfo check + UI UploadStatusCard
 
-### Pendientes (no criticos)
-- CameraScreen navega a 'InvoiceList' inexistente (crash) — debe ser 'Home'
-- Base URL hardcodeada en 3 archivos (authService, apiClient, InvoiceDetail)
-- RequireRole middleware no aplicado en ninguna ruta
+### Resueltos en v2.23.x (12-Mar-2026)
+- ~~HomeScreen campos undefined~~ → proveedor, fecha_documento, monto
+- ~~HomeScreen no refrescaba al volver~~ → useFocusEffect
+- ~~Estado "pendiente" sin sentido~~ → siempre "procesado"
+- ~~RNC receptor rechazaba factura~~ → guarda + warning DGII
+- ~~CameraScreen 'InvoiceList' crash~~ → navega a 'Home'
+- ~~Base URL hardcodeada~~ → src/config/api.ts centralizado
+
+### Pendientes
+- Icono viejo en pantalla de Login
 - BD compartida sin aislamiento entre proyectos
-- MinIO sin healthcheck en docker-compose
 
 ---
 
@@ -116,20 +110,19 @@
 | plan-006 | Fix camara FileProvider | APK 03-Mar |
 | plan-007 | Arquitectura n8n DGII (plan creado) | PENDIENTE |
 | fix-criticos | 5 bugs criticos + deploy | v2.18.0 |
+| sesion-12mar | Duplicados hora + estado + warning DGII | v2.23.3 |
 
 ---
 
 ## RUTA DE TRABAJO
 
-### Inmediato: Rebuild APK
-1. Build local: `cd android && ./gradlew assembleRelease`
-2. Descargar y probar: mensajes amigables, cola offline, NetInfo check
-3. Verificar SharePoint sync con factura real
+### Inmediato: Probar APK
+1. Descargar APK 80MB al teléfono
+2. Probar: escanear factura, verificar auto-refresh, warning RNC
+3. Verificar que facturas se muestran correctamente en lista
 
-### Siguiente: Fix bugs no-criticos
-1. CameraScreen: cambiar 'InvoiceList' → 'Home'
-2. Base URL: centralizar en config
-3. RequireRole: aplicar middleware en rutas
+### Siguiente: UI pendiente
+1. Icono viejo en Login → actualizar logo FacturIA
 
 ### Despues: Implementar plan-007 (n8n DGII)
 - Wave 1: Endpoints backend /api/reportes/606 y /api/reportes/607
