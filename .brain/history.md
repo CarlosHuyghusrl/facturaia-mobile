@@ -814,23 +814,40 @@ expo-modules-core:compileDebugKotlin FAILED
 - El parche en MainApplication.kt
 
 ---
-# # #   2 1 - D i c - 2 0 2 4   ( T a r d e )   -   G e m i n i   -   L i m p i e z a   N u c l e a r   y   P l a n   D o w n g r a d e  
- * * E s t a d o * * :   E n   P r o g r e s o  
- * * A c c i o n e s * * :  
- -   S e   i n t e n t � �   " L i m p i e z a   N u c l e a r "   ( b o r r a r   n o d e _ m o d u l e s ,   a n d r o i d / b u i l d ,   . g r a d l e ) .  
-     -   * F a l l o * :   E l   c o m a n d o   c o m p u e s t o   f a l l � �   p o r   s i n t a x i s   d e   P o w e r S h e l l .  
-     -   * C o r r e c c i � � n * :   S e   e j e c u t a r o n   l o s   c o m a n d o s   s e c u e n c i a l m e n t e .  
- -   S e   a c t u a l i z � �   ` t a s k . m d `   p a r a   i n c l u i r   e l   p a s o   c r � � t i c o   d e   " D o w n g r a d e   E x p o   S D K   5 4   - >   5 2 " .  
- -   S e   c o r r i g i � �   ` i m p l e m e n t a t i o n _ p l a n . m d `   ( a h o r a   ` g e m i n i _ p l a n . m d ` )   p a r a   r e f l e j a r   l a   e s t r a t e g i a   c o r r e c t a :  
-     -   ` n e w A r c h E n a b l e d = t r u e `   ( R e q u e r i d o )  
-     -   ` h e r m e s E n a b l e d = t r u e `   ( R e q u e r i d o )  
-     -   ` S o L o a d e r . i n i t `   ( P a r c h e   a p l i c a d o )  
-     -   * * P L U S * * :   L i m p i e z a   a g r e s i v a   a n t e s   d e l   d o w n g r a d e .  
-  
- * * P r � � x i m o s   P a s o s   ( P a r a   C l a u d e / G e m i n i ) : * *  
- 1 .   E d i t a r   ` p a c k a g e . j s o n `   ( D o w n g r a d e   a   E x p o   5 2 ) .  
- 2 .   ` n p m   i n s t a l l `  
- 3 .   ` n p m   r u n   a n d r o i d `  
+# # #   2 1 - D i c - 2 0 2 4   ( T a r d e )   -   G e m i n i   -   L i m p i e z a   N u c l e a r   y   P l a n   D o w n g r a d e 
+ 
+ * * E s t a d o * * :   E n   P r o g r e s o 
+ 
+ * * A c c i o n e s * * : 
+ 
+ -   S e   i n t e n t � �   " L i m p i e z a   N u c l e a r "   ( b o r r a r   n o d e _ m o d u l e s ,   a n d r o i d / b u i l d ,   . g r a d l e ) . 
+ 
+     -   * F a l l o * :   E l   c o m a n d o   c o m p u e s t o   f a l l � �   p o r   s i n t a x i s   d e   P o w e r S h e l l . 
+ 
+     -   * C o r r e c c i � � n * :   S e   e j e c u t a r o n   l o s   c o m a n d o s   s e c u e n c i a l m e n t e . 
+ 
+ -   S e   a c t u a l i z � �   ` t a s k . m d `   p a r a   i n c l u i r   e l   p a s o   c r � � t i c o   d e   " D o w n g r a d e   E x p o   S D K   5 4   - >   5 2 " . 
+ 
+ -   S e   c o r r i g i � �   ` i m p l e m e n t a t i o n _ p l a n . m d `   ( a h o r a   ` g e m i n i _ p l a n . m d ` )   p a r a   r e f l e j a r   l a   e s t r a t e g i a   c o r r e c t a : 
+ 
+     -   ` n e w A r c h E n a b l e d = t r u e `   ( R e q u e r i d o ) 
+ 
+     -   ` h e r m e s E n a b l e d = t r u e `   ( R e q u e r i d o ) 
+ 
+     -   ` S o L o a d e r . i n i t `   ( P a r c h e   a p l i c a d o ) 
+ 
+     -   * * P L U S * * :   L i m p i e z a   a g r e s i v a   a n t e s   d e l   d o w n g r a d e . 
+ 
+ 
+ 
+ * * P r � � x i m o s   P a s o s   ( P a r a   C l a u d e / G e m i n i ) : * * 
+ 
+ 1 .   E d i t a r   ` p a c k a g e . j s o n `   ( D o w n g r a d e   a   E x p o   5 2 ) . 
+ 
+ 2 .   ` n p m   i n s t a l l ` 
+ 
+ 3 .   ` n p m   r u n   a n d r o i d ` 
+ 
  
 ---
 
@@ -3381,3 +3398,7 @@ Restauracion del auto-framing en el escaner de documentos. Se parcheó react-nat
 - Probar retry BD simulando PgBouncer caido al arranque
 - Probar InvoiceReviewScreen en APK (necesita nuevo build movil)
 - Limpiar imagen Docker antigua v2.17.2
+
+### 2026-03-16 10:51 UTC -- rules-boris-install
+Completada. Commit: 2ac85fef
+Verificacion: head -5 confirma 05-modelos-ia.md, grep sm/notifications confirma 06-boris-flujo.md. Commit fcebcd88 pusheado a main.
