@@ -533,3 +533,133 @@ Cierra el plan: PUT http://localhost:9091/api/plans/close
 
 ### Regla de Oro
 Todo lo que hagas, OpenClaw lo debe saber. Si OpenClaw no paso, no paso.
+
+# ==============================================================================
+# REGLAS DE DELEGACIÓN A IAs EXTERNAS
+# ==============================================================================
+# Copiar este bloque al CLAUDE.md de CADA proyecto en el VPS.
+# Esto instruye a los arquitectos Claude Code CLI a usar ask-ai.sh
+# para todo lo que NO sea escribir/editar código.
+# ==============================================================================
+
+## DELEGACIÓN OBLIGATORIA A IAs EXTERNAS
+
+Claude (tú) eres el ARQUITECTO. Tu trabajo es ESCRIBIR código, ORQUESTAR tareas y TOMAR DECISIONES.
+Para ANALIZAR, INVESTIGAR y DOCUMENTAR, DEBES usar IAs externas vía `ask-ai`.
+Esto ahorra contexto y presupuesto. Es una regla del equipo, no opcional.
+
+### CUÁNDO DELEGAR (OBLIGATORIO)
+
+Antes de consumir tu contexto en cualquiera de estas tareas, usa `ask-ai`:
+
+| Situación | Comando | Por qué |
+|---|---|---|
+| Necesitas buscar documentación, API docs, mejores prácticas | `ask-ai --task research "query"` | Perplexity tiene datos actualizados y fuentes |
+| Necesitas analizar un archivo grande (>100 líneas) SIN editarlo | `cat archivo \| ask-ai --task analyze "contexto"` | Gemini tiene 1M tokens de contexto, tú no |
+| Necesitas decidir entre opciones técnicas | `ask-ai --task reason "opción A vs B"` | Perplexity Reasoning da trade-offs con datos |
+| Pregunta rápida de syntax, regex, flags | `ask-ai --task quick "pregunta"` | Gemini Flash responde en <2s, no gastes contexto |
+| Investigación profunda (auditoría, OWASP, análisis completo) | `ask-ai --task deep "tema"` | Deep Research de Perplexity, gratis |
+| Documentar código existente | `cat archivo \| ask-ai --task doc` | Gemini genera docs, tú solo revisas |
+| Code review de un diff | `git diff \| ask-ai --task review` | Gemini Pro hace review, tú decides qué aplicar |
+| Explicar un error o log largo | `ask-ai --task explain < error.log` | Gemini explica, tú implementas el fix |
+| Resumir un archivo/doc largo | `cat doc \| ask-ai --task summarize` | No llenes tu contexto con lectura pasiva |
+| Generar tests unitarios | `cat modulo.rs \| ask-ai --task test` | DeepSeek genera tests, tú los validas y ajustas |
+
+### CUÁNDO NO DELEGAR (haz esto tú mismo)
+
+- Escribir código nuevo (funciones, módulos, features)
+- Editar código existente (refactoring, bug fixes)
+- Operaciones git (commit, push, merge, rebase)
+- Build, test, deploy (cargo build, npm run, etc.)
+- Orquestar sub-agentes y coordinar tareas
+- Decisiones finales de arquitectura (DESPUÉS de recibir el análisis de ask-ai)
+
+### FLUJO DE TRABAJO CORRECTO
+
+```
+INCORRECTO (gasta contexto y presupuesto):
+1. Leer archivo grande de 500 líneas entero
+2. Pensar sobre qué hace
+3. Buscar en tu conocimiento cómo mejorarlo
+4. Escribir la mejora
+
+CORRECTO (delega lectura, enfócate en acción):
+1. cat archivo.rs | ask-ai --task analyze "identifica problemas de performance"
+2. Leer el resumen de ask-ai (resultado compacto)
+3. Tomar decisión basada en el análisis
+4. Escribir la mejora tú mismo
+```
+
+### EJEMPLO CONCRETO — Nuevo feature con investigación
+
+```bash
+# Paso 1: Investigar (Perplexity, gratis)
+RESEARCH=$(ask-ai --task research "WebSocket reconnection patterns in Rust tokio")
+
+# Paso 2: Analizar código existente (Gemini, gratis)
+ANALYSIS=$(cat src/ws/connection.rs | ask-ai --task analyze "evalúa el manejo actual de reconexión")
+
+# Paso 3: Decidir approach (Perplexity Reasoning, gratis)
+DECISION=$(ask-ai --task reason "exponential backoff vs jitter backoff para WebSocket reconnect en trading system")
+
+# Paso 4: AHORA SÍ — Claude escribe el código (esto es lo que vale)
+# Ya tienes toda la info, ahora implementa basándote en $RESEARCH, $ANALYSIS, $DECISION
+```
+
+### EJEMPLO CONCRETO — Debugging
+
+```bash
+# Paso 1: Explicar el error (Gemini, gratis)
+ERROR_ANALYSIS=$(ask-ai --task explain < /tmp/last-panic.log)
+
+# Paso 2: Buscar si es un issue conocido (Perplexity, gratis)  
+KNOWN_FIX=$(ask-ai --task research "tokio runtime panic on drop: $ERROR_MSG")
+
+# Paso 3: AHORA SÍ — Claude implementa el fix
+# Tienes el diagnóstico + posible solución, implementa directamente
+```
+
+### EJEMPLO CONCRETO — Code review antes de merge
+
+```bash
+# Paso 1: Review automático (Gemini Pro, gratis)
+git diff main..feature-branch | ask-ai --task review > /tmp/review.md
+
+# Paso 2: Leer review y APLICAR cambios tú (Claude escribe código)
+cat /tmp/review.md  # Lee las sugerencias
+# Implementa las correcciones que tengan sentido
+```
+
+### MODELOS DISPONIBLES (referencia rápida)
+
+| Modelo | ID | Mejor para | Velocidad |
+|---|---|---|---|
+| Gemini 2.5 Pro | gemini-2.5-pro | Análisis complejos, archivos grandes | ~10s |
+| Gemini 2.5 Flash | gemini-2.5-flash | Tareas rápidas, docs, explain | ~3s |
+| Gemini 2.5 Flash Lite | gemini-2.5-flash-lite | Trivialidades | ~1s |
+| Perplexity Sonar Pro | sonar-pro | Búsquedas web, investigación | ~5s |
+| Perplexity Sonar | sonar | Búsquedas rápidas | ~3s |
+| Perplexity Reasoning | sonar-reasoning | Trade-offs, decisiones | ~8s |
+| Perplexity Deep Research | sonar-deep-research | Auditorías, análisis extenso | ~60-120s |
+| DeepSeek v3 | deepseek-v3 | Razonamiento, tests | ~5s |
+| Qwen3 Max | qwen3-max | Fallback general | ~5s |
+
+### MÉTRICA DE CUMPLIMIENTO
+
+Al final de cada sesión de trabajo, reportar:
+- Número de llamadas a `ask-ai` realizadas
+- Estimado de tokens ahorrados (ask-ai --stats)
+- Tareas donde se usó Claude directamente para análisis (debería ser 0)
+
+
+## REGLA OBLIGATORIA: USO DE KNOWLEDGE HUB
+
+AL INICIAR cualquier tarea:
+- kb_search del tema para ver si hay contexto previo
+- kb_read de keys relacionadas al proyecto
+
+AL TERMINAR cualquier tarea:
+- kb_save con resultado, key descriptiva, categoría y proyecto
+- Si hubo error o lección aprendida: kb_save con categoría "lesson"
+
+ESTO NO ES OPCIONAL. Cada tarea sin kb_save al final es una tarea incompleta.
