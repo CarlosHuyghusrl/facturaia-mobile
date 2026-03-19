@@ -1,5 +1,5 @@
 ## Estado de sesion
-Tarea: rules-boris-install
+Tarea: context-mode-facturaia
 Fase: started
-Tag retorno: pre-rules-boris-install
-Ultima actualizacion: 2026-03-16 02:54 UTC
+Tag retorno: pre-context-mode-facturaia
+Ultima actualizacion: 2026-03-19 15:10 UTC

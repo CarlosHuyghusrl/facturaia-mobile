@@ -3402,3 +3402,7 @@ Restauracion del auto-framing en el escaner de documentos. Se parcheó react-nat
 ### 2026-03-16 10:51 UTC -- rules-boris-install
 Completada. Commit: 2ac85fef
 Verificacion: head -5 confirma 05-modelos-ia.md, grep sm/notifications confirma 06-boris-flujo.md. Commit fcebcd88 pusheado a main.
+
+### 2026-03-19 15:12 UTC -- context-mode-facturaia
+Completada. Commit: 6ea9ccb9
+Verificacion: claude mcp list | grep context-mode -> 'context-mode: npx -y context-mode - Connected'. Ya estaba instalado en local config.
