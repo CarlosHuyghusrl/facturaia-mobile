@@ -106,8 +106,6 @@
 **Estado:** pendiente
 
 ---
-
----
 ### [MEDIUM] DECISION — 2026-03-19
 **Resumen:** Registro de fallos para aprendizaje futuro
 **Detalle:** Utilizar `boris_register_failed` para documentar los enfoques que no funcionaron, evitando la repetición de errores y promoviendo el aprendizaje.
@@ -122,5 +120,7 @@
 **Sesión origen:** 
 **ID:** disc-20260319-711
 **Estado:** pendiente
+
+---
 
 ---
