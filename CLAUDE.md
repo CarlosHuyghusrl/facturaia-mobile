@@ -652,6 +652,80 @@ Al final de cada sesión de trabajo, reportar:
 - Tareas donde se usó Claude directamente para análisis (debería ser 0)
 
 
+## BORIS — 9 PASOS OBLIGATORIOS
+
+Todo agente DEBE seguir estos 9 pasos en orden. Sin excepciones.
+
+**PASO 1 — boris_start_task:**
+  Llamar boris_start_task(task_name="[nombre]", task_description="[tarea]")
+  Esto hace: git pull, crea tag pre-[nombre], guarda estado en .brain/task.md
+  Si la tarea ya se hizo → RECHAZA automáticamente. No continuar.
+
+**PASO 2 — GSD WAVES (ejecutar la tarea):**
+  Wave 1 ([modelo]): [qué hace — comando o acción concreta]
+    → boris_save_state(progress="Wave 1 done: [qué]", next_step="Wave 2: [qué sigue]")
+    → kb_save key=[nombre]-wave1 category=progress project=[proyecto] value="[resultado]"
+  Wave N (última): verificación final
+    → boris_save_state(progress="Todas las waves done", next_step="Verificar y commit")
+
+**PASO 3 — VERIFICACION:**
+  Comando exacto y concreto (curl, test, grep, systemctl, bash -n).
+  NUNCA usar frases vagas — el hook bloquea commit sin verificación real.
+
+**PASO 4 — boris_verify:**
+  Llamar boris_verify(what_changed="[qué]", how_verified="[cómo — mín 20 chars]", result="[resultado — mín 15 chars]")
+  OBLIGATORIO antes de commit.
+
+**PASO 5 — GIT COMMIT:**
+  git add [archivos-específicos] (NUNCA git add .)
+  git commit -m "[tipo]: [descripción]"
+
+**PASO 6 — GIT PUSH:**
+  git push origin main
+  SIN PUSH el trabajo NO está entregado.
+
+**PASO 7 — boris_register_done:**
+  Llamar boris_register_done(task_name="[nombre]", verification_summary="[resumen]")
+
+**PASO 8 — KB SAVE FINAL:**
+  kb_save key=[nombre]-resultado category=response project=[proyecto] value="STATUS: done | COMMIT: [hash] | EVIDENCIA: [resumen]"
+
+**PASO 9 — NOTIFICAR AL SM:**
+  kb_save key=notify-sm-[nombre] category=notification project=[proyecto] value="DONE: [nombre] | TO: sm-claude-web | FROM: [agente] | COMMIT: [hash] | RESUMEN: [1 oración]"
+  SIN ESTA NOTIFICACIÓN el SM no sabe que terminaste.
+
+### RESUMEN VISUAL DEL FLUJO
+```
+boris_start_task → Wave 1 (save_state+kb) → Wave N (save_state+kb) →
+VERIFICAR → boris_verify → git commit → git push →
+boris_register_done → kb_save final → NOTIFICAR SM
+```
+
+### NUNCA:
+- NUNCA saltarse pasos
+- NUNCA commit sin boris_verify
+- NUNCA terminar sin git push
+- NUNCA terminar sin kb_save final (PASO 8)
+- NUNCA terminar sin notificar al SM (PASO 9)
+
+### SI FALLA:
+  1. boris_save_state con progreso parcial
+  2. boris_register_failed(task_name="[nombre]", why_failed="[causa]", what_needed="[qué falta]")
+  3. kb_save key=[nombre]-resultado category=response value="STATUS: error | CAUSA: [qué falló]"
+  4. kb_save key=notify-sm-[nombre] category=notification value="ERROR: [nombre] | TO: sm-claude-web | CAUSA: [qué falló]"
+
+## KNOWLEDGE HUB — BUS DE TAREAS
+
+Al iniciar sesión: `kb_search category=task` con tu proyecto → si hay STATUS: pending, ejecútalas primero.
+Para pedir algo a otro arquitecto: `kb_save key=task-{proyecto}-{NNN} category=task project={proyecto}` con formato:
+  STATUS: pending
+  TO: {destino}
+  FROM: {tu-proyecto}
+  TIMESTAMP: {ISO8601}
+  TAREA: {descripción}
+  PRIORIDAD: alta|media|baja
+Al terminar cualquier tarea: `kb_save` con resultado. SIEMPRE.
+
 ## REGLA OBLIGATORIA: USO DE KNOWLEDGE HUB
 
 AL INICIAR cualquier tarea:
