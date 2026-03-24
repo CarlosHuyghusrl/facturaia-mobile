@@ -3406,3 +3406,7 @@ Verificacion: head -5 confirma 05-modelos-ia.md, grep sm/notifications confirma 
 ### 2026-03-19 15:12 UTC -- context-mode-facturaia
 Completada. Commit: 6ea9ccb9
 Verificacion: claude mcp list | grep context-mode -> 'context-mode: npx -y context-mode - Connected'. Ya estaba instalado en local config.
+
+### 2026-03-24 03:09 UTC -- commit-pending-files
+Completada. Commit: 8a4a367f
+Verificacion: 25 archivos staged y commiteados en 8a4a367f. git push OK. Repo limpio y sincronizado.

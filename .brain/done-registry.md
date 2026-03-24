@@ -6,6 +6,7 @@
 |-------|-------|-------------|--------|
 | 2026-03-16 10:51 UTC | rules-boris-install | head -5 confirma 05-modelos-ia.md, grep sm/notifications confirma 06-boris-flujo.md. Commit fcebcd88 pusheado a main. | 2ac85fef |
 | 2026-03-19 15:12 UTC | context-mode-facturaia | claude mcp list | grep context-mode -> 'context-mode: npx -y context-mode - Connected'. Ya estaba instalado en local config. | 6ea9ccb9 |
+| 2026-03-24 03:09 UTC | commit-pending-files | 25 archivos staged y commiteados en 8a4a367f. git push OK. Repo limpio y sincronizado. | 8a4a367f |
 
 ## Intentado pero fallido
 
