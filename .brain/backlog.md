@@ -234,6 +234,86 @@
 **Estado:** pendiente
 
 ---
+### [HIGH] ERROR — 2026-03-24
+**Resumen:** Componente OpenClaw MCP aún en conexión
+**Detalle:** El sistema `claude-flow MCP` para `OpenClaw` está reportando un estado de `aún conectando`, lo que indica que no está completamente operativo.
+**Sesión origen:** 
+**ID:** disc-20260324-859
+**Estado:** pendiente
+
+---
+### [HIGH] DECISION — 2026-03-26
+**Resumen:** Adopción de Boris Workflow v6.2 como metodología de trabajo estándar.
+**Detalle:** El workflow define una secuencia de Planificar -> Delegar -> Verificar -> Registrar -> Nunca Repetir, con herramientas y pasos específicos.
+**Sesión origen:** 
+**ID:** disc-20260326-941
+**Estado:** pendiente
+
+---
+### [HIGH] DECISION — 2026-03-26
+**Resumen:** Mandato de no implementar sin diseño previo.
+**Detalle:** La primera 'Ley de Hierro' prohíbe implementar cualquier cosa sin un proceso de diseño explícito y aprobado.
+**Sesión origen:** 
+**ID:** disc-20260326-942
+**Estado:** pendiente
+
+---
+### [HIGH] DECISION — 2026-03-26
+**Resumen:** Mandato de resolver la causa raíz antes de implementar una solución.
+**Detalle:** La segunda 'Ley de Hierro' exige un análisis de causa raíz de 4 fases (root cause -> pattern -> hypothesis -> fix) para cualquier bug.
+**Sesión origen:** 
+**ID:** disc-20260326-943
+**Estado:** pendiente
+
+---
+### [HIGH] DECISION — 2026-03-26
+**Resumen:** Implementación estricta de TDD (Test-Driven Development).
+**Detalle:** La tercera 'Ley de Hierro' establece que todo código debe seguir el ciclo RED -> GREEN -> REFACTOR, y código sin test debe ser borrado.
+**Sesión origen:** 
+**ID:** disc-20260326-944
+**Estado:** pendiente
+
+---
+### [HIGH] DECISION — 2026-03-26
+**Resumen:** Requerimiento de evidencia concreta para declarar una tarea como 'lista'.
+**Detalle:** La cuarta 'Ley de Hierro' prohíbe afirmaciones vagas, exigiendo output real y resultados concretos.
+**Sesión origen:** 
+**ID:** disc-20260326-945
+**Estado:** pendiente
+
+---
+### [HIGH] DECISION — 2026-03-26
+**Resumen:** Separación de roles: el arquitecto (Claude) no codifica directamente.
+**Detalle:** El arquitecto debe delegar la ejecución de código a subagentes o equipos, enfocándose en el diseño y la supervisión.
+**Sesión origen:** 
+**ID:** disc-20260326-947
+**Estado:** pendiente
+
+---
+### [HIGH] DECISION — 2026-03-26
+**Resumen:** Uso estratégico de diferentes modelos de IA según la tarea.
+**Detalle:** Opus para arquitectos, Sonnet para sub-agentes, DeepSeek/Gemini/Qwen para monitoreo, Gemini para docs grandes, Perplexity para búsquedas, Claude Web para arquitectura compleja y problemas recurrentes.
+**Sesión origen:** 
+**ID:** disc-20260326-948
+**Estado:** pendiente
+
+---
+### [HIGH] DECISION — 2026-03-26
+**Resumen:** Gate de commit mediante `boris_verify` para asegurar la calidad de la evidencia.
+**Detalle:** El commit solo se permite si `boris_verify` aprueba la evidencia de trabajo realizado, garantizando la calidad antes del push.
+**Sesión origen:** 
+**ID:** disc-20260326-950
+**Estado:** pendiente
+
+---
+### [HIGH] DECISION — 2026-03-26
+**Resumen:** Estrategia para escalar problemas persistentes o complejos a Claude Web.
+**Detalle:** Cuando un problema falla 3+ veces, involucra arquitectura nueva, o 10+ archivos, se consulta a Claude Web vía Chrome MCP para análisis profundo y diseño alternativo.
+**Sesión origen:** 
+**ID:** disc-20260326-951
+**Estado:** pendiente
+
+---
 ### [MEDIUM] DECISION — 2026-03-19
 **Resumen:** Registro de fallos para aprendizaje futuro
 **Detalle:** Utilizar `boris_register_failed` para documentar los enfoques que no funcionaron, evitando la repetición de errores y promoviendo el aprendizaje.
@@ -282,6 +362,51 @@
 **Estado:** pendiente
 
 ---
+### [MEDIUM] SUGGESTION — 2026-03-24
+**Resumen:** Gestionar 22 archivos sin commit pendientes
+**Detalle:** Existen 22 archivos sin commit (configuraciones de Boris, reglas, hooks, docs) con más de 24 horas de antigüedad. Se recomienda considerar una limpieza o commit para mantener la rama principal limpia.
+**Sesión origen:** 
+**ID:** disc-20260324-860
+**Estado:** pendiente
+
+---
+### [MEDIUM] DECISION — 2026-03-24
+**Resumen:** Configuración de Boris para incluir 9 pasos obligatorios
+**Detalle:** Se ha establecido una configuración para el sistema `Boris` que impone 9 pasos obligatorios en su flujo de trabajo, documentado en el commit `410b0e73`.
+**Sesión origen:** 
+**ID:** disc-20260324-861
+**Estado:** pendiente
+
+---
+### [MEDIUM] DECISION — 2026-03-26
+**Resumen:** Principio de mejora continua de todos los planes.
+**Detalle:** La quinta 'Ley de Hierro' obliga a corregir falsos positivos y añadir lo que falta en cada plan.
+**Sesión origen:** 
+**ID:** disc-20260326-946
+**Estado:** pendiente
+
+---
+### [MEDIUM] DECISION — 2026-03-26
+**Resumen:** Recuperación de contexto obligatoria mediante `boris_get_state` o lectura de `.brain/` tras un reset.
+**Detalle:** Establece un protocolo claro para continuar el trabajo desde el último punto guardado en caso de pérdida de contexto.
+**Sesión origen:** 
+**ID:** disc-20260326-949
+**Estado:** pendiente
+
+---
+### [MEDIUM] DECISION — 2026-03-26
+**Resumen:** Obligación de incluir cómo verificar cada cambio en los planes.
+**Detalle:** Todos los planes deben detallar explícitamente los métodos de verificación para cada modificación propuesta.
+**Sesión origen:** 
+**ID:** disc-20260326-952
+**Estado:** pendiente
+
+---
+---
+
+---
+---
+
 ---
 
 ---
