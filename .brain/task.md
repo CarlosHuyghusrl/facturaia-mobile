@@ -9,3 +9,9 @@ Inicio: 2026-03-30 17:36 UTC
 
 ## Proximo paso
 Planificar antes de codear.
+
+## Progreso actual
+Wave 1 DONE: InvoiceReview 4 fetch→apiClient, versionCode 2, package com.huyghusrl.facturaia. BUILD SUCCESSFUL. Commit 6218273d pushed.
+
+## Proximo paso
+Wave 3: Migrar InvoiceListScreen de Supabase a apiClient + unificar authService + remover @supabase/supabase-js. Wave 2 (HTTPS+keystore) requiere dominio e infra — pospuesto.

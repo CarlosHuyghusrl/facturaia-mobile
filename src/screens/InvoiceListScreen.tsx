@@ -2,12 +2,11 @@
  * InvoiceListScreen - Display and manage invoices
  *
  * Features:
- * - List all receipts from Supabase
+ * - List all invoices from Go backend API
  * - Pull-to-refresh
  * - Filter by status
  * - Search functionality
  * - Navigate to camera for new scans
- * - Real-time updates via Supabase subscriptions
  */
 
 import React, {useState, useEffect, useCallback} from 'react';
@@ -33,8 +32,9 @@ import {
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RouteProp} from '@react-navigation/native';
 import {format} from 'date-fns';
-import {RootStackParamList, Receipt, ReceiptStatus} from '../types/invoice';
-import {supabase, getCurrentUser, signOut} from '../config/supabase';
+import {RootStackParamList} from '../types/invoice';
+import {listarFacturas, Factura} from '../services/facturasService';
+import {logout, getToken} from '../services/authService';
 
 type InvoiceListScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -47,18 +47,18 @@ interface Props {
   route: InvoiceListScreenRouteProp;
 }
 
+type FacturaEstado = Factura['estado'] | 'ALL';
+
 const InvoiceListScreen: React.FC<Props> = ({navigation, route}) => {
   const {groupId} = route.params;
 
   // State
-  const [receipts, setReceipts] = useState<Receipt[]>([]);
-  const [filteredReceipts, setFilteredReceipts] = useState<Receipt[]>([]);
+  const [receipts, setReceipts] = useState<Factura[]>([]);
+  const [filteredReceipts, setFilteredReceipts] = useState<Factura[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState<ReceiptStatus | 'ALL'>(
-    'ALL',
-  );
+  const [selectedStatus, setSelectedStatus] = useState<FacturaEstado>('ALL');
 
   // ==========================================
   // Data Fetching
@@ -66,65 +66,29 @@ const InvoiceListScreen: React.FC<Props> = ({navigation, route}) => {
 
   const fetchReceipts = useCallback(async () => {
     try {
-      const user = await getCurrentUser();
-      if (!user) {
+      const token = await getToken();
+      if (!token) {
         navigation.replace('Login');
         return;
       }
 
-      // Don't filter by group_id if it's "default"
-      let query = supabase
-        .from('receipts')
-        .select('*');
+      const response = await listarFacturas({limit: 100});
+      const data = response.facturas || [];
 
-      if (groupId !== 'default') {
-        query = query.eq('group_id', groupId);
-      }
-
-      const {data, error} = await query.order('date', {ascending: false});
-
-      if (error) {
-        throw error;
-      }
-
-      setReceipts(data || []);
-      setFilteredReceipts(data || []);
+      setReceipts(data);
+      setFilteredReceipts(data);
     } catch (error: any) {
-      console.error('Error fetching receipts:', error);
-      Alert.alert('Error', 'Failed to load invoices');
+      console.error('Error fetching invoices:', error);
+      Alert.alert('Error', 'No se pudieron cargar las facturas');
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }, [groupId, navigation]);
+  }, [navigation]);
 
   useEffect(() => {
     fetchReceipts();
-
-    // Set up real-time subscription
-    const subscriptionConfig: any = {
-      event: '*',
-      schema: 'public',
-      table: 'receipts',
-    };
-
-    // Only filter by group_id if not "default"
-    if (groupId !== 'default') {
-      subscriptionConfig.filter = `group_id=eq.${groupId}`;
-    }
-
-    const subscription = supabase
-      .channel('receipts-channel')
-      .on('postgres_changes', subscriptionConfig, payload => {
-        console.log('Real-time update:', payload);
-        fetchReceipts();
-      })
-      .subscribe();
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [fetchReceipts, groupId]);
+  }, [fetchReceipts]);
 
   // ==========================================
   // Filtering & Search
@@ -135,7 +99,7 @@ const InvoiceListScreen: React.FC<Props> = ({navigation, route}) => {
 
     // Filter by status
     if (selectedStatus !== 'ALL') {
-      filtered = filtered.filter(r => r.status === selectedStatus);
+      filtered = filtered.filter(r => r.estado === selectedStatus);
     }
 
     // Filter by search query
@@ -143,8 +107,9 @@ const InvoiceListScreen: React.FC<Props> = ({navigation, route}) => {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
         r =>
-          r.name.toLowerCase().includes(query) ||
-          r.amount.toString().includes(query),
+          (r.proveedor || '').toLowerCase().includes(query) ||
+          (r.ncf || '').toLowerCase().includes(query) ||
+          String(r.monto || '').includes(query),
       );
     }
 
@@ -165,17 +130,17 @@ const InvoiceListScreen: React.FC<Props> = ({navigation, route}) => {
   };
 
   const handleSignOut = async () => {
-    Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
-      {text: 'Cancel', style: 'cancel'},
+    Alert.alert('Cerrar Sesión', '¿Estás seguro que deseas cerrar sesión?', [
+      {text: 'Cancelar', style: 'cancel'},
       {
-        text: 'Sign Out',
+        text: 'Cerrar Sesión',
         style: 'destructive',
         onPress: async () => {
           try {
-            await signOut();
+            await logout();
             navigation.replace('Login');
           } catch (error) {
-            Alert.alert('Error', 'Failed to sign out');
+            Alert.alert('Error', 'No se pudo cerrar sesión');
           }
         },
       },
@@ -186,41 +151,65 @@ const InvoiceListScreen: React.FC<Props> = ({navigation, route}) => {
   // Render Functions
   // ==========================================
 
-  const renderReceiptItem = ({item}: {item: Receipt}) => {
-    const statusColor =
-      item.status === 'OPEN'
-        ? '#ff9800'
-        : item.status === 'RESOLVED'
-        ? '#4caf50'
-        : '#f44336';
+  const getStatusColor = (estado: string): string => {
+    switch (estado) {
+      case 'procesado':
+      case 'procesada':
+      case 'completado':
+      case 'completada':
+      case 'validado':
+        return '#4caf50';
+      case 'pendiente':
+        return '#ff9800';
+      case 'error':
+      case 'rechazado':
+        return '#f44336';
+      default:
+        return '#9e9e9e';
+    }
+  };
+
+  const renderReceiptItem = ({item}: {item: Factura}) => {
+    const statusColor = getStatusColor(item.estado);
+    const displayName = item.proveedor || item.emisor_rnc || 'Sin nombre';
+    const displayDate = item.fecha_documento || item.created_at;
 
     return (
       <Card style={styles.card}>
         <Card.Content>
           <View style={styles.cardHeader}>
             <View style={styles.cardTitleContainer}>
-              <Title style={styles.cardTitle}>{item.name}</Title>
+              <Title style={styles.cardTitle}>{displayName}</Title>
               <Chip
                 mode="flat"
                 textStyle={{color: statusColor}}
                 style={[styles.statusChip, {borderColor: statusColor}]}>
-                {item.status}
+                {item.estado}
               </Chip>
             </View>
           </View>
 
           <View style={styles.cardDetails}>
             <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Amount:</Text>
+              <Text style={styles.detailLabel}>Total:</Text>
               <Text style={styles.detailValue}>
-                ${(parseFloat(String(item.amount)) || 0).toFixed(2)}
+                ${(parseFloat(String(item.monto)) || 0).toFixed(2)}
               </Text>
             </View>
 
+            {item.ncf ? (
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>NCF:</Text>
+                <Text style={styles.detailValue}>{item.ncf}</Text>
+              </View>
+            ) : null}
+
             <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Date:</Text>
+              <Text style={styles.detailLabel}>Fecha:</Text>
               <Text style={styles.detailValue}>
-                {format(new Date(item.date), 'MMM dd, yyyy')}
+                {displayDate
+                  ? format(new Date(displayDate), 'dd/MM/yyyy')
+                  : 'Sin fecha'}
               </Text>
             </View>
           </View>
@@ -232,18 +221,30 @@ const InvoiceListScreen: React.FC<Props> = ({navigation, route}) => {
   const renderEmptyState = () => (
     <Surface style={styles.emptyState}>
       <IconButton icon="receipt" size={64} />
-      <Title>No Invoices Yet</Title>
+      <Title>Sin Facturas</Title>
       <Paragraph style={styles.emptyText}>
-        Tap the camera button below to scan your first invoice
+        Toca el botón de cámara para escanear tu primera factura
       </Paragraph>
     </Surface>
+  );
+
+  const procesadas = receipts.filter(
+    r =>
+      r.estado === 'procesado' ||
+      r.estado === 'procesada' ||
+      r.estado === 'completado' ||
+      r.estado === 'completada' ||
+      r.estado === 'validado',
+  );
+  const errores = receipts.filter(
+    r => r.estado === 'error' || r.estado === 'rechazado',
   );
 
   const renderHeader = () => (
     <View style={styles.header}>
       {/* Search Bar */}
       <Searchbar
-        placeholder="Search invoices..."
+        placeholder="Buscar facturas..."
         onChangeText={setSearchQuery}
         value={searchQuery}
         style={styles.searchBar}
@@ -255,19 +256,24 @@ const InvoiceListScreen: React.FC<Props> = ({navigation, route}) => {
           selected={selectedStatus === 'ALL'}
           onPress={() => setSelectedStatus('ALL')}
           style={styles.filterChip}>
-          All ({receipts.length})
+          Todas ({receipts.length})
         </Chip>
         <Chip
-          selected={selectedStatus === 'OPEN'}
-          onPress={() => setSelectedStatus('OPEN')}
+          selected={
+            selectedStatus === 'procesado' ||
+            selectedStatus === 'procesada' ||
+            selectedStatus === 'completado' ||
+            selectedStatus === 'completada'
+          }
+          onPress={() => setSelectedStatus('procesado')}
           style={styles.filterChip}>
-          Open ({receipts.filter(r => r.status === 'OPEN').length})
+          Procesadas ({procesadas.length})
         </Chip>
         <Chip
-          selected={selectedStatus === 'RESOLVED'}
-          onPress={() => setSelectedStatus('RESOLVED')}
+          selected={selectedStatus === 'error' || selectedStatus === 'rechazado'}
+          onPress={() => setSelectedStatus('error')}
           style={styles.filterChip}>
-          Resolved ({receipts.filter(r => r.status === 'RESOLVED').length})
+          Errores ({errores.length})
         </Chip>
       </View>
     </View>
@@ -281,7 +287,7 @@ const InvoiceListScreen: React.FC<Props> = ({navigation, route}) => {
     return (
       <View style={styles.centerContainer}>
         <ActivityIndicator size="large" />
-        <Paragraph style={styles.loadingText}>Loading invoices...</Paragraph>
+        <Paragraph style={styles.loadingText}>Cargando facturas...</Paragraph>
       </View>
     );
   }
@@ -317,7 +323,7 @@ const InvoiceListScreen: React.FC<Props> = ({navigation, route}) => {
         icon="camera"
         style={styles.fab}
         onPress={handleNavigateToCamera}
-        label="Scan Invoice"
+        label="Escanear Factura"
       />
     </View>
   );

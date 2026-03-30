@@ -2,8 +2,8 @@
  * TypeScript type definitions for Invoice/Receipt entities
  *
  * These types correspond to:
- * - Supabase database schema (supabase-schema-facturas.sql)
- * - Railway OCR service response (invoice-ocr-service)
+ * - PostgreSQL database schema (facturaia-ocr backend)
+ * - OCR service response (invoice-ocr-service)
  */
 
 // ==========================================
@@ -209,13 +209,6 @@ export class OCRError extends Error {
   constructor(message: string, public details?: any) {
     super(message);
     this.name = 'OCRError';
-  }
-}
-
-export class SupabaseError extends Error {
-  constructor(message: string, public details?: any) {
-    super(message);
-    this.name = 'SupabaseError';
   }
 }
 

@@ -4,7 +4,7 @@
  */
 
 import * as SecureStore from 'expo-secure-store';
-import { API_BASE_URL } from '../config/api';
+import { api } from '../utils/apiClient';
 
 const TOKEN_KEY = 'auth_token';
 const CLIENTE_KEY = 'cliente_data';
@@ -42,24 +42,12 @@ export interface ClienteStats {
  */
 export const login = async (params: LoginParams): Promise<AuthResponse> => {
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000);
-    const response = await fetch(`${API_BASE_URL}/api/clientes/login/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        rnc: params.rnc.replace(/-/g, ''),
-        pin: params.pin,
-      }),
-      signal: controller.signal,
-    });
-    clearTimeout(timeoutId);
+    const data = await api.post('/api/clientes/login/', {
+      rnc: params.rnc.replace(/-/g, ''),
+      pin: params.pin,
+    }, { skipAuth: true, showErrorAlert: false });
 
-    const data = await response.json();
-
-    if (!response.ok || !data.success) {
+    if (!data.success) {
       return {
         success: false,
         error: data.error || data.message || 'Error de autenticación',
@@ -131,26 +119,7 @@ export const verificarSesion = async (): Promise<{ cliente: Cliente; stats: Clie
     const token = await getToken();
     if (!token) return null;
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000);
-    const response = await fetch(`${API_BASE_URL}/api/clientes/me/`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      signal: controller.signal,
-    });
-    clearTimeout(timeoutId);
-
-    if (!response.ok) {
-      if (response.status === 401) {
-        await logout();
-      }
-      return null;
-    }
-
-    const data = await response.json();
+    const data = await api.get('/api/clientes/me/', { showErrorAlert: false });
 
     if (data.success && data.cliente) {
       // Actualizar datos locales
