@@ -7,6 +7,23 @@
 # For more details, see
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
+# React Native
+-keep class com.facebook.hermes.unicode.** { *; }
+-keep class com.facebook.jni.** { *; }
+
+# React Navigation
+-keep class com.swmansion.** { *; }
+-keep class com.th3rdwave.safeareacontext.** { *; }
+
+# Expo
+-keep class expo.modules.** { *; }
+
+# Keep native methods
+-keepclassmembers class * { native <methods>; }
+
+# Keep Parcelable
+-keepclassmembers class * implements android.os.Parcelable { static ** CREATOR; }
+
 # react-native-reanimated
 -keep class com.swmansion.reanimated.** { *; }
 -keep class com.facebook.react.turbomodule.** { *; }

@@ -31,7 +31,7 @@ import {
   listarFacturas,
   obtenerResumen,
 } from '../services/facturasService';
-import { RootStackParamList } from '../types/invoice';
+import { RootStackParamList } from '../../App';
 import OfflineQueueBadge from '../components/OfflineQueueBadge';
 import { api } from '../utils/apiClient';
 
