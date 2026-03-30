@@ -3422,3 +3422,7 @@ Verificacion: 12 de 16 mejoras ejecutadas en 3 waves (Wave 1: InvoiceReview apiC
 ### 2026-03-30 18:31 UTC -- mejoras-cycle-300326
 Completada. Commit: 25688c04
 Verificacion: 45 hallazgos documentados en .brain/mejoras-cycle-300326.md (8 criticos, 12 altos, 14 medios, 11 bajos). grep -c ### = 45. Commit 25688c04 pushed.
+
+### 2026-03-30 22:56 UTC -- criticos-facturaia-300326
+Completada. Commit: 59ba3ade
+Verificacion: 8 criticos resueltos en 2 waves (Wave 1: 5e0d9159, Wave 2: b23eccb7). C1: 0 refs InvoiceListScreen. C2: 0 SYSTEM_ALERT_WINDOW. C3: bundleId com.huyghusrl.facturaia. C4: ProGuard ON. C5: ABI splits enabled. C6: APKs 20-25MB (antes 79MB). C7: HomeScreen import fix. Quick wins ya estaban hechos (quality 0.7, expo-dev-client en devDeps). BUILD SUCCESSFUL.
