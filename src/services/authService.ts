@@ -42,6 +42,8 @@ export interface ClienteStats {
  */
 export const login = async (params: LoginParams): Promise<AuthResponse> => {
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
     const response = await fetch(`${API_BASE_URL}/api/clientes/login/`, {
       method: 'POST',
       headers: {
@@ -51,7 +53,9 @@ export const login = async (params: LoginParams): Promise<AuthResponse> => {
         rnc: params.rnc.replace(/-/g, ''),
         pin: params.pin,
       }),
+      signal: controller.signal,
     });
+    clearTimeout(timeoutId);
 
     const data = await response.json();
 
@@ -127,13 +131,17 @@ export const verificarSesion = async (): Promise<{ cliente: Cliente; stats: Clie
     const token = await getToken();
     if (!token) return null;
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
     const response = await fetch(`${API_BASE_URL}/api/clientes/me/`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
+      signal: controller.signal,
     });
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       if (response.status === 401) {
