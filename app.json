@@ -31,7 +31,7 @@
       ]
     },
     "ios": {
-      "bundleIdentifier": "com.gestoriard.app",
+      "bundleIdentifier": "com.huyghusrl.facturaia",
       "supportsTablet": true
     },
     "plugins": [

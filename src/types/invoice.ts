@@ -156,18 +156,6 @@ export interface SignUpFormData {
 }
 
 // ==========================================
-// Navigation Types
-// ==========================================
-
-export type RootStackParamList = {
-  Login: undefined;
-  Camera: {groupId: string};
-  InvoiceList: {groupId: string};
-  InvoiceDetail: {receiptId: string};
-  Settings: undefined;
-};
-
-// ==========================================
 // API Request/Response Types
 // ==========================================
 
