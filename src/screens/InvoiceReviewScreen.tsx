@@ -15,6 +15,7 @@ import {
   Modal,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from 'react-native';
 import {
   Text,
@@ -156,6 +157,7 @@ const InvoiceReviewScreen: React.FC = () => {
       }
     } catch (error) {
       console.error('[InvoiceReview] Error revalidando:', error);
+      Alert.alert('Error', 'No se pudo revalidar la factura.');
     } finally {
       setIsRevalidating(false);
     }
@@ -174,6 +176,7 @@ const InvoiceReviewScreen: React.FC = () => {
       }
     } catch (error) {
       console.error('[InvoiceReview] Error aprobando:', error);
+      Alert.alert('Error', 'No se pudo aprobar la factura.');
     } finally {
       setIsSubmitting(false);
     }
@@ -218,6 +221,7 @@ const InvoiceReviewScreen: React.FC = () => {
       }
     } catch (error) {
       console.error('[InvoiceReview] Error guardando:', error);
+      Alert.alert('Error', 'No se pudieron guardar los cambios.');
     } finally {
       setIsSubmitting(false);
     }

@@ -12,6 +12,7 @@ import {
   Dimensions,
   TouchableOpacity,
   Modal,
+  Alert,
 } from 'react-native';
 import {
   Text,
@@ -62,6 +63,7 @@ const InvoiceDetailScreen: React.FC = () => {
       setFactura(data);
     } catch (error) {
       console.error('[InvoiceDetail] Error:', error);
+      Alert.alert('Error', 'No se pudo cargar la factura. Intenta de nuevo.');
     } finally {
       setIsLoading(false);
     }
@@ -74,6 +76,7 @@ const InvoiceDetailScreen: React.FC = () => {
       setFactura(updated);
     } catch (error) {
       console.error('[InvoiceDetail] Error reprocesando:', error);
+      Alert.alert('Error', 'No se pudo reprocesar la factura. Intenta de nuevo.');
     } finally {
       setIsReprocesando(false);
     }

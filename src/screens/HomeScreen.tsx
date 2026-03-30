@@ -71,6 +71,7 @@ const HomeScreen: React.FC = () => {
       setHasMore(facturasRes.page < facturasRes.total_pages);
     } catch (error) {
       console.error('[HomeScreen] Error cargando datos:', error);
+      Alert.alert('Error', 'No se pudieron cargar las facturas.');
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -92,6 +93,7 @@ const HomeScreen: React.FC = () => {
       setHasMore(response.page < response.total_pages);
     } catch (error) {
       console.error('[HomeScreen] Error cargando más:', error);
+      Alert.alert('Error', 'No se pudieron cargar más facturas.');
     } finally {
       setIsLoadingMore(false);
     }

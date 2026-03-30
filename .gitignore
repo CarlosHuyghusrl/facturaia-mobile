@@ -28,3 +28,8 @@ hive-mind-prompt-*.txt
 node_modules
 .brain/last-verification.md
 .brain/last-verification.md.used
+
+# Release keystores
+*.keystore
+*.jks
+!android/app/debug.keystore
