@@ -1,4 +1,4 @@
-package com.anonymous.facturascannerapp
+package com.huyghusrl.facturaia
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

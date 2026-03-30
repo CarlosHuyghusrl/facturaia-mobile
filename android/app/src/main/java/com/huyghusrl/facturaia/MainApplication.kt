@@ -1,4 +1,4 @@
-package com.anonymous.facturascannerapp
+package com.huyghusrl.facturaia
 
 import android.app.Application
 import android.content.res.Configuration
