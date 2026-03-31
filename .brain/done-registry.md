@@ -19,6 +19,8 @@
 | 2026-03-31 01:41 UTC | e2e-cicd-310326 | Detox config + 2 E2E templates (login 4, invoice 4) + GitHub Actions CI (3 jobs: test, lint, build-android) + jest 27 tests PASS. Commit 8bba7e73 pushed. | 8bba7e73 |
 | 2026-03-31 02:11 UTC | sentry-tls-310326 | Error reporter lightweight (sin deps) + ErrorBoundary React + initErrorReporter en App.tsx + captura errores globales + promesas + POST /api/errors. TLS ya preparado (task anterior). 27 tests PASS. BUILD SUCCESSFUL. Commit d35ed4a0 pushed. | d35ed4a0 |
 | 2026-03-31 02:44 UTC | criticos-pendientes-310326 | Types any→concretos en App.tsx (InvoiceData, ValidationResult). Backend retry ya tenia backoff (main.go:26-45). ISC batch requiere aprobacion Carlos (23 facturas x AI tokens). .bak eliminado. .gitignore logs. 27 tests PASS. BUILD SUCCESSFUL. Commit 2a8071a6 pushed. | 2a8071a6 |
+| 2026-03-31 03:28 UTC | backend-go-fixes-310326 | Backend v2.25.0 desplegado: goroutine reconexion BD cada 30s, POST /api/errors (sin auth, guarda en error_logs), container healthy, health 200, error insert verificado en BD. ISC batch skipped (no admin user, bug fixeado en v2.13.2, ISC=0 correcto para la mayoria). Go commit 5e3af27. | a5c4e546 |
+| 2026-03-31 04:23 UTC | url-https-310326 | API migrada a https://ocr.huyghusrl.com. curl health 200. Old URL solo como fallback comentado. allowlist actualizado. 28 tests PASS. BUILD SUCCESSFUL. Commit e299782b pushed. | e299782b |
 
 ## Intentado pero fallido
 

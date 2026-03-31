@@ -3458,3 +3458,11 @@ Verificacion: Error reporter lightweight (sin deps) + ErrorBoundary React + init
 ### 2026-03-31 02:44 UTC -- criticos-pendientes-310326
 Completada. Commit: 2a8071a6
 Verificacion: Types any→concretos en App.tsx (InvoiceData, ValidationResult). Backend retry ya tenia backoff (main.go:26-45). ISC batch requiere aprobacion Carlos (23 facturas x AI tokens). .bak eliminado. .gitignore logs. 27 tests PASS. BUILD SUCCESSFUL. Commit 2a8071a6 pushed.
+
+### 2026-03-31 03:28 UTC -- backend-go-fixes-310326
+Completada. Commit: a5c4e546
+Verificacion: Backend v2.25.0 desplegado: goroutine reconexion BD cada 30s, POST /api/errors (sin auth, guarda en error_logs), container healthy, health 200, error insert verificado en BD. ISC batch skipped (no admin user, bug fixeado en v2.13.2, ISC=0 correcto para la mayoria). Go commit 5e3af27.
+
+### 2026-03-31 04:23 UTC -- url-https-310326
+Completada. Commit: e299782b
+Verificacion: API migrada a https://ocr.huyghusrl.com. curl health 200. Old URL solo como fallback comentado. allowlist actualizado. 28 tests PASS. BUILD SUCCESSFUL. Commit e299782b pushed.
