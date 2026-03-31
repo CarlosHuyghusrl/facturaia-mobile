@@ -3486,3 +3486,7 @@ Verificacion: 22 accessibilityLabel+testID en 5 screens (Login 6, Home 4, Camera
 ### 2026-03-31 17:55 UTC -- mejoras-media-310326
 Completada. Commit: 12e86b91
 Verificacion: 4 mejoras MEDIA: types/invoice.ts 310→38 lineas, useCallback 3 handlers InvoiceReview, getUserMessage Record<string,any>, npm audit 14→7. 28 tests PASS. BUILD SUCCESSFUL. Commit 12e86b91 pushed. -225 lineas netas.
+
+### 2026-03-31 18:03 UTC -- mejoras-baja-310326
+Completada. Commit: 025b55ff
+Verificacion: 3 mejoras BAJA: api.ts eliminado (-97 lineas), usesCleartextTraffic removido, health v2.25.0 desplegado. 28 tests PASS. BUILD SUCCESSFUL. Commit 025b55ff pushed.
