@@ -3450,3 +3450,7 @@ Verificacion: 27 jest tests: 3 suites PASS (authService 8, apiClient 10, offline
 ### 2026-03-31 01:41 UTC -- e2e-cicd-310326
 Completada. Commit: 8bba7e73
 Verificacion: Detox config + 2 E2E templates (login 4, invoice 4) + GitHub Actions CI (3 jobs: test, lint, build-android) + jest 27 tests PASS. Commit 8bba7e73 pushed.
+
+### 2026-03-31 02:11 UTC -- sentry-tls-310326
+Completada. Commit: d35ed4a0
+Verificacion: Error reporter lightweight (sin deps) + ErrorBoundary React + initErrorReporter en App.tsx + captura errores globales + promesas + POST /api/errors. TLS ya preparado (task anterior). 27 tests PASS. BUILD SUCCESSFUL. Commit d35ed4a0 pushed.

@@ -1,5 +1,5 @@
 ## Estado de sesion
-Tarea: e2e-cicd-310326
+Tarea: sentry-tls-310326
 Fase: started
-Tag retorno: pre-e2e-cicd-310326
-Ultima actualizacion: 2026-03-31 01:39 UTC
+Tag retorno: pre-sentry-tls-310326
+Ultima actualizacion: 2026-03-31 02:04 UTC
