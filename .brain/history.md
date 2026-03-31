@@ -3474,3 +3474,7 @@ Verificacion: Audit 5 secciones completo: 18 mejoras 100% listas, 8 incompletos,
 ### 2026-03-31 17:08 UTC -- bugfix-310326
 Completada. Commit: f920bc3e
 Verificacion: OpenAI 401 resuelto (key CLIProxyAPI actualizada, 47 modelos disponibles). Login Enter primera vez (onSubmitEditing + returnKeyType next/done + pinRef). Frontend review: 0 bugs criticos, 0 broken nav, gap accessibilityLabel. 28 tests PASS. BUILD SUCCESSFUL. Commit f920bc3e pushed.
+
+### 2026-03-31 17:14 UTC -- mejoras-post-bugfix-310326
+Completada. Commit: 61eeee32
+Verificacion: 10 mejoras documentadas: 3 alta (accessibility, FlatList perf, console.log), 4 media (any types, legacy types, npm audit, useMemo), 3 baja (api.ts legacy, cleartext, health version). Cada una con archivo:linea y justificacion. Read-only, 0 cambios de codigo.
