@@ -138,11 +138,45 @@ export const verificarSesion = async (): Promise<{ cliente: Cliente; stats: Clie
 };
 
 /**
- * Verificar si hay sesión activa
+ * Decodifica el payload de un JWT sin verificar firma.
+ * Solo para validacion local de formato y expiracion.
+ */
+const decodeJwtPayload = (token: string): Record<string, any> | null => {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+
+    // Base64url decode del payload
+    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const payload = JSON.parse(atob(base64));
+    return payload;
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * Verificar si hay sesión activa.
+ * Valida formato JWT (3 partes) y que no esté expirado.
  */
 export const isAuthenticated = async (): Promise<boolean> => {
   const token = await getToken();
-  return token !== null;
+  if (!token) return false;
+
+  const payload = decodeJwtPayload(token);
+  if (!payload) return false;
+
+  // Verificar que tiene campo exp y no está expirado
+  if (payload.exp) {
+    const now = Math.floor(Date.now() / 1000);
+    if (payload.exp < now) {
+      // Token expirado - limpiar
+      await logout();
+      return false;
+    }
+  }
+
+  return true;
 };
 
 export default {

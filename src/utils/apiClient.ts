@@ -11,6 +11,26 @@ import * as SecureStore from 'expo-secure-store';
 import { getUserMessage, getNetworkErrorMessage } from './errorMessages';
 import { API_BASE_URL } from '../config/api';
 
+// Hosts permitidos para requests - previene redireccion a servidores externos
+const ALLOWED_HOSTS = [
+  '217.216.48.91',
+  'localhost',
+  '127.0.0.1',
+  'api.facturaia.com', // futuro HTTPS
+];
+
+/**
+ * Valida que una URL absoluta apunte a un host permitido.
+ */
+const isAllowedUrl = (url: string): boolean => {
+  try {
+    const parsed = new URL(url);
+    return ALLOWED_HOSTS.some(host => parsed.hostname === host);
+  } catch {
+    return false;
+  }
+};
+
 const TOKEN_KEY = 'auth_token';
 
 // Configuración de retry
@@ -90,7 +110,15 @@ export const apiClient = async <T = any>(
     ...fetchOptions
   } = options;
 
-  const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
+  let url: string;
+  if (endpoint.startsWith('http')) {
+    if (!isAllowedUrl(endpoint)) {
+      throw new Error(`URL no permitida: ${endpoint}`);
+    }
+    url = endpoint;
+  } else {
+    url = `${API_BASE_URL}${endpoint}`;
+  }
 
   // Preparar headers
   const headers: HeadersInit = {
@@ -223,7 +251,15 @@ export const api = {
    */
   upload: async <T = any>(endpoint: string, formData: FormData, options?: RequestOptions): Promise<T> => {
     const { skipAuth = false, showErrorAlert = true } = options || {};
-    const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
+    let url: string;
+    if (endpoint.startsWith('http')) {
+      if (!isAllowedUrl(endpoint)) {
+        throw new Error(`URL no permitida: ${endpoint}`);
+      }
+      url = endpoint;
+    } else {
+      url = `${API_BASE_URL}${endpoint}`;
+    }
 
     const headers: HeadersInit = {};
 
