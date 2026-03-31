@@ -3470,3 +3470,7 @@ Verificacion: API migrada a https://ocr.huyghusrl.com. curl health 200. Old URL 
 ### 2026-03-31 13:16 UTC -- audit-exhaustivo-310326
 Completada. Commit: eb21915c
 Verificacion: Audit 5 secciones completo: 18 mejoras 100% listas, 8 incompletos, 5 riesgos produccion, top 5 mejoras, veredicto CONDICIONALMENTE lista. 28 tests PASS, health 200, /api/errors OK, docker healthy 9h. Commit eb21915c pushed.
+
+### 2026-03-31 17:08 UTC -- bugfix-310326
+Completada. Commit: f920bc3e
+Verificacion: OpenAI 401 resuelto (key CLIProxyAPI actualizada, 47 modelos disponibles). Login Enter primera vez (onSubmitEditing + returnKeyType next/done + pinRef). Frontend review: 0 bugs criticos, 0 broken nav, gap accessibilityLabel. 28 tests PASS. BUILD SUCCESSFUL. Commit f920bc3e pushed.
