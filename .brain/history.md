@@ -3490,3 +3490,7 @@ Verificacion: 4 mejoras MEDIA: types/invoice.ts 310→38 lineas, useCallback 3 h
 ### 2026-03-31 18:03 UTC -- mejoras-baja-310326
 Completada. Commit: 025b55ff
 Verificacion: 3 mejoras BAJA: api.ts eliminado (-97 lineas), usesCleartextTraffic removido, health v2.25.0 desplegado. 28 tests PASS. BUILD SUCCESSFUL. Commit 025b55ff pushed.
+
+### 2026-03-31 18:35 UTC -- revision-boris-completa-310326
+Completada. Commit: 48acd1cb
+Verificacion: Login smart submit: autoFocus + pin.length>=4 directo + Keyboard.dismiss. Backend audit: health/login/errors 200, docker healthy, auth enforced. Config audit: bundleId/ProGuard/HTTPS/babel/CI/28tests all OK. Qwen Vision: vision-model disponible, test real pendiente. BUILD SUCCESSFUL. Commit 48acd1cb.
