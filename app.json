@@ -1,8 +1,8 @@
 {
-  "name": "FacturIA",
-  "displayName": "FacturIA",
+  "name": "FacturaIA",
+  "displayName": "FacturaIA",
   "expo": {
-    "name": "FacturIA",
+    "name": "FacturaIA",
     "slug": "facturascannerapp",
     "version": "1.0.4",
     "sdkVersion": "52.0.0",
@@ -40,7 +40,7 @@
       [
         "react-native-document-scanner-plugin",
         {
-          "cameraPermissionText": "FacturIA necesita acceso a la cámara para escanear facturas"
+          "cameraPermissionText": "FacturaIA necesita acceso a la cámara para escanear facturas"
         }
       ],
       "expo-secure-store"
