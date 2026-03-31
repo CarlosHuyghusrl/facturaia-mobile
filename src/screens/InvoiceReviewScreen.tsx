@@ -416,6 +416,8 @@ const InvoiceReviewScreen: React.FC = () => {
                 loading={isSubmitting}
                 style={styles.approveButton}
                 buttonColor="#22c55e"
+                testID="review-approve"
+                accessibilityLabel="Aprobar factura"
               >
                 Aprobar
               </Button>
@@ -427,6 +429,8 @@ const InvoiceReviewScreen: React.FC = () => {
               loading={isSubmitting}
               style={styles.saveButton}
               buttonColor="#3b82f6"
+              testID="review-save"
+              accessibilityLabel="Guardar cambios"
             >
               Corregir y Guardar
             </Button>

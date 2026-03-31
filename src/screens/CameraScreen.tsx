@@ -67,7 +67,7 @@ const ScannerScreen: React.FC = () => {
   const startScanner = async () => {
     try {
       const result = await DocumentScanner.scanDocument({
-        croppedImageQuality: 100,
+        croppedImageQuality: 70,
         maxNumDocuments: 1,
         responseType: 'imageFilePath',
       });
@@ -114,7 +114,7 @@ const ScannerScreen: React.FC = () => {
 
       const result = await launchCamera({
         mediaType: 'photo',
-        quality: 1,
+        quality: 0.7,
         maxWidth: 2048,
         maxHeight: 2048,
         saveToPhotos: false,
@@ -136,7 +136,7 @@ const ScannerScreen: React.FC = () => {
     try {
       const result = await launchImageLibrary({
         mediaType: 'photo',
-        quality: 1,
+        quality: 0.7,
         maxWidth: 2048,
         maxHeight: 2048,
         selectionLimit: 1,
@@ -235,6 +235,8 @@ const ScannerScreen: React.FC = () => {
               buttonColor="#22D3EE"
               textColor="#0f172a"
               icon="document-scanner"
+              testID="camera-scan-doc"
+              accessibilityLabel="Escáner de documentos"
             >
               Escanear Factura
             </Button>
@@ -246,6 +248,8 @@ const ScannerScreen: React.FC = () => {
               buttonColor="#3b82f6"
               textColor="#fff"
               icon="image-multiple"
+              testID="camera-gallery"
+              accessibilityLabel="Abrir galería"
             >
               Galería
             </Button>
@@ -256,6 +260,8 @@ const ScannerScreen: React.FC = () => {
               contentStyle={styles.buttonContent}
               textColor="#94a3b8"
               icon="camera"
+              testID="camera-take-photo"
+              accessibilityLabel="Tomar foto"
             >
               Foto Manual
             </Button>

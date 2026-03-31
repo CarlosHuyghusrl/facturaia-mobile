@@ -117,6 +117,8 @@ const LoginScreen: React.FC = () => {
               returnKeyType="next"
               onSubmitEditing={() => pinRef.current?.focus()}
               blurOnSubmit={false}
+              testID="login-rnc-input"
+              accessibilityLabel="Campo RNC o Cédula"
             />
             {errors.rnc && (
               <HelperText type="error" visible>{errors.rnc}</HelperText>
@@ -145,6 +147,8 @@ const LoginScreen: React.FC = () => {
               ref={pinRef}
               returnKeyType="done"
               onSubmitEditing={handleLogin}
+              testID="login-pin-input"
+              accessibilityLabel="Campo PIN"
             />
             {errors.pin && (
               <HelperText type="error" visible>{errors.pin}</HelperText>
@@ -160,6 +164,8 @@ const LoginScreen: React.FC = () => {
             buttonColor="#22D3EE"
             textColor="#0f172a"
             labelStyle={styles.buttonLabel}
+            testID="login-submit-button"
+            accessibilityLabel="Iniciar sesión"
           >
             {submitting ? (
               <ActivityIndicator color="#0f172a" size="small" />

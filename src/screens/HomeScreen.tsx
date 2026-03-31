@@ -252,6 +252,8 @@ const HomeScreen: React.FC = () => {
 
       {/* Lista con resumen */}
       <FlatList
+        testID="home-invoice-list"
+        accessibilityLabel="Lista de facturas"
         data={facturas}
         keyExtractor={(item) => item.id}
         renderItem={renderFactura}
@@ -277,6 +279,15 @@ const HomeScreen: React.FC = () => {
         }
         onEndReached={loadMore}
         onEndReachedThreshold={0.3}
+        windowSize={10}
+        maxToRenderPerBatch={15}
+        initialNumToRender={10}
+        removeClippedSubviews={true}
+        getItemLayout={(_, index) => ({
+          length: 100,
+          offset: 100 * index,
+          index,
+        })}
         contentContainerStyle={styles.listContent}
       />
 
@@ -286,6 +297,8 @@ const HomeScreen: React.FC = () => {
         style={styles.fab}
         color="#0f172a"
         onPress={() => navigation.navigate('Camera')}
+        testID="home-scan-button"
+        accessibilityLabel="Escanear factura"
       />
     </View>
   );

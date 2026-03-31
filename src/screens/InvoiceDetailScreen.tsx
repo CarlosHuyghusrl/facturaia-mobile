@@ -338,6 +338,8 @@ const InvoiceDetailScreen: React.FC = () => {
             loading={isReprocesando}
             style={styles.reprocesarButton}
             buttonColor="#f59e0b"
+            testID="detail-reprocesar"
+            accessibilityLabel="Reprocesar factura"
           >
             Reprocesar OCR
           </Button>
