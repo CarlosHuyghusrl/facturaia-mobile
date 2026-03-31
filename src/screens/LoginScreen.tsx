@@ -3,7 +3,7 @@
  * Sin selector de empresa
  */
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   StyleSheet,
@@ -30,6 +30,7 @@ const LoginScreen: React.FC = () => {
   const [pin, setPin] = useState('');
   const [errors, setErrors] = useState<{ rnc?: string; pin?: string }>({});
   const [submitting, setSubmitting] = useState(false);
+  const pinRef = useRef<any>(null);
 
   const validateForm = (): boolean => {
     const newErrors: typeof errors = {};
@@ -113,6 +114,9 @@ const LoginScreen: React.FC = () => {
               textColor="#FFFFFF"
               style={styles.input}
               theme={{ colors: { onSurfaceVariant: '#94a3b8' } }}
+              returnKeyType="next"
+              onSubmitEditing={() => pinRef.current?.focus()}
+              blurOnSubmit={false}
             />
             {errors.rnc && (
               <HelperText type="error" visible>{errors.rnc}</HelperText>
@@ -138,6 +142,9 @@ const LoginScreen: React.FC = () => {
               textColor="#FFFFFF"
               style={styles.input}
               theme={{ colors: { onSurfaceVariant: '#94a3b8' } }}
+              ref={pinRef}
+              returnKeyType="done"
+              onSubmitEditing={handleLogin}
             />
             {errors.pin && (
               <HelperText type="error" visible>{errors.pin}</HelperText>
