@@ -3430,3 +3430,7 @@ Verificacion: 8 criticos resueltos en 2 waves (Wave 1: 5e0d9159, Wave 2: b23eccb
 ### 2026-03-30 23:59 UTC -- keystore-errors-310326
 Completada. Commit: 4316c9a2
 Verificacion: Release keystore CN=FacturaIA O=HUYGHU generado, APK firmado v2 scheme verificado con apksigner, 7 Alert.alert agregados (0 catch silenciosos), BUILD SUCCESSFUL 4 APKs 19-25MB. Commit 4316c9a2 pushed.
+
+### 2026-03-31 00:22 UTC -- jwt-expiry-310326
+Completada. Commit: 0ba5cf7d
+Verificacion: JWT expiracion ya estaba implementada y desplegada. ExpiresAt 24h en jwt.go:56. Fallback secret eliminado en Init(). Token decode confirma exp campo con 24h. Expired token retorna 401. Sin cambios de codigo necesarios.
