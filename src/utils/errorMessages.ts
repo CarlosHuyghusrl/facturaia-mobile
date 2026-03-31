@@ -40,7 +40,7 @@ export const NETWORK_MESSAGES = {
  * Extrae el mensaje amigable de una respuesta de error del backend.
  * Prioriza: user_message del backend > mapeo local por error_code > mensaje genérico
  */
-export function getUserMessage(responseData: any): string {
+export function getUserMessage(responseData: Record<string, any>): string {
   // 1. Si el backend envió user_message, usarlo
   if (responseData?.user_message) {
     return responseData.user_message;

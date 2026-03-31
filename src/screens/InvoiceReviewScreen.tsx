@@ -4,7 +4,7 @@
  * Permite aprobar o corregir facturas antes de guardar
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   StyleSheet,
@@ -148,7 +148,7 @@ const InvoiceReviewScreen: React.FC = () => {
   };
 
   // Re-validar campos editados
-  const handleRevalidate = async () => {
+  const handleRevalidate = useCallback(async () => {
     setIsRevalidating(true);
     try {
       const result = await api.post('/api/v1/invoices/validate', formData);
@@ -161,10 +161,10 @@ const InvoiceReviewScreen: React.FC = () => {
     } finally {
       setIsRevalidating(false);
     }
-  };
+  }, [formData]);
 
   // Aprobar factura (guardar como validada)
-  const handleApprove = async () => {
+  const handleApprove = useCallback(async () => {
     setIsSubmitting(true);
     try {
       const result = await api.put(`/api/facturas/${params.invoiceId}/approve`, {
@@ -180,10 +180,10 @@ const InvoiceReviewScreen: React.FC = () => {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [formData, params.invoiceId, navigation]);
 
   // Corregir y guardar (re-validar y guardar)
-  const handleCorrectAndSave = async () => {
+  const handleCorrectAndSave = useCallback(async () => {
     setIsSubmitting(true);
     try {
       // Primero revalidar
@@ -225,7 +225,7 @@ const InvoiceReviewScreen: React.FC = () => {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [formData, params.invoiceId, navigation]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
