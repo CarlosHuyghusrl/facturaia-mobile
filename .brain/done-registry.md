@@ -21,6 +21,7 @@
 | 2026-03-31 02:44 UTC | criticos-pendientes-310326 | Types any→concretos en App.tsx (InvoiceData, ValidationResult). Backend retry ya tenia backoff (main.go:26-45). ISC batch requiere aprobacion Carlos (23 facturas x AI tokens). .bak eliminado. .gitignore logs. 27 tests PASS. BUILD SUCCESSFUL. Commit 2a8071a6 pushed. | 2a8071a6 |
 | 2026-03-31 03:28 UTC | backend-go-fixes-310326 | Backend v2.25.0 desplegado: goroutine reconexion BD cada 30s, POST /api/errors (sin auth, guarda en error_logs), container healthy, health 200, error insert verificado en BD. ISC batch skipped (no admin user, bug fixeado en v2.13.2, ISC=0 correcto para la mayoria). Go commit 5e3af27. | a5c4e546 |
 | 2026-03-31 04:23 UTC | url-https-310326 | API migrada a https://ocr.huyghusrl.com. curl health 200. Old URL solo como fallback comentado. allowlist actualizado. 28 tests PASS. BUILD SUCCESSFUL. Commit e299782b pushed. | e299782b |
+| 2026-03-31 13:16 UTC | audit-exhaustivo-310326 | Audit 5 secciones completo: 18 mejoras 100% listas, 8 incompletos, 5 riesgos produccion, top 5 mejoras, veredicto CONDICIONALMENTE lista. 28 tests PASS, health 200, /api/errors OK, docker healthy 9h. Commit eb21915c pushed. | eb21915c |
 
 ## Intentado pero fallido
 
