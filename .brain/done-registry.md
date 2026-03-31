@@ -28,6 +28,7 @@
 | 2026-03-31 17:55 UTC | mejoras-media-310326 | 4 mejoras MEDIA: types/invoice.ts 310→38 lineas, useCallback 3 handlers InvoiceReview, getUserMessage Record<string,any>, npm audit 14→7. 28 tests PASS. BUILD SUCCESSFUL. Commit 12e86b91 pushed. -225 lineas netas. | 12e86b91 |
 | 2026-03-31 18:03 UTC | mejoras-baja-310326 | 3 mejoras BAJA: api.ts eliminado (-97 lineas), usesCleartextTraffic removido, health v2.25.0 desplegado. 28 tests PASS. BUILD SUCCESSFUL. Commit 025b55ff pushed. | 025b55ff |
 | 2026-03-31 18:35 UTC | revision-boris-completa-310326 | Login smart submit: autoFocus + pin.length>=4 directo + Keyboard.dismiss. Backend audit: health/login/errors 200, docker healthy, auth enforced. Config audit: bundleId/ProGuard/HTTPS/babel/CI/28tests all OK. Qwen Vision: vision-model disponible, test real pendiente. BUILD SUCCESSFUL. Commit 48acd1cb. | 48acd1cb |
+| 2026-03-31 18:56 UTC | vision-multitenant-310326 | Nombre FacturaIA unificado (5 refs). Gemini Vision OCR: match exacto con Claude OCR en factura real (gratis). Multi-tenant: empresa_id en 4 tablas, 3 empresas, RLS activo, no enforced. Commit f4d1ee6b pushed. | f4d1ee6b |
 
 ## Intentado pero fallido
 

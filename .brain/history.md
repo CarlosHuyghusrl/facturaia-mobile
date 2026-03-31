@@ -3494,3 +3494,7 @@ Verificacion: 3 mejoras BAJA: api.ts eliminado (-97 lineas), usesCleartextTraffi
 ### 2026-03-31 18:35 UTC -- revision-boris-completa-310326
 Completada. Commit: 48acd1cb
 Verificacion: Login smart submit: autoFocus + pin.length>=4 directo + Keyboard.dismiss. Backend audit: health/login/errors 200, docker healthy, auth enforced. Config audit: bundleId/ProGuard/HTTPS/babel/CI/28tests all OK. Qwen Vision: vision-model disponible, test real pendiente. BUILD SUCCESSFUL. Commit 48acd1cb.
+
+### 2026-03-31 18:56 UTC -- vision-multitenant-310326
+Completada. Commit: f4d1ee6b
+Verificacion: Nombre FacturaIA unificado (5 refs). Gemini Vision OCR: match exacto con Claude OCR en factura real (gratis). Multi-tenant: empresa_id en 4 tablas, 3 empresas, RLS activo, no enforced. Commit f4d1ee6b pushed.
