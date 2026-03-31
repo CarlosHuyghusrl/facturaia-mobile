@@ -3482,3 +3482,7 @@ Verificacion: 10 mejoras documentadas: 3 alta (accessibility, FlatList perf, con
 ### 2026-03-31 17:43 UTC -- mejoras-alta-310326
 Completada. Commit: a975aa83
 Verificacion: 22 accessibilityLabel+testID en 5 screens (Login 6, Home 4, Camera 6, Detail 2, Review 4). FlatList 5 props perf (windowSize, maxToRender, initialNum, removeClipped, getItemLayout). console.log ya manejado por babel. 28 tests PASS. BUILD SUCCESSFUL. Commit a975aa83 pushed.
+
+### 2026-03-31 17:55 UTC -- mejoras-media-310326
+Completada. Commit: 12e86b91
+Verificacion: 4 mejoras MEDIA: types/invoice.ts 310→38 lineas, useCallback 3 handlers InvoiceReview, getUserMessage Record<string,any>, npm audit 14→7. 28 tests PASS. BUILD SUCCESSFUL. Commit 12e86b91 pushed. -225 lineas netas.
