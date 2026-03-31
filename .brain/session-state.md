@@ -1,5 +1,5 @@
 ## Estado de sesion
-Tarea: jwt-expiry-310326
+Tarea: offline-secure-310326
 Fase: started
-Tag retorno: pre-jwt-expiry-310326
-Ultima actualizacion: 2026-03-31 00:20 UTC
+Tag retorno: pre-offline-secure-310326
+Ultima actualizacion: 2026-03-31 00:26 UTC

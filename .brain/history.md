@@ -3434,3 +3434,7 @@ Verificacion: Release keystore CN=FacturaIA O=HUYGHU generado, APK firmado v2 sc
 ### 2026-03-31 00:22 UTC -- jwt-expiry-310326
 Completada. Commit: 0ba5cf7d
 Verificacion: JWT expiracion ya estaba implementada y desplegada. ExpiresAt 24h en jwt.go:56. Fallback secret eliminado en Init(). Token decode confirma exp campo con 24h. Expired token retorna 401. Sin cambios de codigo necesarios.
+
+### 2026-03-31 00:33 UTC -- offline-secure-310326
+Completada. Commit: 48afd53a
+Verificacion: offlineQueue migrado de AsyncStorage a SecureStore (0 AsyncStorage, 10 SecureStore). Chunking iOS. CLAUDE.md: 4 bugs marcados resueltos, 2 legit abiertos. BUILD SUCCESSFUL 4 APKs 19-25MB. Commit 48afd53a pushed.
