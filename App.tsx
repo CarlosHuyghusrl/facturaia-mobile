@@ -25,7 +25,7 @@ import LoginScreen from "./src/screens/LoginScreen";
 import HomeScreen from "./src/screens/HomeScreen";
 import CameraScreen from "./src/screens/CameraScreen";
 import InvoiceDetailScreen from "./src/screens/InvoiceDetailScreen";
-import InvoiceReviewScreen from "./src/screens/InvoiceReviewScreen";
+import InvoiceReviewScreen, { InvoiceData, ValidationResult } from "./src/screens/InvoiceReviewScreen";
 
 LogBox.ignoreLogs([
   "Non-serializable values were found in the navigation state",
@@ -40,8 +40,8 @@ export type RootStackParamList = {
   InvoiceReview: {
     invoiceId: string;
     imageUrl: string;
-    extractedData: any;
-    validation: any;
+    extractedData: InvoiceData;
+    validation: ValidationResult;
     extractionStatus: string;
   };
 };

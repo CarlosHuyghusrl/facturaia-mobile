@@ -32,13 +32,13 @@ import { api } from '../utils/apiClient';
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 // Tipos para validación
-interface ValidationError {
+export interface ValidationError {
   field: string;
   error: string;
   severity: 'error' | 'warning';
 }
 
-interface ValidationResult {
+export interface ValidationResult {
   valid: boolean;
   needs_review: boolean;
   errors: ValidationError[];
@@ -51,7 +51,7 @@ interface ValidationResult {
   };
 }
 
-interface InvoiceData {
+export interface InvoiceData {
   ncf: string;
   fecha_emision: string;
   emisor_rnc: string;
