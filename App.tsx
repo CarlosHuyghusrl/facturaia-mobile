@@ -10,6 +10,13 @@ import {createStackNavigator} from "@react-navigation/stack";
 import {Provider as PaperProvider, DefaultTheme} from "react-native-paper";
 import {GestureHandlerRootView} from "react-native-gesture-handler";
 
+// Error monitoring
+import {ErrorBoundary} from "./src/components/ErrorBoundary";
+import {initErrorReporter} from "./src/utils/errorReporter";
+
+// Initialize error reporter (captures unhandled errors)
+initErrorReporter();
+
 // Auth Provider
 import {AuthProvider, useAuth} from "./src/hooks/useAuth";
 
@@ -129,12 +136,14 @@ const AppNavigator = () => {
 function App(): React.JSX.Element {
   return (
     <GestureHandlerRootView style={{flex: 1}}>
+      <ErrorBoundary>
       <AuthProvider>
         <PaperProvider theme={theme}>
           <StatusBar barStyle="light-content" backgroundColor="#0f172a" />
           <AppNavigator />
         </PaperProvider>
       </AuthProvider>
+      </ErrorBoundary>
     </GestureHandlerRootView>
   );
 }
