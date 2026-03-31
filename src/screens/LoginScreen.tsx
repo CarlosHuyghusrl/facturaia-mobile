@@ -11,6 +11,7 @@ import {
   Platform,
   ScrollView,
   Alert,
+  Keyboard,
 } from 'react-native';
 import {
   Text,
@@ -99,6 +100,7 @@ const LoginScreen: React.FC = () => {
           <View style={styles.inputContainer}>
             <TextInput
               label="RNC / Cédula"
+              autoFocus
               value={rnc}
               onChangeText={(text) => {
                 setRnc(formatRNC(text));
@@ -115,7 +117,13 @@ const LoginScreen: React.FC = () => {
               style={styles.input}
               theme={{ colors: { onSurfaceVariant: '#94a3b8' } }}
               returnKeyType="next"
-              onSubmitEditing={() => pinRef.current?.focus()}
+              onSubmitEditing={() => {
+                if (pin.length >= 4) {
+                  handleLogin();
+                } else {
+                  pinRef.current?.focus();
+                }
+              }}
               blurOnSubmit={false}
               testID="login-rnc-input"
               accessibilityLabel="Campo RNC o Cédula"
@@ -146,7 +154,10 @@ const LoginScreen: React.FC = () => {
               theme={{ colors: { onSurfaceVariant: '#94a3b8' } }}
               ref={pinRef}
               returnKeyType="done"
-              onSubmitEditing={handleLogin}
+              onSubmitEditing={() => {
+                Keyboard.dismiss();
+                handleLogin();
+              }}
               testID="login-pin-input"
               accessibilityLabel="Campo PIN"
             />
