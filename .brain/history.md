@@ -3478,3 +3478,7 @@ Verificacion: OpenAI 401 resuelto (key CLIProxyAPI actualizada, 47 modelos dispo
 ### 2026-03-31 17:14 UTC -- mejoras-post-bugfix-310326
 Completada. Commit: 61eeee32
 Verificacion: 10 mejoras documentadas: 3 alta (accessibility, FlatList perf, console.log), 4 media (any types, legacy types, npm audit, useMemo), 3 baja (api.ts legacy, cleartext, health version). Cada una con archivo:linea y justificacion. Read-only, 0 cambios de codigo.
+
+### 2026-03-31 17:43 UTC -- mejoras-alta-310326
+Completada. Commit: a975aa83
+Verificacion: 22 accessibilityLabel+testID en 5 screens (Login 6, Home 4, Camera 6, Detail 2, Review 4). FlatList 5 props perf (windowSize, maxToRender, initialNum, removeClipped, getItemLayout). console.log ya manejado por babel. 28 tests PASS. BUILD SUCCESSFUL. Commit a975aa83 pushed.

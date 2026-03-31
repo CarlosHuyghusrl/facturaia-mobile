@@ -24,6 +24,7 @@
 | 2026-03-31 13:16 UTC | audit-exhaustivo-310326 | Audit 5 secciones completo: 18 mejoras 100% listas, 8 incompletos, 5 riesgos produccion, top 5 mejoras, veredicto CONDICIONALMENTE lista. 28 tests PASS, health 200, /api/errors OK, docker healthy 9h. Commit eb21915c pushed. | eb21915c |
 | 2026-03-31 17:08 UTC | bugfix-310326 | OpenAI 401 resuelto (key CLIProxyAPI actualizada, 47 modelos disponibles). Login Enter primera vez (onSubmitEditing + returnKeyType next/done + pinRef). Frontend review: 0 bugs criticos, 0 broken nav, gap accessibilityLabel. 28 tests PASS. BUILD SUCCESSFUL. Commit f920bc3e pushed. | f920bc3e |
 | 2026-03-31 17:14 UTC | mejoras-post-bugfix-310326 | 10 mejoras documentadas: 3 alta (accessibility, FlatList perf, console.log), 4 media (any types, legacy types, npm audit, useMemo), 3 baja (api.ts legacy, cleartext, health version). Cada una con archivo:linea y justificacion. Read-only, 0 cambios de codigo. | 61eeee32 |
+| 2026-03-31 17:43 UTC | mejoras-alta-310326 | 22 accessibilityLabel+testID en 5 screens (Login 6, Home 4, Camera 6, Detail 2, Review 4). FlatList 5 props perf (windowSize, maxToRender, initialNum, removeClipped, getItemLayout). console.log ya manejado por babel. 28 tests PASS. BUILD SUCCESSFUL. Commit a975aa83 pushed. | a975aa83 |
 
 ## Intentado pero fallido
 
