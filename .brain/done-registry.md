@@ -29,6 +29,7 @@
 | 2026-03-31 18:03 UTC | mejoras-baja-310326 | 3 mejoras BAJA: api.ts eliminado (-97 lineas), usesCleartextTraffic removido, health v2.25.0 desplegado. 28 tests PASS. BUILD SUCCESSFUL. Commit 025b55ff pushed. | 025b55ff |
 | 2026-03-31 18:35 UTC | revision-boris-completa-310326 | Login smart submit: autoFocus + pin.length>=4 directo + Keyboard.dismiss. Backend audit: health/login/errors 200, docker healthy, auth enforced. Config audit: bundleId/ProGuard/HTTPS/babel/CI/28tests all OK. Qwen Vision: vision-model disponible, test real pendiente. BUILD SUCCESSFUL. Commit 48acd1cb. | 48acd1cb |
 | 2026-03-31 18:56 UTC | vision-multitenant-310326 | Nombre FacturaIA unificado (5 refs). Gemini Vision OCR: match exacto con Claude OCR en factura real (gratis). Multi-tenant: empresa_id en 4 tablas, 3 empresas, RLS activo, no enforced. Commit f4d1ee6b pushed. | f4d1ee6b |
+| 2026-03-31 19:14 UTC | multitenant-backend-310326 | OCR switch a Gemini 2.5 Flash (gratis via CLIProxyAPI). Multi-tenant YA funciona: JWT tiene empresa_alias, queries filtran por cliente_id (movil) y empresa_alias (admin). empresa_id/owner_id NULL = pendiente data entry Carlos. Container v2.25.1 deployed con OPENAI_MODEL=gemini-2.5-flash. Health 200, login 200. | b56ca372 |
 
 ## Intentado pero fallido
 

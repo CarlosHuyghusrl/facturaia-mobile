@@ -3498,3 +3498,7 @@ Verificacion: Login smart submit: autoFocus + pin.length>=4 directo + Keyboard.d
 ### 2026-03-31 18:56 UTC -- vision-multitenant-310326
 Completada. Commit: f4d1ee6b
 Verificacion: Nombre FacturaIA unificado (5 refs). Gemini Vision OCR: match exacto con Claude OCR en factura real (gratis). Multi-tenant: empresa_id en 4 tablas, 3 empresas, RLS activo, no enforced. Commit f4d1ee6b pushed.
+
+### 2026-03-31 19:14 UTC -- multitenant-backend-310326
+Completada. Commit: b56ca372
+Verificacion: OCR switch a Gemini 2.5 Flash (gratis via CLIProxyAPI). Multi-tenant YA funciona: JWT tiene empresa_alias, queries filtran por cliente_id (movil) y empresa_alias (admin). empresa_id/owner_id NULL = pendiente data entry Carlos. Container v2.25.1 deployed con OPENAI_MODEL=gemini-2.5-flash. Health 200, login 200.
