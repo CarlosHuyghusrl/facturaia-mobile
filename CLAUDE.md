@@ -352,7 +352,7 @@ go run main.go
 docker run -d --name facturaia-ocr --restart unless-stopped --network host \
   -e PORT=8081 -e HOST=0.0.0.0 \
   -e AI_PROVIDER=openai \
-  -e OPENAI_API_KEY=sk-7mFaCRaXj5sp1S5G82S17sF4ClsTzn0ObP1D8yzPEQYmZ \
+  -e OPENAI_API_KEY=sk-GazR6oQwVsbxdaMK5PE_Ht-88lUn3IALdwtwyZg6eWo \
   -e OPENAI_BASE_URL=http://localhost:8317/v1 \
   -e OPENAI_MODEL=claude-opus-4-5-20251101 \
   -e GEMINI_API_KEY=AIzaSyBQU-tSPRsWjc-qWgEtPeXkViSqyzdNQDc \
@@ -443,8 +443,8 @@ docker run -d --name facturaia-ocr --restart unless-stopped --network host \
 
 ### Backend OCR
 - Puerto: 8081
-- Endpoint: http://217.216.48.91:8081
-- Image proxy: http://217.216.48.91:8081/api/facturas/{id}/imagen (no auth, UUID-protected)
+- Endpoint: https://ocr.huyghusrl.com (HTTPS)
+- Image proxy: https://ocr.huyghusrl.com/api/facturas/{id}/imagen (no auth, UUID-protected)
 
 ### MinIO
 - User: gestoria_minio
@@ -453,7 +453,7 @@ docker run -d --name facturaia-ocr --restart unless-stopped --network host \
 
 ### CLIProxyAPI - Proxy IA Multi-Proveedor (10-Feb-2026)
 - **URL:** http://localhost:8317/v1
-- **Key:** sk-7mFaCRaXj5sp1S5G82S17sF4ClsTzn0ObP1D8yzPEQYmZ
+- **Key:** sk-GazR6oQwVsbxdaMK5PE_Ht-88lUn3IALdwtwyZg6eWo
 
 **Proveedores OAuth disponibles:**
 | Proveedor | Cuenta | Modelos |

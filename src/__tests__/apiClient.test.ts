@@ -6,6 +6,7 @@
 describe('apiClient URL allowlist', () => {
   const ALLOWED_HOSTS = [
     '217.216.48.91',
+    'ocr.huyghusrl.com',
     'localhost',
     '127.0.0.1',
     'api.facturaia.com',
@@ -23,6 +24,7 @@ describe('apiClient URL allowlist', () => {
 
   it('allows the production server URL', () => {
     expect(isAllowedUrl('http://217.216.48.91:8081/api/test')).toBe(true);
+    expect(isAllowedUrl('https://ocr.huyghusrl.com/api/test')).toBe(true);
   });
 
   it('allows localhost', () => {
@@ -31,6 +33,10 @@ describe('apiClient URL allowlist', () => {
 
   it('allows 127.0.0.1', () => {
     expect(isAllowedUrl('http://127.0.0.1:3000/api/test')).toBe(true);
+  });
+
+  it('allows HTTPS production domain', () => {
+    expect(isAllowedUrl('https://ocr.huyghusrl.com/api/test')).toBe(true);
   });
 
   it('allows future HTTPS domain', () => {

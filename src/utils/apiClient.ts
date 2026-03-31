@@ -13,7 +13,8 @@ import { API_BASE_URL } from '../config/api';
 
 // Hosts permitidos para requests - previene redireccion a servidores externos
 const ALLOWED_HOSTS = [
-  '217.216.48.91',
+  '217.216.48.91', // legacy HTTP fallback
+  'ocr.huyghusrl.com',
   'localhost',
   '127.0.0.1',
   'api.facturaia.com', // futuro HTTPS
