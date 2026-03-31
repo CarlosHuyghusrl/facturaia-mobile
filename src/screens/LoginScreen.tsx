@@ -3,7 +3,7 @@
  * Sin selector de empresa
  */
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -32,6 +32,17 @@ const LoginScreen: React.FC = () => {
   const [errors, setErrors] = useState<{ rnc?: string; pin?: string }>({});
   const [submitting, setSubmitting] = useState(false);
   const pinRef = useRef<any>(null);
+
+  // Auto-submit: cuando RNC y PIN estan completos, login automatico
+  useEffect(() => {
+    if (rnc.replace(/-/g, '').length >= 9 && pin.length >= 4 && !submitting && !isLoading) {
+      // Delay breve para que el usuario vea lo que escribio
+      const timer = setTimeout(() => {
+        handleLogin();
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [pin]); // Solo trigger cuando PIN cambia
 
   const validateForm = (): boolean => {
     const newErrors: typeof errors = {};
@@ -154,10 +165,7 @@ const LoginScreen: React.FC = () => {
               theme={{ colors: { onSurfaceVariant: '#94a3b8' } }}
               ref={pinRef}
               returnKeyType="done"
-              onSubmitEditing={() => {
-                Keyboard.dismiss();
-                handleLogin();
-              }}
+              onSubmitEditing={handleLogin}
               testID="login-pin-input"
               accessibilityLabel="Campo PIN"
             />
