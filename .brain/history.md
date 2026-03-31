@@ -3454,3 +3454,7 @@ Verificacion: Detox config + 2 E2E templates (login 4, invoice 4) + GitHub Actio
 ### 2026-03-31 02:11 UTC -- sentry-tls-310326
 Completada. Commit: d35ed4a0
 Verificacion: Error reporter lightweight (sin deps) + ErrorBoundary React + initErrorReporter en App.tsx + captura errores globales + promesas + POST /api/errors. TLS ya preparado (task anterior). 27 tests PASS. BUILD SUCCESSFUL. Commit d35ed4a0 pushed.
+
+### 2026-03-31 02:44 UTC -- criticos-pendientes-310326
+Completada. Commit: 2a8071a6
+Verificacion: Types any→concretos en App.tsx (InvoiceData, ValidationResult). Backend retry ya tenia backoff (main.go:26-45). ISC batch requiere aprobacion Carlos (23 facturas x AI tokens). .bak eliminado. .gitignore logs. 27 tests PASS. BUILD SUCCESSFUL. Commit 2a8071a6 pushed.

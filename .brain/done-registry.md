@@ -18,6 +18,7 @@
 | 2026-03-31 01:23 UTC | tests-pinning-310326 | 27 jest tests: 3 suites PASS (authService 8, apiClient 10, offlineQueue 9). Certificate pinning no factible en Expo managed (documentado). BUILD SUCCESSFUL. Commit e8a12814 pushed. | e8a12814 |
 | 2026-03-31 01:41 UTC | e2e-cicd-310326 | Detox config + 2 E2E templates (login 4, invoice 4) + GitHub Actions CI (3 jobs: test, lint, build-android) + jest 27 tests PASS. Commit 8bba7e73 pushed. | 8bba7e73 |
 | 2026-03-31 02:11 UTC | sentry-tls-310326 | Error reporter lightweight (sin deps) + ErrorBoundary React + initErrorReporter en App.tsx + captura errores globales + promesas + POST /api/errors. TLS ya preparado (task anterior). 27 tests PASS. BUILD SUCCESSFUL. Commit d35ed4a0 pushed. | d35ed4a0 |
+| 2026-03-31 02:44 UTC | criticos-pendientes-310326 | Types any→concretos en App.tsx (InvoiceData, ValidationResult). Backend retry ya tenia backoff (main.go:26-45). ISC batch requiere aprobacion Carlos (23 facturas x AI tokens). .bak eliminado. .gitignore logs. 27 tests PASS. BUILD SUCCESSFUL. Commit 2a8071a6 pushed. | 2a8071a6 |
 
 ## Intentado pero fallido
 
