@@ -384,29 +384,29 @@ docker run -d --name facturaia-ocr --restart unless-stopped --network host \
 - **Fix rápido:** `docker restart facturaia-ocr` (solo si PgBouncer ya está UP)
 - **Fix definitivo pendiente:** Agregar retry con backoff exponencial en facturaia-ocr/cmd/server/main.go
 
-### ⚠️ InvoiceReviewScreen sin Authorization header (10-Mar-2026)
+### ✅ RESUELTO: InvoiceReviewScreen sin Authorization header (10-Mar-2026)
+- **Fix**: InvoiceReviewScreen migrado a apiClient en commit 6218273d (mejoras-facturaia-300326).
 - **Afecta:** Pantalla de revisión post-OCR completa
 - **Síntoma:** Approve, Update y Validate retornan 401 silenciosamente
 - **Causa:** 3 fetch() calls directos sin Authorization header (no usan apiClient.ts)
-- **Fix:** Reemplazar fetch() con apiClient en InvoiceReviewScreen.tsx
 
-### ⚠️ HomeScreen field name mismatch (10-Mar-2026)
+### ✅ RESUELTO: HomeScreen field name mismatch (10-Mar-2026)
+- **Fix**: Campos corregidos a proveedor, fecha_documento, monto en HomeScreen. Resuelto 12-Mar-2026.
 - **Afecta:** Lista de facturas en pantalla principal
 - **Síntoma:** Campos emisor_nombre, fecha_emision, total aparecen como undefined
 - **Causa:** Factura type (facturasService.ts) define proveedor, fecha_documento, monto pero HomeScreen usa nombres diferentes
-- **Fix:** Alinear nombres de campos entre type y screen
 
-### ⚠️ CameraScreen navega a 'InvoiceList' inexistente (10-Mar-2026)
+### ✅ RESUELTO: CameraScreen navega a 'InvoiceList' inexistente (10-Mar-2026)
+- **Fix**: CameraScreen ahora navega a 'Home' correctamente. Resuelto en mejoras-facturaia-300326.
 - **Afecta:** Botón "Ver Lista" después de escanear factura
 - **Síntoma:** Crash de la app
 - **Causa:** CameraScreen.tsx:374 navega a 'InvoiceList' que no existe en el navigator (App.tsx)
-- **Fix:** Cambiar a navigation.navigate('Home')
 
-### ⚠️ JWT sin expiración + fallback secret hardcodeado (10-Mar-2026)
+### ✅ RESUELTO: JWT sin expiración + fallback secret hardcodeado (10-Mar-2026)
+- **Fix**: ExpiresAt 24h en jwt.go:56. Fallback secret eliminado, Init() requiere JWT_SECRET. Verificado 31-Mar-2026.
 - **Afecta:** Seguridad de autenticación
 - **Síntoma:** Tokens válidos para siempre; secret por defecto en código
 - **Causa:** GenerateToken() no pone ExpiresAt; fallback "dev_secret_change_in_production_32chars!"
-- **Fix:** Agregar ExpiresAt (24h) y eliminar fallback secret en jwt.go
 
 ### ⚠️ ISC=0 en facturas antiguas (pre-v2.13.2)
 - **Afecta:** 23 de 26 facturas en BD

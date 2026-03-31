@@ -2,13 +2,18 @@
  * Cola offline para facturas pendientes de subir.
  * Guarda imágenes localmente cuando no hay conexión o el servidor falla.
  * Las procesa automáticamente cuando vuelve la conexión.
+ *
+ * Usa expo-secure-store para cifrar datos en reposo (protege URIs de facturas).
+ * Chunking automático para manejar el límite de 2KB por key en iOS.
  */
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import NetInfo from '@react-native-community/netinfo';
 
-const QUEUE_KEY = '@facturaia_offline_queue';
-const MAX_QUEUE_SIZE = 50; // Máximo 50 facturas en cola
+const QUEUE_KEY = 'facturaia_offline_queue';
+const CHUNK_KEY_PREFIX = 'facturaia_oq_chunk_';
+const CHUNK_SIZE = 1800; // Stay under 2KB iOS limit with margin
+const MAX_QUEUE_SIZE = 50;
 
 export interface QueuedInvoice {
   id: string;
@@ -17,6 +22,73 @@ export interface QueuedInvoice {
   attempts: number;
   lastError?: string;
   status: 'pending' | 'uploading' | 'failed';
+}
+
+/**
+ * Guarda datos con chunking automático para iOS.
+ */
+async function secureSet(key: string, value: string): Promise<void> {
+  if (value.length <= CHUNK_SIZE) {
+    await SecureStore.setItemAsync(key, value);
+    // Clean up any old chunks
+    await cleanChunks(key);
+  } else {
+    // Split into chunks
+    const chunks = Math.ceil(value.length / CHUNK_SIZE);
+    await SecureStore.setItemAsync(key, `__chunked__${chunks}`);
+    for (let i = 0; i < chunks; i++) {
+      const chunk = value.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+      await SecureStore.setItemAsync(`${CHUNK_KEY_PREFIX}${key}_${i}`, chunk);
+    }
+  }
+}
+
+/**
+ * Lee datos con soporte de chunking.
+ */
+async function secureGet(key: string): Promise<string | null> {
+  const value = await SecureStore.getItemAsync(key);
+  if (!value) return null;
+
+  if (value.startsWith('__chunked__')) {
+    const chunks = parseInt(value.replace('__chunked__', ''), 10);
+    let result = '';
+    for (let i = 0; i < chunks; i++) {
+      const chunk = await SecureStore.getItemAsync(`${CHUNK_KEY_PREFIX}${key}_${i}`);
+      if (chunk) result += chunk;
+    }
+    return result;
+  }
+
+  return value;
+}
+
+/**
+ * Elimina datos y sus chunks.
+ */
+async function secureDelete(key: string): Promise<void> {
+  const value = await SecureStore.getItemAsync(key);
+  if (value && value.startsWith('__chunked__')) {
+    const chunks = parseInt(value.replace('__chunked__', ''), 10);
+    for (let i = 0; i < chunks; i++) {
+      await SecureStore.deleteItemAsync(`${CHUNK_KEY_PREFIX}${key}_${i}`);
+    }
+  }
+  await SecureStore.deleteItemAsync(key);
+}
+
+/**
+ * Limpia chunks huérfanos.
+ */
+async function cleanChunks(key: string): Promise<void> {
+  // Try to clean up to 10 potential old chunks
+  for (let i = 0; i < 10; i++) {
+    try {
+      await SecureStore.deleteItemAsync(`${CHUNK_KEY_PREFIX}${key}_${i}`);
+    } catch {
+      // Ignore - chunk doesn't exist
+    }
+  }
 }
 
 /**
@@ -48,7 +120,7 @@ export async function addToQueue(imageUri: string): Promise<string> {
  */
 export async function getQueue(): Promise<QueuedInvoice[]> {
   try {
-    const data = await AsyncStorage.getItem(QUEUE_KEY);
+    const data = await secureGet(QUEUE_KEY);
     return data ? JSON.parse(data) : [];
   } catch {
     return [];
@@ -59,7 +131,7 @@ export async function getQueue(): Promise<QueuedInvoice[]> {
  * Guarda la cola.
  */
 async function saveQueue(queue: QueuedInvoice[]): Promise<void> {
-  await AsyncStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
+  await secureSet(QUEUE_KEY, JSON.stringify(queue));
 }
 
 /**
@@ -106,9 +178,6 @@ export async function isOnline(): Promise<boolean> {
 /**
  * Procesa la cola: sube facturas pendientes al servidor.
  * Llamar cuando vuelva la conexión o periódicamente.
- *
- * @param uploadFn - Función que sube una imagen al servidor
- * @param onProgress - Callback con (current, total) para mostrar progreso
  */
 export async function processQueue(
   uploadFn: (imageUri: string) => Promise<any>,
@@ -144,7 +213,6 @@ export async function processQueue(
     } catch (err: any) {
       const newAttempts = item.attempts + 1;
       if (newAttempts >= 5) {
-        // Max retries reached, keep in queue but mark as failed permanently
         await updateQueueItem(item.id, {
           status: 'failed',
           attempts: newAttempts,
@@ -168,5 +236,5 @@ export async function processQueue(
  * Limpia la cola completa (para debug/reset).
  */
 export async function clearQueue(): Promise<void> {
-  await AsyncStorage.removeItem(QUEUE_KEY);
+  await secureDelete(QUEUE_KEY);
 }
