@@ -3438,3 +3438,7 @@ Verificacion: JWT expiracion ya estaba implementada y desplegada. ExpiresAt 24h 
 ### 2026-03-31 00:33 UTC -- offline-secure-310326
 Completada. Commit: 48afd53a
 Verificacion: offlineQueue migrado de AsyncStorage a SecureStore (0 AsyncStorage, 10 SecureStore). Chunking iOS. CLAUDE.md: 4 bugs marcados resueltos, 2 legit abiertos. BUILD SUCCESSFUL 4 APKs 19-25MB. Commit 48afd53a pushed.
+
+### 2026-03-31 01:09 UTC -- app-security-310326
+Completada. Commit: e40d6877
+Verificacion: apiClient allowlist (4 hosts, 2 checkpoints), isAuthenticated JWT format+exp validation con auto-logout, HTTPS-ready config con API_PRODUCTION_URL. BUILD SUCCESSFUL 4 APKs 19-25MB. Commit e40d6877 pushed.

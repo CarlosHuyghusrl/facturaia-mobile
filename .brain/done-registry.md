@@ -14,6 +14,7 @@
 | 2026-03-30 23:59 UTC | keystore-errors-310326 | Release keystore CN=FacturaIA O=HUYGHU generado, APK firmado v2 scheme verificado con apksigner, 7 Alert.alert agregados (0 catch silenciosos), BUILD SUCCESSFUL 4 APKs 19-25MB. Commit 4316c9a2 pushed. | 4316c9a2 |
 | 2026-03-31 00:22 UTC | jwt-expiry-310326 | JWT expiracion ya estaba implementada y desplegada. ExpiresAt 24h en jwt.go:56. Fallback secret eliminado en Init(). Token decode confirma exp campo con 24h. Expired token retorna 401. Sin cambios de codigo necesarios. | 0ba5cf7d |
 | 2026-03-31 00:33 UTC | offline-secure-310326 | offlineQueue migrado de AsyncStorage a SecureStore (0 AsyncStorage, 10 SecureStore). Chunking iOS. CLAUDE.md: 4 bugs marcados resueltos, 2 legit abiertos. BUILD SUCCESSFUL 4 APKs 19-25MB. Commit 48afd53a pushed. | 48afd53a |
+| 2026-03-31 01:09 UTC | app-security-310326 | apiClient allowlist (4 hosts, 2 checkpoints), isAuthenticated JWT format+exp validation con auto-logout, HTTPS-ready config con API_PRODUCTION_URL. BUILD SUCCESSFUL 4 APKs 19-25MB. Commit e40d6877 pushed. | e40d6877 |
 
 ## Intentado pero fallido
 
