@@ -26,6 +26,7 @@ import {
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 
 import { Factura, obtenerFactura, reprocesarFactura } from '../services/facturasService';
+import { api } from '../utils/apiClient';
 import { API_BASE_URL } from '../config/api';
 
 type RouteParams = {
@@ -50,6 +51,7 @@ const InvoiceDetailScreen: React.FC = () => {
   const [factura, setFactura] = useState<Factura | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isReprocesando, setIsReprocesando] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [imageModalVisible, setImageModalVisible] = useState(false);
 
   useEffect(() => {
@@ -67,6 +69,32 @@ const InvoiceDetailScreen: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleDelete = async () => {
+    Alert.alert(
+      'Eliminar Factura',
+      '¿Estás seguro? Esta acción no se puede deshacer.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Eliminar',
+          style: 'destructive',
+          onPress: async () => {
+            setIsDeleting(true);
+            try {
+              await api.delete(`/api/facturas/${facturaId}`);
+              Alert.alert('Eliminada', 'La factura fue eliminada correctamente.');
+              navigation.goBack();
+            } catch (error: any) {
+              Alert.alert('Error', 'No se pudo eliminar la factura.');
+            } finally {
+              setIsDeleting(false);
+            }
+          },
+        },
+      ]
+    );
   };
 
   const handleReprocesar = async () => {
@@ -344,6 +372,21 @@ const InvoiceDetailScreen: React.FC = () => {
             Reprocesar OCR
           </Button>
         )}
+
+        {/* Botón eliminar factura */}
+        <Button
+          mode="outlined"
+          onPress={handleDelete}
+          loading={isDeleting}
+          disabled={isDeleting || isLoading}
+          style={{ marginTop: 16, borderColor: '#ef4444' }}
+          textColor="#ef4444"
+          icon="delete"
+          testID="detail-delete-button"
+          accessibilityLabel="Eliminar factura"
+        >
+          Eliminar Factura
+        </Button>
       </ScrollView>
 
       {/* Modal imagen ampliada */}

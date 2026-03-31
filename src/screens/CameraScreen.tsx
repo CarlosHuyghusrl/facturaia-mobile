@@ -114,7 +114,7 @@ const ScannerScreen: React.FC = () => {
 
       const result = await launchCamera({
         mediaType: 'photo',
-        quality: 0.7,
+        quality: 0.85,
         maxWidth: 2048,
         maxHeight: 2048,
         saveToPhotos: false,
@@ -136,7 +136,7 @@ const ScannerScreen: React.FC = () => {
     try {
       const result = await launchImageLibrary({
         mediaType: 'photo',
-        quality: 0.7,
+        quality: 0.85,
         maxWidth: 2048,
         maxHeight: 2048,
         selectionLimit: 1,
