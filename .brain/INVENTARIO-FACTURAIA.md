@@ -125,7 +125,7 @@
 
 - **Modelo**: Claude Opus 4.5 (claude-opus-4-5-20251101)
 - **Via**: CLIProxyAPI localhost:8317 (OpenAI-compatible)
-- **API Key**: sk-7mFaCRaXj5sp1S5G82S17sF4ClsTzn0ObP1D8yzPEQYmZ
+- **API Key**: sk-GazR6oQwVsbxdaMK5PE_Ht-88lUn3IALdwtwyZg6eWo
 - **Vision mode**: imagen directa sin Tesseract intermedio
 - **Fix v2.19.0**: System message fuerza respuesta JSON-only
 - **Fallback**: Extracción JSON de texto mixto si falla JSON-only

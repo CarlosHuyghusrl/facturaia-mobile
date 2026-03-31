@@ -16,6 +16,7 @@
 | 2026-03-31 00:33 UTC | offline-secure-310326 | offlineQueue migrado de AsyncStorage a SecureStore (0 AsyncStorage, 10 SecureStore). Chunking iOS. CLAUDE.md: 4 bugs marcados resueltos, 2 legit abiertos. BUILD SUCCESSFUL 4 APKs 19-25MB. Commit 48afd53a pushed. | 48afd53a |
 | 2026-03-31 01:09 UTC | app-security-310326 | apiClient allowlist (4 hosts, 2 checkpoints), isAuthenticated JWT format+exp validation con auto-logout, HTTPS-ready config con API_PRODUCTION_URL. BUILD SUCCESSFUL 4 APKs 19-25MB. Commit e40d6877 pushed. | e40d6877 |
 | 2026-03-31 01:23 UTC | tests-pinning-310326 | 27 jest tests: 3 suites PASS (authService 8, apiClient 10, offlineQueue 9). Certificate pinning no factible en Expo managed (documentado). BUILD SUCCESSFUL. Commit e8a12814 pushed. | e8a12814 |
+| 2026-03-31 01:41 UTC | e2e-cicd-310326 | Detox config + 2 E2E templates (login 4, invoice 4) + GitHub Actions CI (3 jobs: test, lint, build-android) + jest 27 tests PASS. Commit 8bba7e73 pushed. | 8bba7e73 |
 
 ## Intentado pero fallido
 

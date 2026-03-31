@@ -1,5 +1,5 @@
 ## Estado de sesion
-Tarea: tests-pinning-310326
+Tarea: e2e-cicd-310326
 Fase: started
-Tag retorno: pre-tests-pinning-310326
-Ultima actualizacion: 2026-03-31 01:15 UTC
+Tag retorno: pre-e2e-cicd-310326
+Ultima actualizacion: 2026-03-31 01:39 UTC

@@ -471,7 +471,7 @@ n8n ─────────────────────────�
 docker run -d --name facturaia-ocr --restart unless-stopped --network host \
   -e PORT=8081 -e HOST=0.0.0.0 \
   -e AI_PROVIDER=openai \
-  -e OPENAI_API_KEY=sk-7mFaCRaXj5sp1S5G82S17sF4ClsTzn0ObP1D8yzPEQYmZ \
+  -e OPENAI_API_KEY=sk-GazR6oQwVsbxdaMK5PE_Ht-88lUn3IALdwtwyZg6eWo \
   -e OPENAI_BASE_URL=http://localhost:8317/v1 \
   -e OPENAI_MODEL=claude-opus-4-5-20251101 \
   -e GEMINI_API_KEY=AIzaSyBQU-tSPRsWjc-qWgEtPeXkViSqyzdNQDc \
@@ -616,7 +616,7 @@ Compartidas:
 | Servicio | `systemd: cliproxyapi.service` |
 | Puerto | `8317` |
 | Version | `6.7.32` |
-| Auth | `Bearer sk-7mFaCRaXj5sp1S5G82S17sF4ClsTzn0ObP1D8yzPEQYmZ` |
+| Auth | `Bearer sk-GazR6oQwVsbxdaMK5PE_Ht-88lUn3IALdwtwyZg6eWo` |
 | API | OpenAI-compatible (`/v1/chat/completions`) |
 
 **Providers configurados**:
@@ -628,7 +628,7 @@ Compartidas:
 ```bash
 # OCR principal (Claude Opus 4.5)
 curl http://localhost:8317/v1/chat/completions \
-  -H "Authorization: Bearer sk-7mFaCRaXj5sp1S5G82S17sF4ClsTzn0ObP1D8yzPEQYmZ" \
+  -H "Authorization: Bearer sk-GazR6oQwVsbxdaMK5PE_Ht-88lUn3IALdwtwyZg6eWo" \
   -d '{"model": "claude-opus-4-5-20251101", "messages": [...]}'
 
 # Fallback (Gemini Flash)

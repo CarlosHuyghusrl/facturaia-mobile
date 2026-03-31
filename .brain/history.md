@@ -3446,3 +3446,7 @@ Verificacion: apiClient allowlist (4 hosts, 2 checkpoints), isAuthenticated JWT 
 ### 2026-03-31 01:23 UTC -- tests-pinning-310326
 Completada. Commit: e8a12814
 Verificacion: 27 jest tests: 3 suites PASS (authService 8, apiClient 10, offlineQueue 9). Certificate pinning no factible en Expo managed (documentado). BUILD SUCCESSFUL. Commit e8a12814 pushed.
+
+### 2026-03-31 01:41 UTC -- e2e-cicd-310326
+Completada. Commit: 8bba7e73
+Verificacion: Detox config + 2 E2E templates (login 4, invoice 4) + GitHub Actions CI (3 jobs: test, lint, build-android) + jest 27 tests PASS. Commit 8bba7e73 pushed.
