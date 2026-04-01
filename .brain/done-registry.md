@@ -31,6 +31,7 @@
 | 2026-03-31 18:56 UTC | vision-multitenant-310326 | Nombre FacturaIA unificado (5 refs). Gemini Vision OCR: match exacto con Claude OCR en factura real (gratis). Multi-tenant: empresa_id en 4 tablas, 3 empresas, RLS activo, no enforced. Commit f4d1ee6b pushed. | f4d1ee6b |
 | 2026-03-31 19:14 UTC | multitenant-backend-310326 | OCR switch a Gemini 2.5 Flash (gratis via CLIProxyAPI). Multi-tenant YA funciona: JWT tiene empresa_alias, queries filtran por cliente_id (movil) y empresa_alias (admin). empresa_id/owner_id NULL = pendiente data entry Carlos. Container v2.25.1 deployed con OPENAI_MODEL=gemini-2.5-flash. Health 200, login 200. | b56ca372 |
 | 2026-03-31 20:05 UTC | delete-button-quality-310326 | Boton eliminar factura con Alert confirmacion + api.delete + goBack. Quality 0.7→0.85 en camara y galeria. 28 tests PASS. BUILD SUCCESSFUL. Commit 1d44ec16 pushed. | 1d44ec16 |
+| 2026-04-01 03:44 UTC | deep-explore-010426 | Wave 1: 26 screenshots de todos los modales y secciones del SaaS GestoriaRD (5 roles: admin, supervisor, contador, OV, DGII). Wave 2: Design Critique ejecutado (23/50, 6 críticos identificados) + Design System completo (paleta, tipografía, 30+ componentes, tokens JSON, 5 page templates, 5 user flows). Guardado en KB: design-critique-gestoriard-010426, design-system-gestoriard-010426, resultado-deep-explore-010426. | 5719a8ca |
 
 ## Intentado pero fallido
 
