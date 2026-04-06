@@ -3510,3 +3510,35 @@ Verificacion: Boton eliminar factura con Alert confirmacion + api.delete + goBac
 ### 2026-04-01 03:44 UTC -- deep-explore-010426
 Completada. Commit: 5719a8ca
 Verificacion: Wave 1: 26 screenshots de todos los modales y secciones del SaaS GestoriaRD (5 roles: admin, supervisor, contador, OV, DGII). Wave 2: Design Critique ejecutado (23/50, 6 críticos identificados) + Design System completo (paleta, tipografía, 30+ componentes, tokens JSON, 5 page templates, 5 user flows). Guardado en KB: design-critique-gestoriard-010426, design-system-gestoriard-010426, resultado-deep-explore-010426.
+
+### 2026-04-01 05:14 UTC -- shadboard-study-010426
+Completada. Commit: be9f83ff
+Verificacion: 74 componentes UI en shadboard-reference/full-kit. Design system Apple/Stripe/Linear completo guardado en KB key=design-system-v2-gestoriard-010426 (id 3365). Tokens JSON, CSS vars, Tailwind config, 30+ componentes documentados, 5 patrones de página, 3 principios, 10 reglas.
+
+### 2026-04-01 05:34 UTC -- mockups-visuales-010426
+Completada. Commit: be9f83ff
+Verificacion: 3 mockups HTML creados y screenshots tomados via Playwright: A=Apple Blanco, B=Dark Elegante, C=Mix Moderno. Todos renderizan correctamente. Archivos en ~/mockups-gestoriard/. KB id 3389.
+
+### 2026-04-01 15:18 UTC -- explore-v2-010426
+Completada. Commit: be9f83ff
+Verificacion: 4 waves Playwright completadas. Reporte 7-secciones guardado KB id=3808. Findings: dual-DB bug Supabase vs PostgreSQL, QB 0 datos sincronizados, OV tabs 3 placeholders + 1 real (DGII IR-2) + 1 bug (TSS), Supervisor 7 tabs funcionales con Gemini 98.4% accuracy en codigos DGII.
+
+### 2026-04-01 19:44 UTC -- verificar-v2-completo-010426
+Completada. Commit: 23020d7
+Verificacion: 27 APIs v2 verificadas (9 public 200, 17 auth 401). v2-dashboard UI Mockup C completo. Gaps: waves 3-5 faltantes, security finding password_crm_hash expuesto. Dev preview http://217.216.48.91:3015/v2-dashboard. KB guardado id=4082.
+
+### 2026-04-01 20:13 UTC -- fix-pruebas-010426
+Completada. Commit: eed72af
+Verificacion: Wave1: eed72af password_crm_hash eliminado (psql confirm, TSC clean). Wave2: 24 screenshots, 19 flujos probados, 8 errores catalogados. Wave3: 10 gaps priorizados. KB id=4131.
+
+### 2026-04-02 01:38 UTC -- rate-limit-310326
+Completada. Commit: 1de3134
+Verificacion: 15 rutas sensibles protegidas con withRateLimit. TSC 0 errores. Commit 1de3134 pusheado. Las 3 rutas originales del task (tss/send-email, dgii-excel/upload-sharepoint, harvesting/manual) ya estaban protegidas.
+
+### 2026-04-02 01:48 UTC -- global-ratelimit-310326
+Completada. Commit: 1de3134
+Verificacion: middleware.ts ya tenia implementado global rate limit 100/min per IP en lineas 61-84. GLOBAL_MAX_REQUESTS=100, GLOBAL_WINDOW_MS=60000, aplica a /api/* excepto health, console.warn en 429. No requeria cambios. TSC 0 errores.
+
+### 2026-04-02 02:21 UTC -- fix-bugs-criticos-010426
+Completada. Commit: 733ffed
+Verificacion: TSC 0 errores. Scraper 0.0.0.0:8321 health OK. dgi-chat sin withRequireAuth. useCRMData usa fetch. 4 nuevas rutas API. Push a main, Coolify autodeploy iniciado.
