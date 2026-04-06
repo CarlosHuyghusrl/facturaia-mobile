@@ -3546,3 +3546,7 @@ Verificacion: TSC 0 errores. Scraper 0.0.0.0:8321 health OK. dgi-chat sin withRe
 ### 2026-04-06 11:05 UTC -- facturaia-revivir-060426
 Completada. Commit: e67be425
 Verificacion: docker inspect -> healthy. docker ps -> facturaia-ocr Up (healthy). Logs: v2.25.0 arrancó 06-Apr 10:54:43, Database: true, Storage: true. Backup sha256:5591bd2d creado. Sin errores criticos.
+
+### 2026-04-06 11:47 UTC -- facturaia-analisis-060426
+Completada. Commit: d09e49fe
+Verificacion: cat .brain/analisis-completo-060426.md muestra 6 secciones (ESTADO ACTUAL, INTEGRACION GESTORIARD, EVALUACION CHANDRA OCR 2, PLAN CONTINGENCIA, MEJORAS PROPUESTAS, RESUMEN EJECUTIVO). 367 lineas. Generado sin modificar codigo.
