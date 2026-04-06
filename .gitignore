@@ -38,3 +38,4 @@ node_modules
 logs/
 *.log
 mcp_scheduler.log
+.gitnexus
