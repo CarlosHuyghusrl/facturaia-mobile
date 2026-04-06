@@ -3550,3 +3550,7 @@ Verificacion: docker inspect -> healthy. docker ps -> facturaia-ocr Up (healthy)
 ### 2026-04-06 11:47 UTC -- facturaia-analisis-060426
 Completada. Commit: d09e49fe
 Verificacion: cat .brain/analisis-completo-060426.md muestra 6 secciones (ESTADO ACTUAL, INTEGRACION GESTORIARD, EVALUACION CHANDRA OCR 2, PLAN CONTINGENCIA, MEJORAS PROPUESTAS, RESUMEN EJECUTIVO). 367 lineas. Generado sin modificar codigo.
+
+### 2026-04-06 15:51 UTC -- audit-facturaia-060426
+Completada. Commit: 1f137714
+Verificacion: 177 lineas en .brain/audit-facturaia-060426.md. GitNexus 684 nodos. Gemini cooldown verificado. KB guardado id=6622. Commit 1f137714 pushed.

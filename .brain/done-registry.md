@@ -42,6 +42,7 @@
 | 2026-04-02 02:21 UTC | fix-bugs-criticos-010426 | TSC 0 errores. Scraper 0.0.0.0:8321 health OK. dgi-chat sin withRequireAuth. useCRMData usa fetch. 4 nuevas rutas API. Push a main, Coolify autodeploy iniciado. | 733ffed |
 | 2026-04-06 11:05 UTC | facturaia-revivir-060426 | docker inspect -> healthy. docker ps -> facturaia-ocr Up (healthy). Logs: v2.25.0 arrancó 06-Apr 10:54:43, Database: true, Storage: true. Backup sha256:5591bd2d creado. Sin errores criticos. | e67be425 |
 | 2026-04-06 11:47 UTC | facturaia-analisis-060426 | cat .brain/analisis-completo-060426.md muestra 6 secciones (ESTADO ACTUAL, INTEGRACION GESTORIARD, EVALUACION CHANDRA OCR 2, PLAN CONTINGENCIA, MEJORAS PROPUESTAS, RESUMEN EJECUTIVO). 367 lineas. Generado sin modificar codigo. | d09e49fe |
+| 2026-04-06 15:51 UTC | audit-facturaia-060426 | 177 lineas en .brain/audit-facturaia-060426.md. GitNexus 684 nodos. Gemini cooldown verificado. KB guardado id=6622. Commit 1f137714 pushed. | 1f137714 |
 
 ## Intentado pero fallido
 
