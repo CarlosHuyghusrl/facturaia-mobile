@@ -1,5 +1,5 @@
 ## Estado de sesion
-Tarea: global-ratelimit-310326
+Tarea: facturaia-revivir-060426
 Fase: started
-Tag retorno: pre-global-ratelimit-310326
-Ultima actualizacion: 2026-04-02 01:39 UTC
+Tag retorno: pre-facturaia-revivir-060426
+Ultima actualizacion: 2026-04-06 11:02 UTC

@@ -40,6 +40,7 @@
 | 2026-04-02 01:38 UTC | rate-limit-310326 | 15 rutas sensibles protegidas con withRateLimit. TSC 0 errores. Commit 1de3134 pusheado. Las 3 rutas originales del task (tss/send-email, dgii-excel/upload-sharepoint, harvesting/manual) ya estaban protegidas. | 1de3134 |
 | 2026-04-02 01:48 UTC | global-ratelimit-310326 | middleware.ts ya tenia implementado global rate limit 100/min per IP en lineas 61-84. GLOBAL_MAX_REQUESTS=100, GLOBAL_WINDOW_MS=60000, aplica a /api/* excepto health, console.warn en 429. No requeria cambios. TSC 0 errores. | 1de3134 |
 | 2026-04-02 02:21 UTC | fix-bugs-criticos-010426 | TSC 0 errores. Scraper 0.0.0.0:8321 health OK. dgi-chat sin withRequireAuth. useCRMData usa fetch. 4 nuevas rutas API. Push a main, Coolify autodeploy iniciado. | 733ffed |
+| 2026-04-06 11:05 UTC | facturaia-revivir-060426 | docker inspect -> healthy. docker ps -> facturaia-ocr Up (healthy). Logs: v2.25.0 arrancó 06-Apr 10:54:43, Database: true, Storage: true. Backup sha256:5591bd2d creado. Sin errores criticos. | e67be425 |
 
 ## Intentado pero fallido
 

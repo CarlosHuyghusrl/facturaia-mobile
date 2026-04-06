@@ -3542,3 +3542,7 @@ Verificacion: middleware.ts ya tenia implementado global rate limit 100/min per 
 ### 2026-04-02 02:21 UTC -- fix-bugs-criticos-010426
 Completada. Commit: 733ffed
 Verificacion: TSC 0 errores. Scraper 0.0.0.0:8321 health OK. dgi-chat sin withRequireAuth. useCRMData usa fetch. 4 nuevas rutas API. Push a main, Coolify autodeploy iniciado.
+
+### 2026-04-06 11:05 UTC -- facturaia-revivir-060426
+Completada. Commit: e67be425
+Verificacion: docker inspect -> healthy. docker ps -> facturaia-ocr Up (healthy). Logs: v2.25.0 arrancó 06-Apr 10:54:43, Database: true, Storage: true. Backup sha256:5591bd2d creado. Sin errores criticos.
