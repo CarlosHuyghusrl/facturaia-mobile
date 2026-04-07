@@ -17,6 +17,7 @@
       "backgroundColor": "#0F172A"
     },
     "android": {
+      "versionCode": 1,
       "package": "com.huyghusrl.facturaia",
       "usesCleartextTraffic": true,
       "adaptiveIcon": {
