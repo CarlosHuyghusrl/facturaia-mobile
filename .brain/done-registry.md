@@ -43,6 +43,7 @@
 | 2026-04-06 11:05 UTC | facturaia-revivir-060426 | docker inspect -> healthy. docker ps -> facturaia-ocr Up (healthy). Logs: v2.25.0 arrancó 06-Apr 10:54:43, Database: true, Storage: true. Backup sha256:5591bd2d creado. Sin errores criticos. | e67be425 |
 | 2026-04-06 11:47 UTC | facturaia-analisis-060426 | cat .brain/analisis-completo-060426.md muestra 6 secciones (ESTADO ACTUAL, INTEGRACION GESTORIARD, EVALUACION CHANDRA OCR 2, PLAN CONTINGENCIA, MEJORAS PROPUESTAS, RESUMEN EJECUTIVO). 367 lineas. Generado sin modificar codigo. | d09e49fe |
 | 2026-04-06 15:51 UTC | audit-facturaia-060426 | 177 lineas en .brain/audit-facturaia-060426.md. GitNexus 684 nodos. Gemini cooldown verificado. KB guardado id=6622. Commit 1f137714 pushed. | 1f137714 |
+| 2026-04-07 00:48 UTC | fallback-ocr-070426 | go build ./... OK. docker build v2.26.0 OK. curl /health -> healthy, database+storage available. FallbackProvider in providers.go confirmed. commit 12d701b pushed to master. | 3d433938 |
 
 ## Intentado pero fallido
 

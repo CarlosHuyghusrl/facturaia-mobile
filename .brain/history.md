@@ -2,7 +2,21 @@
 
 **Proyecto**: FacturaIA
 **Path**: C:\FacturaIA
-**Ultima actualizacion**: 14-Feb-2026
+**Ultima actualizacion**: 07-Apr-2026
+
+---
+
+### 2026-04-07 — Arquitecto facturaia — Fallback OCR Chain v2.26.0
+**Estado**: Completado
+**Repo afectado**: facturaia-ocr (backend Go)
+**Commit**: 12d701b (master)
+**Cambios**:
+- `internal/ai/providers.go`: FallbackProvider + ErrAllProvidersFailed + isCooldownError
+- `api/handler.go`: createProvider() retorna FallbackProvider(gemini-2.5-flash, openrouter-gemma-27b)
+- handler detecta ErrAllProvidersFailed → guarda factura con extraction_status=revision_manual
+- Docker: facturaia-ocr:v2.26.0 desplegado y healthy
+**Verificación**: curl localhost:8081/health → healthy, database+storage available
+**Pendiente**: P2 versionCode, P3 console.log, P4 tsconfig, probar fallback real
 
 ---
 
@@ -3554,3 +3568,7 @@ Verificacion: cat .brain/analisis-completo-060426.md muestra 6 secciones (ESTADO
 ### 2026-04-06 15:51 UTC -- audit-facturaia-060426
 Completada. Commit: 1f137714
 Verificacion: 177 lineas en .brain/audit-facturaia-060426.md. GitNexus 684 nodos. Gemini cooldown verificado. KB guardado id=6622. Commit 1f137714 pushed.
+
+### 2026-04-07 00:48 UTC -- fallback-ocr-070426
+Completada. Commit: 3d433938
+Verificacion: go build ./... OK. docker build v2.26.0 OK. curl /health -> healthy, database+storage available. FallbackProvider in providers.go confirmed. commit 12d701b pushed to master.
