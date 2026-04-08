@@ -44,6 +44,12 @@
 | 2026-04-06 11:47 UTC | facturaia-analisis-060426 | cat .brain/analisis-completo-060426.md muestra 6 secciones (ESTADO ACTUAL, INTEGRACION GESTORIARD, EVALUACION CHANDRA OCR 2, PLAN CONTINGENCIA, MEJORAS PROPUESTAS, RESUMEN EJECUTIVO). 367 lineas. Generado sin modificar codigo. | d09e49fe |
 | 2026-04-06 15:51 UTC | audit-facturaia-060426 | 177 lineas en .brain/audit-facturaia-060426.md. GitNexus 684 nodos. Gemini cooldown verificado. KB guardado id=6622. Commit 1f137714 pushed. | 1f137714 |
 | 2026-04-07 00:48 UTC | fallback-ocr-070426 | go build ./... OK. docker build v2.26.0 OK. curl /health -> healthy, database+storage available. FallbackProvider in providers.go confirmed. commit 12d701b pushed to master. | 3d433938 |
+| 2026-04-07 15:08 UTC | diseno-responsive-070426 | 6 Playwright screenshots (375px+1440px x chat/dashboard/ficha). All pages responsive. UUID fix deployed. Ficha loads Acela Associates. Dashboard 4-col KPI grid. Chat mobile/desktop clean. Auth guard working. NUEVO badge live. WCAG AA contrast fixes applied. | 7153890 |
+| 2026-04-07 16:40 UTC | identidad-gestoriard-070426 | npm run build exit 0, 99/99 páginas. grep huyghu frontend v2 = 0. Logo SVG creado. 6 placeholders. 9 UUID casts. TypeScript limpio. | d5ea0fe |
+| 2026-04-07 19:33 UTC | mockup-sprint1-080426 | 0 errores TypeScript. 5 páginas implementadas. Scoring bug corregido. Push a main exitoso. | e071255 |
+| 2026-04-07 22:10 UTC | dashboard-rediseno-fase1-080426 | Chrome MCP screenshot produccion: header Buenos dias + 315 Clientes KPI + 2 columnas + pipeline 1/12/148 real + casos 2026-000001 + accesos rapidos. 3 commits: aa122cf fixes, 6a82ddf KPI+header+layout, 579ed05 stats endpoint. npm build OK, tsc 0 errores. | 579ed05 |
+| 2026-04-07 23:06 UTC | auditoria-visual-080426 | Wave 1: sidebar WCAG 99eb656 (iconos 20px, texto 0.85). Wave 2: 8 Chrome MCP screenshots 5 pantallas. Wave 3: usability fixes f26853e (min-h removed, empty states, tipo_notificacion). Wave 4: responsive 1440/768/375px OK. Wave 5: accessibility audit in progress. Critique 27.6/50 avg. 3572e58 brain files pushed. | 3572e58 |
+| 2026-04-08 01:39 UTC | fix-backend-design-completo-080426 | 7 waves completadas. Wave 1: endpoints 500 resueltos. Wave 2: clientes semaforo scoring 30b8a95. Wave 3: declaraciones API 2572 rows 8ccfbb9. Wave 4: BD 27756 tareas borradas backup 9MB. Wave 5: biblioteca datos reales 8ccfbb9. Wave 6: responsive touch 44px dba1860. Wave 7: usability empty states+skeletons+error retry+focus dba1860. tsc 0 errores, build OK. | dba1860 |
 
 ## Intentado pero fallido
 
