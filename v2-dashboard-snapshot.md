@@ -1,0 +1,172 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - navigation "Navegación principal" [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]: G
+        - generic [ref=e6]:
+          - generic [ref=e7]: GestoriaRD
+          - generic [ref=e8]: Huyghu & Asoc.
+      - button "Buscar (⌘K)" [ref=e10]:
+        - img [ref=e11]
+        - generic [ref=e14]: Buscar...
+        - generic [ref=e15]: ⌘K
+      - generic [ref=e16]:
+        - paragraph [ref=e17]: Principal
+        - link "Dashboard" [ref=e18] [cursor=pointer]:
+          - /url: /v2-dashboard/
+          - img [ref=e20]
+          - generic [ref=e25]: Dashboard
+        - link "Clientes 315" [ref=e26] [cursor=pointer]:
+          - /url: /clientes/
+          - img [ref=e28]
+          - generic [ref=e33]: Clientes
+          - generic [ref=e34]: "315"
+        - link "Casos DGI 8" [ref=e35] [cursor=pointer]:
+          - /url: /casos/
+          - img [ref=e37]
+          - generic [ref=e39]: Casos DGI
+          - generic [ref=e40]: "8"
+        - link "Agenda Fiscal" [ref=e41] [cursor=pointer]:
+          - /url: /agenda/
+          - img [ref=e43]
+          - generic [ref=e45]: Agenda Fiscal
+      - generic [ref=e46]:
+        - paragraph [ref=e47]: Oficina Virtual
+        - link "DGII Online" [ref=e48] [cursor=pointer]:
+          - /url: /dgii/
+          - img [ref=e50]
+          - generic [ref=e52]: DGII Online
+        - link "Inbox 12" [ref=e53] [cursor=pointer]:
+          - /url: /inbox/
+          - img [ref=e55]
+          - generic [ref=e58]: Inbox
+          - generic [ref=e59]: "12"
+        - link "Supervisión" [ref=e60] [cursor=pointer]:
+          - /url: /supervision/
+          - img [ref=e62]
+          - generic [ref=e65]: Supervisión
+        - link "Configuración" [ref=e66] [cursor=pointer]:
+          - /url: /configuracion/
+          - img [ref=e68]
+          - generic [ref=e71]: Configuración
+      - generic [ref=e72]:
+        - generic [ref=e73]: CD
+        - generic [ref=e74]:
+          - generic [ref=e75]: Carlos De La Torre
+          - generic [ref=e76]: Contador Principal
+    - generic [ref=e77]:
+      - banner [ref=e78]:
+        - navigation "Breadcrumb" [ref=e79]:
+          - generic [ref=e81]: GestoriaRD
+          - generic [ref=e82]:
+            - generic [ref=e83]: ›
+            - generic [ref=e84]: Dashboard
+        - generic [ref=e85]:
+          - button "Buscar cliente o caso (⌘K)" [ref=e86]:
+            - img [ref=e87]
+            - generic [ref=e90]: Buscar cliente, caso...
+            - generic [ref=e91]: ⌘K
+          - button "Notificaciones (tienes nuevas)" [ref=e92]:
+            - img [ref=e93]
+          - button "+ Nuevo Caso" [ref=e97]
+          - generic [ref=e98]: CD
+      - main [ref=e99]:
+        - paragraph [ref=e100]: Buenos días, Carlos 👋
+        - paragraph [ref=e101]: Miércoles, 1 de abril de 2026 · 8 tareas vencen esta semana
+        - generic [ref=e102]:
+          - 'figure "Clientes Activos: 0" [ref=e223]':
+            - paragraph [ref=e105]: Clientes Activos
+            - paragraph [ref=e106]: "0"
+            - paragraph [ref=e107]: ↑ +12 este mes
+          - 'figure "Casos Abiertos: 0" [ref=e224]':
+            - paragraph [ref=e110]: Casos Abiertos
+            - paragraph [ref=e111]: "0"
+            - paragraph [ref=e112]: ⚠ 8 críticos
+          - 'figure "Tareas Esta Semana: 43" [ref=e113]':
+            - paragraph [ref=e115]: Tareas Esta Semana
+            - paragraph [ref=e116]: "43"
+            - paragraph [ref=e117]: ● 8 vencen hoy
+          - 'figure "Inbox No Leído: 12" [ref=e118]':
+            - paragraph [ref=e120]: Inbox No Leído
+            - paragraph [ref=e121]: "12"
+            - paragraph [ref=e122]: ↑ 3 nuevos hoy
+        - generic [ref=e123]:
+          - generic [ref=e124]:
+            - generic [ref=e125]:
+              - generic [ref=e126]:
+                - generic [ref=e127]: Clientes Recientes
+                - generic [ref=e128]: "0"
+              - generic [ref=e129]:
+                - button "Exportar" [ref=e130]
+                - button "+ Agregar" [ref=e131]
+            - table [ref=e132]:
+              - rowgroup [ref=e133]:
+                - row "Cliente / Contribuyente RNC Contador Estado Vencimiento" [ref=e134]:
+                  - columnheader "Cliente / Contribuyente" [ref=e135]
+                  - columnheader "RNC" [ref=e136]
+                  - columnheader "Contador" [ref=e137]
+                  - columnheader "Estado" [ref=e138]
+                  - columnheader "Vencimiento" [ref=e139]
+              - rowgroup [ref=e140]:
+                - row "No hay clientes para mostrar" [ref=e225]:
+                  - cell "No hay clientes para mostrar" [ref=e226]
+          - generic [ref=e143]:
+            - generic [ref=e144]:
+              - generic [ref=e145]:
+                - generic [ref=e146]:
+                  - img [ref=e147]
+                  - text: Asistente IA
+                - generic [ref=e150]: Gemini · En línea
+              - generic [ref=e152]:
+                - generic [ref=e153]:
+                  - paragraph [ref=e154]: Asistente GestoriaRD
+                  - generic [ref=e155]: Hola Carlos. Hoy tienes 8 tareas fiscales urgentes. ¿Revisamos las prioritarias?
+                - generic [ref=e157]: ¿Estado de Importadora América?
+                - generic [ref=e159]:
+                  - text: "Importadora América — Caso #2026-0089 ITBIS pendiente. Vence el"
+                  - strong [ref=e160]: viernes 3 abr
+                  - text: . ¿Abro expediente?
+              - generic [ref=e161]:
+                - textbox "Pregunta sobre clientes, casos..." [ref=e162]
+                - button "Enviar mensaje" [ref=e163]:
+                  - img [ref=e164]
+            - generic [ref=e167]:
+              - generic [ref=e168]: Acciones Rápidas
+              - generic [ref=e169]:
+                - button "Nuevo Caso DGI / Fiscal" [ref=e170]:
+                  - img [ref=e172]
+                  - generic [ref=e175]: Nuevo Caso
+                  - generic [ref=e176]: DGI / Fiscal
+                - button "Nuevo Cliente Registrar empresa" [ref=e177]:
+                  - img [ref=e179]
+                  - generic [ref=e182]: Nuevo Cliente
+                  - generic [ref=e183]: Registrar empresa
+                - button "Ver Agenda 8 tareas hoy" [ref=e184]:
+                  - img [ref=e186]
+                  - generic [ref=e188]: Ver Agenda
+                  - generic [ref=e189]: 8 tareas hoy
+                - button "DGII Online Oficina Virtual" [ref=e190]:
+                  - img [ref=e192]
+                  - generic [ref=e194]: DGII Online
+                  - generic [ref=e195]: Oficina Virtual
+            - generic [ref=e196]:
+              - generic [ref=e197]: Actividad Reciente
+              - generic [ref=e198]:
+                - generic [ref=e199]:
+                  - img [ref=e201]
+                  - generic [ref=e204]:
+                    - paragraph [ref=e205]: "Caso #2026-0089 asignado a Luis Méndez"
+                    - paragraph [ref=e206]: hace 14 min
+                - generic [ref=e207]:
+                  - img [ref=e209]
+                  - generic [ref=e212]:
+                    - paragraph [ref=e213]: "Caso #2026-0087 cerrado exitosamente"
+                    - paragraph [ref=e214]: hace 1 hora
+                - generic [ref=e215]:
+                  - img [ref=e217]
+                  - generic [ref=e220]:
+                    - paragraph [ref=e221]: "Inbox: 3 correos de DGII sin procesar"
+                    - paragraph [ref=e222]: hace 2 horas
+  - button "Open Next.js Dev Tools" [ref=e232] [cursor=pointer]:
+    - img [ref=e233]
+  - alert [ref=e236]

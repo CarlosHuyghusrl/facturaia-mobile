@@ -1,0 +1,376 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <!-- Main background gradient -->
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0F0C29;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#302B63;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#24243E;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Radial depth gradient -->
+    <radialGradient id="depthGradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#4338CA;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#4338CA;stop-opacity:0" />
+    </radialGradient>
+
+    <!-- Scan line glow gradient (horizontal) -->
+    <linearGradient id="scanLineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#22D3EE;stop-opacity:0" />
+      <stop offset="20%" style="stop-color:#22D3EE;stop-opacity:0.8" />
+      <stop offset="50%" style="stop-color:#22D3EE;stop-opacity:1" />
+      <stop offset="80%" style="stop-color:#22D3EE;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#22D3EE;stop-opacity:0" />
+    </linearGradient>
+
+    <!-- Scan band gradient (vertical) -->
+    <linearGradient id="scanBandGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#22D3EE;stop-opacity:0" />
+      <stop offset="50%" style="stop-color:#22D3EE;stop-opacity:0.12" />
+      <stop offset="100%" style="stop-color:#22D3EE;stop-opacity:0" />
+    </linearGradient>
+
+    <!-- Document shadow -->
+    <filter id="docShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="24" flood-color="rgba(0,0,0,0.4)" />
+    </filter>
+
+    <!-- Cyan glow filter -->
+    <filter id="cyanGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <!-- Gold glow filter -->
+    <filter id="goldGlow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <!-- Icon rounded clip path -->
+    <clipPath id="iconClip">
+      <rect x="0" y="0" width="1024" height="1024" rx="200" ry="200" />
+    </clipPath>
+
+    <!-- Document white fill with subtle gradient -->
+    <linearGradient id="docWhite" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F0EFFF;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Corner fold gradient -->
+    <linearGradient id="foldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#818CF8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#A5B4FC;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Gold particle glow -->
+    <filter id="particleGlow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- =============================== -->
+  <!-- ROOT CLIP APPLIED TO EVERYTHING -->
+  <!-- =============================== -->
+  <g clip-path="url(#iconClip)">
+
+    <!-- =============================== -->
+    <!-- BACKGROUND                      -->
+    <!-- =============================== -->
+    <rect x="0" y="0" width="1024" height="1024" fill="url(#bgGradient)" />
+    <rect x="0" y="0" width="1024" height="1024" fill="url(#depthGradient)" />
+
+    <!-- Dot grid texture -->
+    <g opacity="0.15" fill="#4F46E5">
+      <!-- Row 1 -->
+      <circle cx="80" cy="80" r="2.5" />
+      <circle cx="160" cy="80" r="2.5" />
+      <circle cx="240" cy="80" r="2.5" />
+      <circle cx="320" cy="80" r="2.5" />
+      <circle cx="400" cy="80" r="2.5" />
+      <circle cx="480" cy="80" r="2.5" />
+      <circle cx="560" cy="80" r="2.5" />
+      <circle cx="640" cy="80" r="2.5" />
+      <circle cx="720" cy="80" r="2.5" />
+      <circle cx="800" cy="80" r="2.5" />
+      <circle cx="880" cy="80" r="2.5" />
+      <circle cx="960" cy="80" r="2.5" />
+      <!-- Row 2 -->
+      <circle cx="80" cy="160" r="2.5" />
+      <circle cx="160" cy="160" r="2.5" />
+      <circle cx="240" cy="160" r="2.5" />
+      <circle cx="320" cy="160" r="2.5" />
+      <circle cx="400" cy="160" r="2.5" />
+      <circle cx="480" cy="160" r="2.5" />
+      <circle cx="560" cy="160" r="2.5" />
+      <circle cx="640" cy="160" r="2.5" />
+      <circle cx="720" cy="160" r="2.5" />
+      <circle cx="800" cy="160" r="2.5" />
+      <circle cx="880" cy="160" r="2.5" />
+      <circle cx="960" cy="160" r="2.5" />
+      <!-- Row 3 -->
+      <circle cx="80" cy="240" r="2.5" />
+      <circle cx="160" cy="240" r="2.5" />
+      <circle cx="240" cy="240" r="2.5" />
+      <circle cx="320" cy="240" r="2.5" />
+      <circle cx="400" cy="240" r="2.5" />
+      <circle cx="480" cy="240" r="2.5" />
+      <circle cx="560" cy="240" r="2.5" />
+      <circle cx="640" cy="240" r="2.5" />
+      <circle cx="720" cy="240" r="2.5" />
+      <circle cx="800" cy="240" r="2.5" />
+      <circle cx="880" cy="240" r="2.5" />
+      <circle cx="960" cy="240" r="2.5" />
+      <!-- Row 4 -->
+      <circle cx="80" cy="320" r="2.5" />
+      <circle cx="160" cy="320" r="2.5" />
+      <circle cx="240" cy="320" r="2.5" />
+      <circle cx="320" cy="320" r="2.5" />
+      <circle cx="400" cy="320" r="2.5" />
+      <circle cx="480" cy="320" r="2.5" />
+      <circle cx="560" cy="320" r="2.5" />
+      <circle cx="640" cy="320" r="2.5" />
+      <circle cx="720" cy="320" r="2.5" />
+      <circle cx="800" cy="320" r="2.5" />
+      <circle cx="880" cy="320" r="2.5" />
+      <circle cx="960" cy="320" r="2.5" />
+      <!-- Row 5 -->
+      <circle cx="80" cy="400" r="2.5" />
+      <circle cx="160" cy="400" r="2.5" />
+      <circle cx="240" cy="400" r="2.5" />
+      <circle cx="320" cy="400" r="2.5" />
+      <circle cx="400" cy="400" r="2.5" />
+      <circle cx="480" cy="400" r="2.5" />
+      <circle cx="560" cy="400" r="2.5" />
+      <circle cx="640" cy="400" r="2.5" />
+      <circle cx="720" cy="400" r="2.5" />
+      <circle cx="800" cy="400" r="2.5" />
+      <circle cx="880" cy="400" r="2.5" />
+      <circle cx="960" cy="400" r="2.5" />
+      <!-- Row 6 -->
+      <circle cx="80" cy="480" r="2.5" />
+      <circle cx="160" cy="480" r="2.5" />
+      <circle cx="240" cy="480" r="2.5" />
+      <circle cx="320" cy="480" r="2.5" />
+      <circle cx="400" cy="480" r="2.5" />
+      <circle cx="480" cy="480" r="2.5" />
+      <circle cx="560" cy="480" r="2.5" />
+      <circle cx="640" cy="480" r="2.5" />
+      <circle cx="720" cy="480" r="2.5" />
+      <circle cx="800" cy="480" r="2.5" />
+      <circle cx="880" cy="480" r="2.5" />
+      <circle cx="960" cy="480" r="2.5" />
+      <!-- Row 7 -->
+      <circle cx="80" cy="560" r="2.5" />
+      <circle cx="160" cy="560" r="2.5" />
+      <circle cx="240" cy="560" r="2.5" />
+      <circle cx="320" cy="560" r="2.5" />
+      <circle cx="400" cy="560" r="2.5" />
+      <circle cx="480" cy="560" r="2.5" />
+      <circle cx="560" cy="560" r="2.5" />
+      <circle cx="640" cy="560" r="2.5" />
+      <circle cx="720" cy="560" r="2.5" />
+      <circle cx="800" cy="560" r="2.5" />
+      <circle cx="880" cy="560" r="2.5" />
+      <circle cx="960" cy="560" r="2.5" />
+      <!-- Row 8 -->
+      <circle cx="80" cy="640" r="2.5" />
+      <circle cx="160" cy="640" r="2.5" />
+      <circle cx="240" cy="640" r="2.5" />
+      <circle cx="320" cy="640" r="2.5" />
+      <circle cx="400" cy="640" r="2.5" />
+      <circle cx="480" cy="640" r="2.5" />
+      <circle cx="560" cy="640" r="2.5" />
+      <circle cx="640" cy="640" r="2.5" />
+      <circle cx="720" cy="640" r="2.5" />
+      <circle cx="800" cy="640" r="2.5" />
+      <circle cx="880" cy="640" r="2.5" />
+      <circle cx="960" cy="640" r="2.5" />
+      <!-- Row 9 -->
+      <circle cx="80" cy="720" r="2.5" />
+      <circle cx="160" cy="720" r="2.5" />
+      <circle cx="240" cy="720" r="2.5" />
+      <circle cx="320" cy="720" r="2.5" />
+      <circle cx="400" cy="720" r="2.5" />
+      <circle cx="480" cy="720" r="2.5" />
+      <circle cx="560" cy="720" r="2.5" />
+      <circle cx="640" cy="720" r="2.5" />
+      <circle cx="720" cy="720" r="2.5" />
+      <circle cx="800" cy="720" r="2.5" />
+      <circle cx="880" cy="720" r="2.5" />
+      <circle cx="960" cy="720" r="2.5" />
+      <!-- Row 10 -->
+      <circle cx="80" cy="800" r="2.5" />
+      <circle cx="160" cy="800" r="2.5" />
+      <circle cx="240" cy="800" r="2.5" />
+      <circle cx="320" cy="800" r="2.5" />
+      <circle cx="400" cy="800" r="2.5" />
+      <circle cx="480" cy="800" r="2.5" />
+      <circle cx="560" cy="800" r="2.5" />
+      <circle cx="640" cy="800" r="2.5" />
+      <circle cx="720" cy="800" r="2.5" />
+      <circle cx="800" cy="800" r="2.5" />
+      <circle cx="880" cy="800" r="2.5" />
+      <circle cx="960" cy="800" r="2.5" />
+      <!-- Row 11 -->
+      <circle cx="80" cy="880" r="2.5" />
+      <circle cx="160" cy="880" r="2.5" />
+      <circle cx="240" cy="880" r="2.5" />
+      <circle cx="320" cy="880" r="2.5" />
+      <circle cx="400" cy="880" r="2.5" />
+      <circle cx="480" cy="880" r="2.5" />
+      <circle cx="560" cy="880" r="2.5" />
+      <circle cx="640" cy="880" r="2.5" />
+      <circle cx="720" cy="880" r="2.5" />
+      <circle cx="800" cy="880" r="2.5" />
+      <circle cx="880" cy="880" r="2.5" />
+      <circle cx="960" cy="880" r="2.5" />
+      <!-- Row 12 -->
+      <circle cx="80" cy="960" r="2.5" />
+      <circle cx="160" cy="960" r="2.5" />
+      <circle cx="240" cy="960" r="2.5" />
+      <circle cx="320" cy="960" r="2.5" />
+      <circle cx="400" cy="960" r="2.5" />
+      <circle cx="480" cy="960" r="2.5" />
+      <circle cx="560" cy="960" r="2.5" />
+      <circle cx="640" cy="960" r="2.5" />
+      <circle cx="720" cy="960" r="2.5" />
+      <circle cx="800" cy="960" r="2.5" />
+      <circle cx="880" cy="960" r="2.5" />
+      <circle cx="960" cy="960" r="2.5" />
+    </g>
+
+    <!-- =============================== -->
+    <!-- DOCUMENT / FACTURA ELEMENT      -->
+    <!-- =============================== -->
+    <!-- Shadow layer -->
+    <rect x="372" y="302" width="280" height="360" rx="8" ry="8"
+          fill="rgba(0,0,0,0.4)" filter="url(#docShadow)" />
+
+    <!-- Document body (white, with corner cut) -->
+    <!-- Using a path to create document with top-right corner fold -->
+    <!-- Document main body: start at top-left, go clockwise, cut top-right corner -->
+    <path d="
+      M 380 302
+      L 572 302
+      L 652 382
+      L 652 654
+      Q 652 662 644 662
+      L 380 662
+      Q 372 662 372 654
+      L 372 310
+      Q 372 302 380 302
+      Z
+    " fill="url(#docWhite)" />
+
+    <!-- Corner fold triangle -->
+    <path d="
+      M 572 302
+      L 652 382
+      L 572 382
+      Z
+    " fill="url(#foldGradient)" />
+
+    <!-- Fold crease line -->
+    <line x1="572" y1="302" x2="572" y2="382" stroke="#C7D2FE" stroke-width="1.5" opacity="0.7" />
+    <line x1="572" y1="382" x2="652" y2="382" stroke="#C7D2FE" stroke-width="1.5" opacity="0.7" />
+
+    <!-- Document content lines (simulated text rows) -->
+    <!-- Line 1: wide header bar -->
+    <rect x="400" y="410" width="180" height="12" rx="6" fill="#6366F1" opacity="0.25" />
+    <!-- Line 2: shorter -->
+    <rect x="400" y="438" width="140" height="10" rx="5" fill="#6366F1" opacity="0.2" />
+    <!-- Line 3: full width -->
+    <rect x="400" y="463" width="175" height="10" rx="5" fill="#6366F1" opacity="0.18" />
+    <!-- Line 4: medium -->
+    <rect x="400" y="488" width="120" height="10" rx="5" fill="#6366F1" opacity="0.2" />
+    <!-- Line 5: short amount line -->
+    <rect x="400" y="518" width="155" height="10" rx="5" fill="#6366F1" opacity="0.18" />
+
+    <!-- Small header accent on document -->
+    <rect x="400" y="385" width="60" height="8" rx="4" fill="#818CF8" opacity="0.5" />
+
+    <!-- =============================== -->
+    <!-- SCAN BAND (behind scan line)    -->
+    <!-- =============================== -->
+    <rect x="0" y="470" width="1024" height="60" fill="url(#scanBandGradient)" />
+
+    <!-- =============================== -->
+    <!-- SCAN LINE                       -->
+    <!-- =============================== -->
+    <line x1="0" y1="500" x2="1024" y2="500"
+          stroke="url(#scanLineGradient)" stroke-width="3"
+          filter="url(#cyanGlow)" />
+
+    <!-- =============================== -->
+    <!-- SCANNER BRACKETS (4 corners)    -->
+    <!-- =============================== -->
+    <g filter="url(#cyanGlow)" stroke="#22D3EE" stroke-width="6" stroke-linecap="round" fill="none">
+      <!-- Top-left bracket -->
+      <path d="M 400 380 L 330 380 L 330 310 L 400 310" />
+      <!-- Top-right bracket -->
+      <path d="M 624 380 L 694 380 L 694 310 L 624 310" />
+      <!-- Bottom-left bracket -->
+      <path d="M 400 632 L 330 632 L 330 702 L 400 702" />
+      <!-- Bottom-right bracket -->
+      <path d="M 624 632 L 694 632 L 694 702 L 624 702" />
+    </g>
+
+    <!-- =============================== -->
+    <!-- GOLD "Fi" MONOGRAM — AI SYMBOL  -->
+    <!-- =============================== -->
+    <!-- Centered at ~(820, 230), ~100x100 total -->
+    <!-- Using geometric paths for a modern "Fi" monogram -->
+    <g filter="url(#goldGlow)" fill="#FBBF24">
+      <!-- "F" letter — geometric bars -->
+      <!-- Vertical stem of F -->
+      <rect x="772" y="188" width="14" height="72" rx="3" />
+      <!-- Top horizontal bar of F -->
+      <rect x="772" y="188" width="46" height="14" rx="3" />
+      <!-- Middle horizontal bar of F -->
+      <rect x="772" y="220" width="36" height="12" rx="3" />
+
+      <!-- "i" letter — to the right of F, slight overlap for monogram effect -->
+      <!-- i dot -->
+      <circle cx="843" cy="196" r="8" />
+      <!-- i stem -->
+      <rect x="838" y="212" width="11" height="48" rx="3" />
+    </g>
+
+    <!-- =============================== -->
+    <!-- GOLD PARTICLES (decorative)     -->
+    <!-- =============================== -->
+    <g filter="url(#particleGlow)" fill="#FBBF24">
+      <circle cx="740" cy="200" r="5" opacity="0.5" />
+      <circle cx="760" cy="175" r="3.5" opacity="0.4" />
+      <circle cx="880" cy="210" r="4" opacity="0.45" />
+      <circle cx="870" cy="175" r="3" opacity="0.35" />
+    </g>
+
+    <!-- Additional ambient particles in background -->
+    <g fill="#FBBF24" opacity="0.2">
+      <circle cx="150" cy="150" r="3" />
+      <circle cx="900" cy="820" r="3" />
+      <circle cx="200" cy="780" r="2.5" />
+      <circle cx="820" cy="120" r="2.5" />
+    </g>
+
+    <!-- =============================== -->
+    <!-- SUBTLE INNER GLOW (top edge)    -->
+    <!-- =============================== -->
+    <rect x="0" y="0" width="1024" height="200" fill="url(#depthGradient)" opacity="0.2" />
+
+  </g>
+</svg>
