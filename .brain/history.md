@@ -3596,3 +3596,27 @@ Verificacion: Wave 1: sidebar WCAG 99eb656 (iconos 20px, texto 0.85). Wave 2: 8 
 ### 2026-04-08 01:39 UTC -- fix-backend-design-completo-080426
 Completada. Commit: dba1860
 Verificacion: 7 waves completadas. Wave 1: endpoints 500 resueltos. Wave 2: clientes semaforo scoring 30b8a95. Wave 3: declaraciones API 2572 rows 8ccfbb9. Wave 4: BD 27756 tareas borradas backup 9MB. Wave 5: biblioteca datos reales 8ccfbb9. Wave 6: responsive touch 44px dba1860. Wave 7: usability empty states+skeletons+error retry+focus dba1860. tsc 0 errores, build OK.
+
+### 2026-04-08 15:20 UTC -- sprint2-dgii-oficina-virtual-080426
+Completada. Commit: d87f42a
+Verificacion: 5 waves completadas. tsc 0 errores en cada wave. npm build OK 15.6kB. 7 archivos DGII creados (3423L total vs 10259L viejas = 67% reduccion). 6 tabs funcionales: Resumen+KPIs, Declaraciones 5 tipos, Formatos 8 DGII, Cuenta Corriente+Deudas, Consultas busqueda, Chat IA RAG. Ficha 360 +tab DGII. AlertaFiscalizacion en dashboard. ARIA accessibility. Responsive mobile. 5 commits pushed to main.
+
+### 2026-04-08 20:13 UTC -- sprint3-cartas-agenda-inbox-crm-080426
+Completada. Commit: 2ca62e9
+Verificacion: 5 waves completadas. tsc 0 errores en cada wave. Formularios 20 templates BD + auto-fill. Agenda calendario+tabla. Inbox 2 tabs (alertas+DGII). Ficha 360 +4 tabs (Financiero QB real 390 customers/447 invoices/148 payments, Historial, Reportes, Grupos). Chat RAG Perplexity con citas [1][2]. SLA visual incidencias. QB auto-match 156/390 clientes. 4 commits pushed.
+
+### 2026-04-09 01:19 UTC -- audit-responsive-usability-090426
+Completada. Commit: 3d98ab3
+Verificacion: 10 pages con media queries responsive. tsc 0 errores. 5 agentes paralelos. Dashboard bottom-bar fix, clientes hide columns, ficha tabs scroll, formularios stack, agenda compact cells+44px, dgii full-width, inbox 50/50, biblioteca stack sidebar, chat safe-area, incidencias wrap. Pendiente: verificacion Chrome MCP 3 breakpoints post-deploy.
+
+### 2026-04-09 12:43 UTC -- facturaia-dgii-tabs-090426
+Completada. Commit: e60b653
+Verificacion: tsc 0 errores. TabCuentaCorriente lee data.cuenta_corriente con 5 columnas + banner azul pending + fallback legacy. TabDeclaraciones 14 filtros (era 6). +230 -32 lineas. Pushed to main.
+
+### 2026-04-09 13:29 UTC -- sprint4-tss-qb-cmdk-config-090426
+Completada. Commit: 188c924
+Verificacion: 2 waves: W1 4 pages paralelas (TSS 1544L + Casos 696L + Config 400L + Supervision 460L), W2 CommandPalette 320L + QB badges + Biblioteca fix. tsc 0 errores cada wave. Todas con responsive 375/768/1440 + usability rules embebidas. Pendiente: verificacion Chrome MCP post-deploy.
+
+### 2026-04-09 14:02 UTC -- fix-funciones-rotas-090426
+Completada. Commit: c92f18d
+Verificacion: grep alert() = 0 en 5 archivos. tsc 0 errores. Dashboard 3 navega real, Agenda modal nueva tarea, Casos modal nuevo caso, Incidencias modal+expand, DGII Chat limpio. +924 -132 lineas.
