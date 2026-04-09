@@ -56,6 +56,7 @@
 | 2026-04-09 12:43 UTC | facturaia-dgii-tabs-090426 | tsc 0 errores. TabCuentaCorriente lee data.cuenta_corriente con 5 columnas + banner azul pending + fallback legacy. TabDeclaraciones 14 filtros (era 6). +230 -32 lineas. Pushed to main. | e60b653 |
 | 2026-04-09 13:29 UTC | sprint4-tss-qb-cmdk-config-090426 | 2 waves: W1 4 pages paralelas (TSS 1544L + Casos 696L + Config 400L + Supervision 460L), W2 CommandPalette 320L + QB badges + Biblioteca fix. tsc 0 errores cada wave. Todas con responsive 375/768/1440 + usability rules embebidas. Pendiente: verificacion Chrome MCP post-deploy. | 188c924 |
 | 2026-04-09 14:02 UTC | fix-funciones-rotas-090426 | grep alert() = 0 en 5 archivos. tsc 0 errores. Dashboard 3 navega real, Agenda modal nueva tarea, Casos modal nuevo caso, Incidencias modal+expand, DGII Chat limpio. +924 -132 lineas. | c92f18d |
+| 2026-04-09 21:25 UTC | audit-saas-gestoriard-090426 | 19 rutas auditadas. 348 lineas documentadas. 4 OK / 13 parciales / 2 rotas. KB guardado resultado-audit-visual-facturaia-090426. | 2c64d617 |
 
 ## Intentado pero fallido
 

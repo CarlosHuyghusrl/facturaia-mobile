@@ -3620,3 +3620,7 @@ Verificacion: 2 waves: W1 4 pages paralelas (TSS 1544L + Casos 696L + Config 400
 ### 2026-04-09 14:02 UTC -- fix-funciones-rotas-090426
 Completada. Commit: c92f18d
 Verificacion: grep alert() = 0 en 5 archivos. tsc 0 errores. Dashboard 3 navega real, Agenda modal nueva tarea, Casos modal nuevo caso, Incidencias modal+expand, DGII Chat limpio. +924 -132 lineas.
+
+### 2026-04-09 21:25 UTC -- audit-saas-gestoriard-090426
+Completada. Commit: 2c64d617
+Verificacion: 19 rutas auditadas. 348 lineas documentadas. 4 OK / 13 parciales / 2 rotas. KB guardado resultado-audit-visual-facturaia-090426.
