@@ -57,6 +57,8 @@
 | 2026-04-09 13:29 UTC | sprint4-tss-qb-cmdk-config-090426 | 2 waves: W1 4 pages paralelas (TSS 1544L + Casos 696L + Config 400L + Supervision 460L), W2 CommandPalette 320L + QB badges + Biblioteca fix. tsc 0 errores cada wave. Todas con responsive 375/768/1440 + usability rules embebidas. Pendiente: verificacion Chrome MCP post-deploy. | 188c924 |
 | 2026-04-09 14:02 UTC | fix-funciones-rotas-090426 | grep alert() = 0 en 5 archivos. tsc 0 errores. Dashboard 3 navega real, Agenda modal nueva tarea, Casos modal nuevo caso, Incidencias modal+expand, DGII Chat limpio. +924 -132 lineas. | c92f18d |
 | 2026-04-09 21:25 UTC | audit-saas-gestoriard-090426 | 19 rutas auditadas. 348 lineas documentadas. 4 OK / 13 parciales / 2 rotas. KB guardado resultado-audit-visual-facturaia-090426. | 2c64d617 |
+| 2026-04-09 22:36 UTC | megafix-saas-090426 | 5 bugs fixed: contadores 404→307(auth redirect), clientes Promise.all split, resumen-ejecutivo QB join via clientes.cliente_id, inbox removed sidebar, 4 DGII endpoints migrated. All queries verified against real DB with empresa_id 616b8f1b-d3f1. DB tests: 26 casos_dgi, 189 qb_invoices, 21 tareas_7d — all return data correctly. | 189664be |
+| 2026-04-09 23:34 UTC | task-facturaia-qa-plano-100426 | QA completo 18 páginas GestoriaRD con Playwright. Plano arquitectura en .brain/qa-plano-100426.md (300+ líneas). kb_save resultado-qa-plano-100426 completado. 8/18 OK, 5 parciales, 5 bugs críticos documentados con causa raíz. | 189664be |
 
 ## Intentado pero fallido
 
