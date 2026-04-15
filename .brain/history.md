@@ -6,6 +6,21 @@
 
 ---
 
+### 2026-04-15 — Arquitecto facturaia — Clasificación Compra/Venta 606/607
+**Estado**: Completado
+**Archivos modificados**:
+- `facturaia-ocr/internal/db/client_invoices.go` — struct Aplica607+Periodo607, SELECT+Scan en 3 queries
+- `facturaia-ocr/api/handler.go` — aplica_607 en whitelist UpdateInvoice
+- `facturaia-ocr/api/client_handlers.go` — aplica_607 en JSON response
+- `src/services/facturasService.ts` — campos aplica_607, aplica_606, periodo_607 en Factura
+- `src/screens/CameraScreen.tsx` — selector Compra/Venta (606/607) post-OCR
+- `src/screens/HomeScreen.tsx` — filter tabs Todas/Compras/Ventas
+**Cambios**:
+- DB ya tenía aplica_607 boolean — no se necesitó migración
+- Backend v2.27.0 desplegado, health OK, aplica_607 en API response
+- Frontend commit 3bfda994, APK build en progreso
+**Pendiente**: APK build en background
+
 ### 2026-04-07 — Arquitecto facturaia — Fallback OCR Chain v2.26.0
 **Estado**: Completado
 **Repo afectado**: facturaia-ocr (backend Go)
