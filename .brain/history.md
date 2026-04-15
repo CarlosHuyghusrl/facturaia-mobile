@@ -3647,3 +3647,7 @@ Verificacion: 5 bugs fixed: contadores 404→307(auth redirect), clientes Promis
 ### 2026-04-09 23:34 UTC -- task-facturaia-qa-plano-100426
 Completada. Commit: 189664be
 Verificacion: QA completo 18 páginas GestoriaRD con Playwright. Plano arquitectura en .brain/qa-plano-100426.md (300+ líneas). kb_save resultado-qa-plano-100426 completado. 8/18 OK, 5 parciales, 5 bugs críticos documentados con causa raíz.
+
+### 2026-04-15 17:32 UTC -- facturas-venta-607-20260415
+Completada. Commit: 3bfda994
+Verificacion: Backend v2.27.0 healthy. GET /api/facturas/mis-facturas/ -> 200 OK, aplica_607 presente en JSON (aplica_607_en_keys: True). go build sin errores. tsc sin errores en archivos modificados.
