@@ -32,6 +32,7 @@ import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
 
 import {
   subirFacturaConValidacion,
+  actualizarFactura,
   InvoiceProcessResponse,
   Factura,
 } from '../services/facturasService';
@@ -52,6 +53,8 @@ const ScannerScreen: React.FC = () => {
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [processResult, setProcessResult] = useState<InvoiceProcessResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [tipoFactura, setTipoFactura] = useState<'compra' | 'venta' | null>(null);
+  const [isSavingTipo, setIsSavingTipo] = useState(false);
   // Datos básicos para mostrar en éxito
   const [editData, setEditData] = useState({
     ncf: '',
@@ -61,6 +64,22 @@ const ScannerScreen: React.FC = () => {
 
   const formatMoney = (amount: number) => {
     return `RD$ ${amount.toLocaleString('es-DO', { minimumFractionDigits: 2 })}`;
+  };
+
+  const selectTipo = async (tipo: 'compra' | 'venta') => {
+    if (!processResult?.invoice_id) return;
+    setTipoFactura(tipo);
+    setIsSavingTipo(true);
+    try {
+      await actualizarFactura(processResult.invoice_id, {
+        aplica_607: tipo === 'venta',
+        aplica_606: tipo === 'compra',
+      });
+    } catch (err) {
+      console.error('[Scanner] Error guardando tipo:', err);
+    } finally {
+      setIsSavingTipo(false);
+    }
   };
 
   // Abrir escáner de documentos
@@ -200,6 +219,7 @@ const ScannerScreen: React.FC = () => {
     setImageUri(null);
     setProcessResult(null);
     setError(null);
+    setTipoFactura(null);
   };
 
   // Ver detalle de factura
@@ -362,6 +382,46 @@ const ScannerScreen: React.FC = () => {
         </Surface>
 
         <Text style={styles.successTitle}>¡Guardada!</Text>
+
+        {/* Selector tipo compra/venta */}
+        {!tipoFactura ? (
+          <View style={{ width: '100%', paddingHorizontal: 24, marginBottom: 20 }}>
+            <Text style={{ color: '#94a3b8', fontSize: 13, textAlign: 'center', marginBottom: 12 }}>
+              ¿Tipo de factura?
+            </Text>
+            <View style={{ flexDirection: 'row', gap: 12 }}>
+              <Button
+                mode="contained"
+                onPress={() => selectTipo('compra')}
+                style={{ flex: 1, borderRadius: 8 }}
+                buttonColor="#1e293b"
+                textColor="#fff"
+                icon="cart-arrow-down"
+              >
+                Compra (606)
+              </Button>
+              <Button
+                mode="contained"
+                onPress={() => selectTipo('venta')}
+                style={{ flex: 1, borderRadius: 8 }}
+                buttonColor="#1e293b"
+                textColor="#22D3EE"
+                icon="cart-arrow-up"
+              >
+                Venta (607)
+              </Button>
+            </View>
+          </View>
+        ) : (
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16, gap: 8 }}>
+            <Text style={{ color: tipoFactura === 'venta' ? '#22D3EE' : '#22c55e', fontSize: 14, fontWeight: '600' }}>
+              {isSavingTipo ? '⏳ Guardando...' : tipoFactura === 'venta' ? '📤 Venta (607)' : '📥 Compra (606)'}
+            </Text>
+            <Button mode="text" onPress={() => setTipoFactura(null)} textColor="#64748b" compact>
+              Cambiar
+            </Button>
+          </View>
+        )}
 
         {processResult?.extraction_status !== 'validated' && (
           <View style={{ backgroundColor: '#78350f', padding: 10, borderRadius: 8, marginBottom: 12 }}>

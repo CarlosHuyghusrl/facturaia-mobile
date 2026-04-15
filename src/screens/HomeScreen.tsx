@@ -48,6 +48,7 @@ const HomeScreen: React.FC = () => {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [tipoFilter, setTipoFilter] = useState<'todas' | 'compras' | 'ventas'>('todas');
 
   const ITEMS_PER_PAGE = 20;
 
@@ -106,6 +107,12 @@ const HomeScreen: React.FC = () => {
     }, [])
   );
 
+  const facturasFiltradas = facturas.filter(f => {
+    if (tipoFilter === 'compras') return f.aplica_607 !== true;
+    if (tipoFilter === 'ventas') return f.aplica_607 === true;
+    return true;
+  });
+
   // Formatear moneda
   const formatMoney = (amount: number) => {
     return `RD$ ${amount.toLocaleString('es-DO', { minimumFractionDigits: 2 })}`;
@@ -161,6 +168,20 @@ const HomeScreen: React.FC = () => {
         }}
       />
       {renderResumen()}
+      {/* Filtro tabs */}
+      <View style={styles.filterRow}>
+        {(['todas', 'compras', 'ventas'] as const).map(f => (
+          <TouchableOpacity
+            key={f}
+            style={[styles.filterTab, tipoFilter === f && styles.filterTabActive]}
+            onPress={() => setTipoFilter(f)}
+          >
+            <Text style={[styles.filterTabText, tipoFilter === f && styles.filterTabTextActive]}>
+              {f === 'todas' ? 'Todas' : f === 'compras' ? '📥 Compras' : '📤 Ventas'}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
     </>
   );
 
@@ -254,7 +275,7 @@ const HomeScreen: React.FC = () => {
       <FlatList
         testID="home-invoice-list"
         accessibilityLabel="Lista de facturas"
-        data={facturas}
+        data={facturasFiltradas}
         keyExtractor={(item) => item.id}
         renderItem={renderFactura}
         ListHeaderComponent={renderListHeader}
@@ -453,6 +474,32 @@ const styles = StyleSheet.create({
     right: 16,
     bottom: 16,
     backgroundColor: '#22D3EE',
+  },
+  filterRow: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    paddingBottom: 8,
+    gap: 8,
+  },
+  filterTab: {
+    flex: 1,
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: '#1e293b',
+    alignItems: 'center',
+  },
+  filterTabActive: {
+    backgroundColor: '#0e4a6d',
+    borderWidth: 1,
+    borderColor: '#22D3EE',
+  },
+  filterTabText: {
+    fontSize: 12,
+    color: '#64748b',
+    fontWeight: '600',
+  },
+  filterTabTextActive: {
+    color: '#22D3EE',
   },
 });
 

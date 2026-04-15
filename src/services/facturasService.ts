@@ -57,6 +57,11 @@ export interface Factura {
   forma_pago?: string;
   tipo_bien_servicio?: string;
 
+  // Clasificacion fiscal
+  aplica_606?: boolean;       // Factura de compra (para 606)
+  aplica_607?: boolean;       // Factura de venta (para 607)
+  periodo_607?: string;       // Período declaración 607
+
   // Estado
   estado: 'pendiente' | 'procesado' | 'procesada' | 'completado' | 'completada' | 'error' | 'validado' | 'rechazado';
 
