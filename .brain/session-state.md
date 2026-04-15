@@ -1,5 +1,5 @@
 ## Estado de sesion
-Tarea: qa-plano-100426
+Tarea: facturas-venta-607-20260415
 Fase: started
-Tag retorno: pre-qa-plano-100426
-Ultima actualizacion: 2026-04-09 23:25 UTC
+Tag retorno: pre-facturas-venta-607-20260415
+Ultima actualizacion: 2026-04-15 16:44 UTC

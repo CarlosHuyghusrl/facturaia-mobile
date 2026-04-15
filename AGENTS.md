@@ -214,7 +214,7 @@ This is a starting point. Add your own conventions, style, and rules as you figu
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **FacturaScannerApp** (685 symbols, 879 relationships, 14 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **FacturaScannerApp** (632 symbols, 825 relationships, 14 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 

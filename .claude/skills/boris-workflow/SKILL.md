@@ -46,6 +46,9 @@ Planifica -> Delega -> Verifica en Chrome/curl/test -> Registra -> Nunca repitas
 ```
 Al inicio de sesion? -> boris_get_state o lee .brain/
 Tarea pendiente en task.md? -> CONTINUA. No empieces de cero.
+Memoria compartida? -> sypnose_search "tema de la tarea" → contexto de TODOS los agentes
+  curl -s -X POST http://localhost:18792/sypnose_search -H "Content-Type: application/json" \
+    -d '{"params":{"query":"TEMA","limit":5}}'
 ```
 
 ### PASO 1: Iniciar + Clasificar
