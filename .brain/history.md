@@ -3655,3 +3655,7 @@ Verificacion: Backend v2.27.0 healthy. GET /api/facturas/mis-facturas/ -> 200 OK
 ### 2026-04-15 18:44 UTC -- informe-v2-gestoriard-20260415
 Completada. Commit: 88e86324
 Verificacion: KB guardado id 7360. Informe: 22 paginas, 26661 lineas, 8 problemas detectados. Read-only sin modificaciones.
+
+### 2026-04-15 19:25 UTC -- deep-dive-v2-gestoriard-20260415
+Completada. Commit: 367eb205
+Verificacion: KB guardado id 7364. 5 areas auditadas: Formato606Form (615L, 4 endpoints), 5 componentes DGII, Shell 17 links, 4 tabs desconectados FUNCIONALES, inventario 9 formularios. Read-only.

@@ -61,6 +61,7 @@
 | 2026-04-09 23:34 UTC | task-facturaia-qa-plano-100426 | QA completo 18 páginas GestoriaRD con Playwright. Plano arquitectura en .brain/qa-plano-100426.md (300+ líneas). kb_save resultado-qa-plano-100426 completado. 8/18 OK, 5 parciales, 5 bugs críticos documentados con causa raíz. | 189664be |
 | 2026-04-15 17:32 UTC | facturas-venta-607-20260415 | Backend v2.27.0 healthy. GET /api/facturas/mis-facturas/ -> 200 OK, aplica_607 presente en JSON (aplica_607_en_keys: True). go build sin errores. tsc sin errores en archivos modificados. | 3bfda994 |
 | 2026-04-15 18:44 UTC | informe-v2-gestoriard-20260415 | KB guardado id 7360. Informe: 22 paginas, 26661 lineas, 8 problemas detectados. Read-only sin modificaciones. | 88e86324 |
+| 2026-04-15 19:25 UTC | deep-dive-v2-gestoriard-20260415 | KB guardado id 7364. 5 areas auditadas: Formato606Form (615L, 4 endpoints), 5 componentes DGII, Shell 17 links, 4 tabs desconectados FUNCIONALES, inventario 9 formularios. Read-only. | 367eb205 |
 
 ## Intentado pero fallido
 
