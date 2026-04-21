@@ -696,3 +696,26 @@ curl -s -X POST http://localhost:18810/dispatch -H "Content-Type: application/js
 10. Mithos en localhost:18810. Windows → SSH tunnel primero.
 
 
+
+
+## PARL SCORECARD — OBLIGATORIO ANTES DE DISPATCH (21-Abr-2026)
+
+Tras refinar el plan a instrucciones exactas old->new, ANTES de despachar Sonnets capataces:
+
+1. Invocar `/sypnose-parl-score` sobre el plan refinado.
+2. Verificar 5 gates:
+   - r_parallel_pred >= 0.05
+   - parallel_ratio >= 2.0
+   - concurrency_peak >= 2
+   - r_finish_pred >= 0.9
+   - critical_ratio <= 0.6 (excepcion permitida con justificacion estructural: commit-before-push, build-before-deploy, create-before-edit, schema-before-migrate, test-before-tag, pre-flight-before-all)
+3. Si algun gate falla sin excepcion -> NO dispatch. Reviewer Agent propone reagrupacion. Maximo 2 iteraciones.
+4. Si PASS -> guardar scorecard en KB (`parl_scorecard.pre_exec`) y proceder.
+
+Serial collapse = failure mode donde el arquitecto hace el plan secuencial pudiendo paralelizarlo. PARL lo detecta; no se tolera.
+
+Excepciones permitidas (documentar en el plan):
+- `--skip-parl micro` para plan trivial de 1 tarea
+- `swarm_dispatch: true` para tarea exploratoria sin targets fijos (va a Kimi Swarm)
+
+Post-exec: BORIS calcula `r_parallel_real`, `r_finish_real`, `r_perf_real = verificadores_pass / verificadores_total`, y `critical_steps_real` al cerrar la ultima wave. Escribe en `parl_scorecard.post_exec` del task KB. Datos alimentan el script de telemetria nocturno.
