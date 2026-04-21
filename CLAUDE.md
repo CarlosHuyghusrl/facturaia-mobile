@@ -443,7 +443,7 @@ curl http://localhost:8317/v1/chat/completions \
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **FacturaScannerApp** (632 symbols, 825 relationships, 14 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **FacturaScannerApp** (633 symbols, 828 relationships, 14 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 
@@ -541,3 +541,158 @@ To check whether embeddings exist, inspect `.gitnexus/meta.json` — the `stats.
 | Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
 
 <!-- gitnexus:end -->
+
+
+
+## WORKERS — COMO USARLOS (OBLIGATORIO LEER)
+
+### Que son
+MiroFish Dispatch (:18810) lanza workers claw en paralelo. Cada worker es un Claude Code Rust que ejecuta 1 tarea y muere. Tu planificas, workers ejecutan.
+
+### Dispatch JSON
+```bash
+curl -s -X POST http://localhost:18810/dispatch \
+  -H "Content-Type: application/json" \
+  -d '{
+    "description": "Que hace este dispatch",
+    "workspace": "/path/al/proyecto",
+    "keep_workspace": true,
+    "max_parallel": 100,
+    "tasks": [
+      {
+        "profile": "executor",
+        "description": "Instruccion EXACTA aqui",
+        "timeout_secs": 600
+      }
+    ]
+  }'
+```
+
+### REGLA #1 — Prompts EXACTOS (90% del exito)
+
+PROHIBIDO:
+- "Podrias revisar el archivo X y mejorar Y"
+- "Implementa la feature de autenticacion"
+- "Upgrade esta pagina al design system"
+
+OBLIGATORIO:
+- "Edita /path/archivo.py linea 45. Cambia return x*2 por return x*3. Verifica: python3 -c 'import archivo; print(OK)'"
+- "Ejecuta EXACTAMENTE: curl -sf http://localhost:8080/health. Copia output."
+- "Crea /path/nuevo.py con este contenido: [contenido completo]. Verifica: python3 -c 'import nuevo'"
+
+Si el prompt es vago, el worker dira "no changes needed" o preguntara en vez de ejecutar.
+
+### REGLA #2 — 1 worker = 1 tarea
+- Cada worker hace UNA cosa
+- 3 pasos = 3 workers, no 1
+- Nunca "implementa feature compleja" en 1 worker
+- Los workers comparten el workspace — el archivo que crea worker 1 lo lee worker 2
+
+### REGLA #3 — Perfiles
+| Tarea | Perfil | Cuando |
+|---|---|---|
+| executor | Comando bash, crear archivo, cambio puntual | 70% de las tareas |
+| executor-pro | Editar codigo que requiere leer contexto | Cambios complejos |
+| verifier | Verificar que algo funciona | QA despues de cada wave |
+| researcher | Leer codigo y documentar | Investigacion |
+| debugger | Diagnosticar y corregir bug | Cuando algo falla |
+| planner | Crear plan de dispatch | Planificacion |
+
+### REGLA #4 — Limites
+- max_parallel: con modelo Kimi, usar el maximo posible (100 mejor que 10, 1000 mejor que 100). Kimi lo permite. Con CLIProxy sin Kimi: max 8.
+- NO lanzar 2 dispatches grandes a la vez
+- timeout_secs: 600 para tareas normales, 900 para compilacion
+- Verificar entre waves ANTES de lanzar la siguiente
+
+### REGLA #5 — Lo que workers NO hacen
+- Tareas subjetivas ("mejora este codigo")
+- Reescrituras masivas ("upgrade todo al design system")
+- Decisiones (eso lo haces TU)
+- Login interactivo (oauth, gcloud auth login)
+- Si necesitas reescritura masiva: TU lees el archivo, decides el diff exacto, y le das al worker la edicion precisa linea por linea
+
+### REGLA #6 — Verificar entre waves
+```bash
+# Despues de cada dispatch:
+curl -s http://localhost:18810/health   # workers_active debe ser 0
+ls /path/resultados/                     # archivos existen?
+grep "error" logs/*.log                  # hay errores?
+```
+Si un gate falla → PARAR. No lanzar mas workers sobre error.
+
+### REGLA #7 — Errores comunes
+| Error | Fix |
+|---|---|
+| "filesystem sandbox-restricted" | Falta --permission-mode danger-full-access en worker.rs |
+| "spawn error: No such file" | sudo ln -sf /usr/local/bin/mirofish-claw /usr/local/bin/mithos-claw |
+| "timed out after 300s" | Subir timeout_secs a 600 |
+| "401 Unauthorized" | CLIProxy key incorrecta |
+| "connection reset by peer" | Si no es Kimi, bajar a 8. Con Kimi soporta 100+ |
+| Workers "preguntan en vez de ejecutar" | CLAUDE.md incorrecto, usar CLAUDE-executor.md |
+| Workers dicen "no changes needed" | Prompt vago, especificar linea exacta a cambiar |
+
+### Flujo standard
+```
+1. Dividir trabajo en tareas atomicas
+2. Agrupar en waves (independientes en Wave 1, dependientes en Wave 2)
+3. Lanzar Wave 1 (con Kimi: 100+ workers; sin Kimi: max 8)
+4. Verificar gate Wave 1
+5. Lanzar Wave 2
+6. Verificar gate Wave 2
+7. Commit + reportar
+```
+
+### Ejemplo real que funciona (probado)
+```json
+{
+  "description": "Crear 3 archivos Python",
+  "workspace": "/home/user/proyecto",
+  "keep_workspace": true,
+  "max_parallel": 100,
+  "tasks": [
+    {
+      "profile": "executor",
+      "description": "Crea /home/user/proyecto/utils.py con: def add(a,b): return a+b. Verifica: python3 -c 'from utils import add; assert add(2,3)==5; print(OK)'"
+    },
+    {
+      "profile": "executor",
+      "description": "Crea /home/user/proyecto/config.py con: PORT=8080 y DEBUG=False. Verifica: python3 -c 'from config import PORT; print(PORT)'"
+    },
+    {
+      "profile": "verifier",
+      "description": "Ejecuta: ls /home/user/proyecto/*.py | wc -l. Debe ser 2+. Reporta VERIFIED o FAILED."
+    }
+  ]
+}
+```
+
+
+## EJECUCIÓN SYPNOSE v2 — PIRÁMIDE 4 CAPAS (21-Abr-2026)
+
+### Arquitectura
+ARQUITECTO (Opus 4.6) — planifica, delega Sonnets, valida final
+  └→ SONNET CAPATAZ (Agent tool, 1-5 paralelo) — refina prompts, despacha workers, verifica
+       └→ WORKERS KIMI K2 (Mithos :18810, 10-30 por wave) — ejecutan 1 tarea atómica
+            └→ VERIFICADORES (flash-lite/cerebras) — PASS/FAIL rápido
+
+### Modelos — prefijo openai/ OBLIGATORIO en dispatch
+Workers: openai/kimi-k2 (1ro) → openai/kimi-k2-0905 (2do) → openai/deepseek-v3.2 (3ro)
+Verificadores: openai/gemini-2.5-flash-lite (1ro) → openai/cerebras-llama-8b (2do) → openai/llama-3.1-8b (3ro)
+NO USAR: qwen-* (504 frecuente), gemini-2.5-pro (cuota agotada)
+
+### Dispatch
+curl -s -X POST http://localhost:18810/dispatch -H "Content-Type: application/json" -d '{"description":"Wave N","workspace":"/path","keep_workspace":true,"max_parallel":30,"tasks":[...]}'
+
+### Reglas
+1. Anti-colisión: 1 archivo = 1 worker. File_map antes de dispatch.
+2. Checkpoint: Workers → Verificadores → Build → git commit → WAVE DONE.
+3. Fallback: Si modelo falla, siguiente en chain. Max 2 retries/worker.
+4. Budget: Max 3 waves fallidas → PARAR, escalar al SM.
+5. Git: tag pre-plan, commit por wave, push al final.
+6. Poll: Cada 30-45s (NO 15s).
+7. Template: CONTEXTO + ARCHIVO + ACCIÓN + CAMBIO exacto + VERIFICACIÓN + SI FALLA.
+8. Build check por wave, no solo al final.
+9. depends_on entre waves si hay dependencias.
+10. Mithos en localhost:18810. Windows → SSH tunnel primero.
+
+
