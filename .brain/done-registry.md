@@ -62,6 +62,9 @@
 | 2026-04-15 17:32 UTC | facturas-venta-607-20260415 | Backend v2.27.0 healthy. GET /api/facturas/mis-facturas/ -> 200 OK, aplica_607 presente en JSON (aplica_607_en_keys: True). go build sin errores. tsc sin errores en archivos modificados. | 3bfda994 |
 | 2026-04-15 18:44 UTC | informe-v2-gestoriard-20260415 | KB guardado id 7360. Informe: 22 paginas, 26661 lineas, 8 problemas detectados. Read-only sin modificaciones. | 88e86324 |
 | 2026-04-15 19:25 UTC | deep-dive-v2-gestoriard-20260415 | KB guardado id 7364. 5 areas auditadas: Formato606Form (615L, 4 endpoints), 5 componentes DGII, Shell 17 links, 4 tabs desconectados FUNCIONALES, inventario 9 formularios. Read-only. | 367eb205 |
+| 2026-04-17 16:41 UTC | spike-dgii-forms-170426 | npm run build exit 0, 24/24 vitest PASS, compare-xlsx ESTRUCTURA IDENTICA, release v0.1.0 en GitHub CarlosHuyghusrl/sypnose-dgii-forms | 1fa519e7 |
+| 2026-04-17 17:51 UTC | task-facturaia-integrate-606-fetch-170426 | Build exit 0, 24/24 vitest PASSED, release v0.2.0 en GitHub. client606.ts con fetch real + adapter fechas + Vite proxy. App.tsx con loading/error/empty states. | 04b50ca |
+| 2026-04-17 17:51 UTC | task-facturaia-spike-dgii-forms-170426 | Formato606Sheet.tsx 23 campos editables, validators 8 funciones, XLSX export SheetJS, 24/24 tests, design system V2, release v0.1.0 en GitHub. | 1fa519e7 |
 
 ## Intentado pero fallido
 

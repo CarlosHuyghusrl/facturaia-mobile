@@ -3659,3 +3659,27 @@ Verificacion: KB guardado id 7360. Informe: 22 paginas, 26661 lineas, 8 problema
 ### 2026-04-15 19:25 UTC -- deep-dive-v2-gestoriard-20260415
 Completada. Commit: 367eb205
 Verificacion: KB guardado id 7364. 5 areas auditadas: Formato606Form (615L, 4 endpoints), 5 componentes DGII, Shell 17 links, 4 tabs desconectados FUNCIONALES, inventario 9 formularios. Read-only.
+
+### 2026-04-17 16:41 UTC -- spike-dgii-forms-170426
+Completada. Commit: 1fa519e7
+Verificacion: npm run build exit 0, 24/24 vitest PASS, compare-xlsx ESTRUCTURA IDENTICA, release v0.1.0 en GitHub CarlosHuyghusrl/sypnose-dgii-forms
+
+### 2026-04-17 — FacturaIA Arquitecto — spike-dgii-forms-170426
+**Estado**: Completado
+**Repo**: CarlosHuyghusrl/sypnose-dgii-forms (privado, https://github.com/CarlosHuyghusrl/sypnose-dgii-forms)
+**Release**: v0.1.0
+**Cambios**: 3 waves, 13 sub-agentes, repo standalone
+- Wave 1 (5 agentes): Tailwind V4 + Formato606Sheet.tsx 23 cols display + 20 mocks DOP 475,950 + App.tsx demo + docs
+- Wave 2 (4 agentes): Inputs editables 23 campos + validators.ts 8 funciones + useMemo totales + validación inline onBlur
+- Wave 3 (4 agentes): xlsxExporter.ts SheetJS + botón download + compare-xlsx.ts + README integración
+**Verificación**: npm run build exit 0, 24/24 vitest PASS, ESTRUCTURA IDENTICA compare-xlsx
+**KB**: resultado-facturaia-spike-dgii-forms-170426 (gestoriard, id 7486)
+**Pendiente**: GestoriaRD integra el componente (NO FacturaIA)
+
+### 2026-04-17 17:51 UTC -- task-facturaia-integrate-606-fetch-170426
+Completada. Commit: 04b50ca
+Verificacion: Build exit 0, 24/24 vitest PASSED, release v0.2.0 en GitHub. client606.ts con fetch real + adapter fechas + Vite proxy. App.tsx con loading/error/empty states.
+
+### 2026-04-17 17:51 UTC -- task-facturaia-spike-dgii-forms-170426
+Completada. Commit: 1fa519e7
+Verificacion: Formato606Sheet.tsx 23 campos editables, validators 8 funciones, XLSX export SheetJS, 24/24 tests, design system V2, release v0.1.0 en GitHub.
