@@ -1,5 +1,5 @@
 ## Estado de sesion
-Tarea: dgii-forms-7-componentes-220426
+Tarea: ux9-mejoras-dgii-230426
 Fase: started
-Tag retorno: pre-dgii-forms-7-componentes-220426
-Ultima actualizacion: 2026-04-22 13:59 UTC
+Tag retorno: pre-ux9-mejoras-dgii-230426
+Ultima actualizacion: 2026-04-23 21:19 UTC
