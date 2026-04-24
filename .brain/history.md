@@ -3687,3 +3687,7 @@ Verificacion: Formato606Sheet.tsx 23 campos editables, validators 8 funciones, X
 ### 2026-04-22 14:21 UTC -- dgii-forms-7-componentes
 Completada. Commit: 8e62802
 Verificacion: 5 waves completadas: 7 campos JSON, 7 types TS, 14 validators+exporters, 7 Sheet components, App.tsx 8 tabs. tsc exit 0. Pushed origin main.
+
+### 2026-04-24 01:27 UTC -- ux9-mejoras-dgii-230426
+Completada. Commit: 63768d3
+Verificacion: npm run build exit 0. 6 hooks creados + Formato606Sheet.tsx integrado. /formularios/606 = 13.7kB compilado sin errores TS.
