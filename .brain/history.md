@@ -3691,3 +3691,7 @@ Verificacion: 5 waves completadas: 7 campos JSON, 7 types TS, 14 validators+expo
 ### 2026-04-24 01:27 UTC -- ux9-mejoras-dgii-230426
 Completada. Commit: 63768d3
 Verificacion: npm run build exit 0. 6 hooks creados + Formato606Sheet.tsx integrado. /formularios/606 = 13.7kB compilado sin errores TS.
+
+### 2026-04-24 11:15 UTC -- ux9-apply-7forms-sp-prefill-240426
+Completada. Commit: ea72a5d
+Verificacion: 8/8 Sheet components tienen 6 hooks (IT1 tiene 3: autosave+badge+keyboard). SP button Cargar SP en 606Sheet y 607Sheet. route.ts tiene map607Row para Factura607. Commit ea72a5d pushed origin main. 9 archivos, 913 inserciones.

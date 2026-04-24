@@ -67,6 +67,7 @@
 | 2026-04-17 17:51 UTC | task-facturaia-spike-dgii-forms-170426 | Formato606Sheet.tsx 23 campos editables, validators 8 funciones, XLSX export SheetJS, 24/24 tests, design system V2, release v0.1.0 en GitHub. | 1fa519e7 |
 | 2026-04-22 14:21 UTC | dgii-forms-7-componentes | 5 waves completadas: 7 campos JSON, 7 types TS, 14 validators+exporters, 7 Sheet components, App.tsx 8 tabs. tsc exit 0. Pushed origin main. | 8e62802 |
 | 2026-04-24 01:27 UTC | ux9-mejoras-dgii-230426 | npm run build exit 0. 6 hooks creados + Formato606Sheet.tsx integrado. /formularios/606 = 13.7kB compilado sin errores TS. | 63768d3 |
+| 2026-04-24 11:15 UTC | ux9-apply-7forms-sp-prefill-240426 | 8/8 Sheet components tienen 6 hooks (IT1 tiene 3: autosave+badge+keyboard). SP button Cargar SP en 606Sheet y 607Sheet. route.ts tiene map607Row para Factura607. Commit ea72a5d pushed origin main. 9 archivos, 913 inserciones. | ea72a5d |
 
 ## Intentado pero fallido
 
