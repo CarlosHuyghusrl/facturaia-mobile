@@ -68,6 +68,135 @@
 | 2026-04-22 14:21 UTC | dgii-forms-7-componentes | 5 waves completadas: 7 campos JSON, 7 types TS, 14 validators+exporters, 7 Sheet components, App.tsx 8 tabs. tsc exit 0. Pushed origin main. | 8e62802 |
 | 2026-04-24 01:27 UTC | ux9-mejoras-dgii-230426 | npm run build exit 0. 6 hooks creados + Formato606Sheet.tsx integrado. /formularios/606 = 13.7kB compilado sin errores TS. | 63768d3 |
 | 2026-04-24 11:15 UTC | ux9-apply-7forms-sp-prefill-240426 | 8/8 Sheet components tienen 6 hooks (IT1 tiene 3: autosave+badge+keyboard). SP button Cargar SP en 606Sheet y 607Sheet. route.ts tiene map607Row para Factura607. Commit ea72a5d pushed origin main. 9 archivos, 913 inserciones. | ea72a5d |
+| 2026-04-24 13:09 UTC | sprint5-responsive-polish-formularios-dgii-240426 | 31 workers mithos-dispatch claude-sonnet-4-6. 28 archivos modificados. tsc --noEmit exit 0. Commit 9d7bd0c pushed origin main. | 9d7bd0c |
+| 2026-04-24 13:24 UTC | sprint6-sp-documents-panel-15forms-240426 | tsc --noEmit exit 0, 18/18 Form wrappers tienen SPDocumentsPanel, push origin main OK | 7ffa17c |
+| 2026-04-24 14:42 UTC | sprint7-rediseño-formularios-agrupación-fiscal-240426 | Playwright confirma: 4 secciones, 18 cards, headers correctos (Esta semana/Retenciones mensuales/Declaraciones anuales 2026/Declaraciones especiales), todas las pages nuevas responden (ej: /formularios/ir2/ renderiza formulario completo). tsc --noEmit exit 0. Desplegado en producción gestoriard.com container 28600d2. | 28600d2 |
+| 2026-04-24 16:12 UTC | sprint8-dgiibutton-unificacion-240426 | 30 archivos DGII migrados a DGIIButton (12 Sheet + 18 Form). Scroll interno eliminado de 11 Sheets. tsc --noEmit exit 0. Grep emoji=0, grep maxHeight=0. Pushed a main. | 88773c2 |
+| 2026-04-24 17:08 UTC | auditoria-formularios-playwright-15workers-240426 | Auditoria Playwright produccion gestoriard.com detecto 7 problemas UX. 4 commits (af6c782, 8fafca7, 0694c64, c3da192) corrigieron: headers duplicados, inputs RNC/periodo duplicados, boton Cargar SP duplicado, min-h-screen forzando viewport, SPDocumentsPanel emojis, 9 toasts con ℹ️. 15 workers paralelos via claw-dispatch:18830 verificaron estructura. tsc exit 0 en cambios. Todos commits pushed a main. | c3da192 |
+| 2026-04-24 18:44 UTC | sypnose-18formularios-excel-like-240426 | Playwright en gestoriard.com/formularios/606/ post-deploy 182512755226:
+- viewport: 1440
+- mainContentClass: 'space-y-4 w-full max-w-none' (era max-w-4xl)
+- mainContentW: 1140px (era 896, +244px)
+- wrapperClientW: 1090px (era 846, +244px)
+- tableScrollW: 1664px (24 cols DGII oficial)
+- scrollDelta: 574px (34% scroll — aceptable Excel-like con 24 cols)
+- stickyThead: true ✅
+- hasMinWidth: false ✅
+
+Screenshots 1440 + 375 mobile confirman: layout centrado, 13 columnas visibles en desktop, banner 606 + cliente + período + toolbar + tabla todos presentes sin duplicación. Mobile apila correctamente.
+
+Commits pushed a main:
+- f6377c8: 11 Sheets Excel-like (min-w removido, sticky thead, text 11px, h-7 rows)
+- 54b99a8: 12 Forms max-w-4xl→max-w-none (aprovechar main-area) | 54b99a8 |
+| 2026-04-24 19:29 UTC | delete-row-sidebar-autocollapse-240426 | Playwright 1600x900 post-deploy 192725086437:
+- sidebar: 64px (auto-colapsada por pathname /formularios/*)
+- wrapper: 1486px (era 846, +640px)
+- tabla scrollW: 1664px (24 cols DGII oficiales)
+- scroll horizontal: 178px (11%, era 49%)
+- Delete button por fila (trash2) en los 11 Sheets
+- Agregar Fila OK, Editar celdas OK (click = input), Eliminar fila ready
+- Screenshot muestra 20+ de 24 columnas visibles sin scroll
+- tsc exit 0
+
+15 workers dispatched (11 executors + 4 verifier/appshell). 7 workers fallaron silencioso — fix aplicado directo con Python script. Commit + push + deploy Coolify trigger vía MCP. | 5f8ab82 |
+| 2026-04-24 21:50 UTC | mobile-cards-responsive-240426 | Playwright 375x812 post-deploy 213936383191:
+- Tabla desktop hidden (md:block aplicado OK)
+- Empty state mobile: 'No hay registros. Usa Agregar Fila.' visible
+- NO hay scroll horizontal en mobile
+- Banner, Cliente, Período, Botones SP/BD, Toolbar apilados verticalmente
+- DGIIRowCardMobile component creado
+- 11 Sheets con patrón hidden md:block + md:hidden space-y-2
+- Screenshot 606-MOBILE-OK-375.png confirma
+- tsc exit 0 | b890d1a |
+| 2026-04-24 22:17 UTC | dashboard-unificado-multiformulario-250426 | 3 archivos creados:
+- app/api/v2/dgii/cliente-resumen/route.ts (1359b): agrega form_type/periodo, retorna formularios por cliente
+- app/components/DGII/ResumenClienteGrid.tsx (5321b): grid de 18 cards con status Presentado/Pendiente + último período
+- app/formularios/cliente/page.tsx (1951b): page selector cliente + grid
++ link en /formularios/page.tsx
+
+tsc exit 0. Commit 1821798 pushed a main. Coolify deploy triggered. | 1821798 |
+| 2026-04-24 22:46 UTC | dashboard-unificado-e2e-verified-250426 | Playwright E2E verificado en producción gestoriard.com:
+1. Login OK con agenda@huyghusrl.com
+2. Navegación a /formularios/cliente/
+3. Search 'acela' → dropdown muestra Acela Associates RNC 130309094
+4. Click selector → grid aparece con 18 cards
+5. API /api/v2/dgii/cliente-resumen?rnc=130309094 retorna 200 OK con formularios:{}
+6. Cards muestran: Forma XXX + Clock+Pendiente + descripción + 'Sin archivos para este cliente' + link Abrir formulario
+
+BUG RESUELTO:
+- Query con GROUP BY+COUNT falló con permission denied (RLS)
+- Reescrito sin aggregates (commit 417afe6)
+- GRANT SELECT ON dgii_archivos_generados TO gestoria_app aplicado en DB
+
+Screenshots: dashboard-poblado-FINAL.png + dashboard-cliente-1440.png + dashboard-cliente-375mobile.png | 417afe6 |
+| 2026-04-25 01:21 UTC | polish-dashboard-12mejoras-250426 | 12 mejoras commit 0fffd66 push a main:
+1. Skeleton loader animado en ResumenClienteGrid
+2. Banner período activo (mes/año contextual)
+3. Tooltip normativa (title attr en cards)
+4. Íconos Lucide por formulario (18 formularios)
+5. Sort secundario por días al vencimiento
+6. Empty state CTA 'Todos al día'
+7-19. URL params auto-cliente en 12 Forms (606/607/608/609/610/623/629/IR3/IR4/IR17/IT1/IR2/TSS)
+20. Migration GRANT + 2 indexes en migrations/20260425_grant_dgii_archivos_to_app.sql
+21. DB GRANT + indexes aplicados vía docker exec
+
+tsc exit 0
+
+5 forms (ACT/CRS/IR-1/IR-18/RST) con estructura distinta postpuestos para iteración futura. | 0fffd66 |
+| 2026-04-25 02:01 UTC | polish-dashboard-completo-final-250426 | Commit 8f50621 push a main + deploy Coolify queued.
+
+8 archivos modificados/creados:
+- app/components/DGII/formatos/{FormatoACTForm,FormatoCRSForm,FormatoIR1Form,FormatoIR18Form,FormatoRSTForm}.tsx (URL params)
+- app/lib/dashboard-pdf-exporter.ts (NEW 2087b)
+- app/components/DGII/CalendarioFiscal.tsx (NEW 3829b)
+- app/formularios/cliente/page.tsx (integración)
+
+Cambios:
+- 18/18 Forms ahora soportan ?rnc=X&from=resumen
+- PDF exporter listo (jsPDF + jspdf-autotable ya en package.json)
+- CalendarioFiscal grid 12 meses + días vencimiento por badge color
+- /formularios/cliente integra calendario
+
+tsc exit 0 | 8f50621 |
+| 2026-04-25 14:44 UTC | polish-pendientes-finales-250426 | Commit 7c4c758 push a main + deploy queued.
+
+2 archivos modificados:
+- app/formularios/cliente/page.tsx (6126 bytes): boton Exportar PDF con DGIIButton+Download+toast
+- migrations/20260425_audit_rls_dgii.sql (NEW): audit script RLS
+
+RLS AUDIT FINDINGS (criticos):
+- dgii_archivos_generados.rowsecurity=false (RLS NO habilitado)
+- 0 policies definidas
+- Solo filtrado por empresa_id en código JS
+- set_empresa_context existe
+- current_empresa_id NO existe
+
+Riesgo cross-tenant si código deja de pasar empresa_id. Recomendación: ALTER TABLE...ENABLE ROW LEVEL SECURITY + policy.
+
+Workers (15 dispatched) reportaron OK pero no modificaron — mismo bug recurrente del dispatcher. Aplicado directo via Write tool.
+
+tsc exit 0 | 7c4c758 |
+| 2026-04-25 15:33 UTC | rls-tenant-isolation-dgii-archivos-250426 | RLS habilitado en dgii_archivos_generados:
+- 4 policies tenant_isolation (SELECT/INSERT/UPDATE/DELETE)
+- helper function current_empresa_id() lee app.current_empresa_id config
+- GRANT EXECUTE a gestoria_app + authenticated
+
+Verificado:
+- pg_policy 4 rows
+- API /api/v2/dgii/cliente-resumen?rnc=130309094 retorna 200 OK
+- Cross-tenant filtering activo a nivel BD
+
+Commit 4322098 push a main. | 4322098 |
+| 2026-04-25 15:49 UTC | rls-5-tablas-npm-audit-250426 | RLS aplicado en 5 tablas (envios_606/607/it1, qb_company_configs, qb_customers). 4 policies cada una. qb_customers via FK cliente_id→clientes.empresa_id.
+
+npm audit: 9→5 vulnerabilidades. Critical eliminada (protobufjs). 4 moderates eliminadas.
+
+Pendientes:
+- next.js DoS (high) requiere major version bump
+- xlsx sin fix disponible
+
+tsc exit 0. Commit dc9296f push a main. | dc9296f |
+| 2026-04-25 20:59 UTC | gestoriard-s1-formularios-230426 | TypeScript compilation: exit 0. 10 responsive pages committed: dashboard (grid-cols-1 sm:grid-cols-2 lg:grid-cols-4), login (minHeight touch targets), supervision/casos/agenda/clientes/ranking/admin responsive polish. useDgiiFormato hook verified (app/hooks/useDgiiFormato.ts 58L). 14+ type stubs created (app/types/dgii*.types.ts). 8 Sheet.tsx audit completed (web-quality conforme). All changes pure responsive design, no logic modifications. Commit 38b905b pushed to main. | 38b905b |
 
 ## Intentado pero fallido
 
