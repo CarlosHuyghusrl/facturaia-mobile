@@ -6,6 +6,21 @@
 
 ---
 
+### 2026-04-27 — Arquitecto facturaia — RLS Inventory + Hook Fix
+**Estado**: Completado
+**Archivos modificados**: ~/servidor-infra/oc-bridge/check-pending-tasks.sh
+**Cambios**:
+- Inventario completo RLS: 55 tablas dgii_* (7 con RLS, 48 sin RLS)
+- Confirmado: gestoria_app = rol principal. OCR backend = NO accede DB directamente.
+- 48 tablas de formularios DGII sin RLS = riesgo multi-tenant (datos tributarios)
+- dgii_pagos: RLS ON pero policy {public}/ALL = sin tenant isolation real
+- empresas + empresas_login: SIN RLS = riesgo crítico
+- Hook fix: check-pending-tasks.sh corregido (endpoint, parser, exit 0)
+**KB guardado**: resultado-facturaia-rls-inventory-270427 (id 8332), facturaia-rls-table-matrix-for-c4-270427 (id 8334)
+**Commit**: 33ce4d9 servidor-infra main
+**Git tag**: pre-rls-inventory-270427
+**Workers**: dispatch roto (DashScope) — fallback bash directo aplicado
+
 ### 2026-04-15 — Arquitecto facturaia — Clasificación Compra/Venta 606/607
 **Estado**: Completado
 **Archivos modificados**:
