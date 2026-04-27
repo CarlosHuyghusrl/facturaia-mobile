@@ -1,9 +1,9 @@
 ## Estado de sesion (pre-compact auto-save)
-Ultima actualizacion: 2026-04-27 18:12 UTC
+Ultima actualizacion: 2026-04-27 18:27 UTC
 Fase: interrupted-by-compact
 Branch: main
-Ultimo commit: 60f9d750 state: pre-compact auto-save
-Archivos sin commit: 115
+Ultimo commit: 57a637a2 [FIX-HOOKS] memoria-primero-reminder: ruta relativa a absoluta en settings.json
+Archivos sin commit: 113
 
 ## NOTA
 Contexto fue compactado. Al retomar:
