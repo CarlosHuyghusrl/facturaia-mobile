@@ -61,6 +61,18 @@
           }
         ]
       }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/bash /home/gestoria/eas-builds/FacturaScannerApp/.claude/hooks/memoria-primero-reminder.sh",
+            "timeout": 5000
+          }
+        ]
+      }
     ]
   },
   "permissions": {
