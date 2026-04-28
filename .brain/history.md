@@ -3887,3 +3887,11 @@ tsc exit 0. Commit dc9296f push a main.
 ### 2026-04-25 20:59 UTC -- gestoriard-s1-formularios-230426
 Completada. Commit: 38b905b
 Verificacion: TypeScript compilation: exit 0. 10 responsive pages committed: dashboard (grid-cols-1 sm:grid-cols-2 lg:grid-cols-4), login (minHeight touch targets), supervision/casos/agenda/clientes/ranking/admin responsive polish. useDgiiFormato hook verified (app/hooks/useDgiiFormato.ts 58L). 14+ type stubs created (app/types/dgii*.types.ts). 8 Sheet.tsx audit completed (web-quality conforme). All changes pure responsive design, no logic modifications. Commit 38b905b pushed to main.
+
+### 2026-04-27 18:34 UTC -- facturaia-megaplan-desbloqueo-cliente-real-270427
+Completada. Commit: 7306678
+Verificacion: 6/6 fases completas. FASE1: RLS verificado OK en 7 tablas dgii post-C4. FASE2: 18/18 DGII forms audit PASS (0 crashes, 0 blank pages). FASE3: N/A (0 forms failing). FASE4: hook absolute path fix committed 57a637a2. FASE5: KB saved gemini-wrapper N/A for facturaia. FASE6: OCR field mapping documented in KB. P0 CRITICAL FIX: empresas RLS login breakage resolved via gestoria_app_select policy (commit 7306678 gestoriard). gestoriard.com login restored.
+
+### 2026-04-27 20:12 UTC -- forms-placeholder-270427
+Completada. Commit: f16969e
+Verificacion: tsc --noEmit EXIT:0. PlaceholderFormularioEnDesarrollo.tsx + 4 wrappers 629/IR3/IR4/TSS. Push main f16969e.
