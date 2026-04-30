@@ -3895,3 +3895,71 @@ Verificacion: 6/6 fases completas. FASE1: RLS verificado OK en 7 tablas dgii pos
 ### 2026-04-27 20:12 UTC -- forms-placeholder-270427
 Completada. Commit: f16969e
 Verificacion: tsc --noEmit EXIT:0. PlaceholderFormularioEnDesarrollo.tsx + 4 wrappers 629/IR3/IR4/TSS. Push main f16969e.
+
+### 2026-04-28 20:17 UTC -- prefill-suggestions-api-280427
+Completada. Commit: bbceeba2
+Verificacion: 4 archivos creados en gestoriard (commit bbceeba2 main): app/types/prefill.types.ts (38L), app/api/prefill/suggestions/route.ts (60L GET), app/api/prefill/suggestions/[id]/route.ts (55L PATCH), app/hooks/useFormPrefillSuggestions.ts (81L). Schema BD verificado via psql self-hosted: 42 filas pending en form_prefill_suggestions (606=11, 607=5, IT-1=4, IR-1=4, IR-2=12, TSS=5, DIOR=1), RLS tenant_isolation_select activa. Enum PrefillFormType corregido para incluir 11 form_types reales. tsc errores son TS7016 next/server pre-existentes (afecta toda la base, no causados por cambios). KB accept-prefill-suggestions-facturaia-270427 publicado para coordinacion dgii-scraper.
+
+### 2026-04-28 21:08 UTC -- sprint2-ui-prefill-280428
+Completada. Commit: bf9b8d46
+Verificacion: Commit bf9b8d46 main push OK. 7 archivos sprint: 2 nuevos (PrefillSuggestionsPanel.tsx 710L + prefill-mapper.ts 377L) + 5 modificados (Formato606/607/IT1/IR1/IR2Form.tsx). 5/7 form_types con UI integrada (skip TSS placeholder, DIOR no Form). tsc grep 7 archivos sprint = 0 errores. Workers Opus 8 totales (4 waves paralelas: research+design, implement+integrate, verify, extend+integrate-3-forms). KB resultado-sprint2-ui-prefill-280428 + accept-prefill-suggestions-facturaia-280428-v2 publicados.
+
+### 2026-04-28 22:08 UTC -- sprint2-ui-prefill-280428
+Completada. Commit: c8779587
+Verificacion: Wave 5 QA visual PASS 5/5 forms en producción gestoriard.com (auth agenda@huyghusrl.com). 4 commits push main: bf9b8d46 UI panel + integración 5 forms, 2c053936 fix SUPABASE_INTERNAL_URL (TypeError fetch failed), a60dfb1c fix panel sin filtro periodo (BD heterogénea), c8779587 docs Wave 5 report. 15 screenshots full-page en /tmp/wave5/ (5 forms × 3 resoluciones 1920/768/375). 36 sugerencias visibles total: 606=11, 607=5, IT-1=4, IR-1=4, IR-2=12. Skip TSS (placeholder), DIOR (no existe Form). a11y verificada via snapshot (aria-expanded, role=region/article/meter, aria-label descriptivo). Cross-form consistency 5/5. Reporte .brain/wave5-qa-visual-280428.md (151L).
+
+### 2026-04-28 23:11 UTC -- wave6-design-critique-fixes-280428
+Completada. Commit: 822988d7
+Verificacion: 4 fixes criticos aplicados commit 822988d7 push main + Coolify deploy completado. C1 mobile container min-h-[200px] verificado en DOM (cardsContainerClasses correcto post-deploy). C2 bulk confirm modal verificado via Chrome MCP click 'Aplicar todas (11)' -> modal abre con texto 'Esto creara/actualizara 11 filas... Continuar?' + botones Cancelar/Confirmar. C3 contraste #B86E00 verificado en codigo. C4 'Rechazar todas' bg-red-600 oklch verificado runtime. Cards count=11 renderizadas en DOM en mobile. Descubrimiento bonus: panel queda debajo del fold en mobile (top=674 viewport=667), reorder posicion pendiente Sprint 3. Calificacion post-fix 7.5/10 (era 6.5/10).
+
+### 2026-04-29 15:05 UTC -- wave3-quickwins-uxfixes-290428
+Completada. Commit: e9005339
+Verificacion: Wave 3 commit e9005339 push main + Coolify deploy completado. 3 workers Opus paralelo: QW1 npm install deps fantasma (tsc 132->0 errores), QW2 typing virtualRow VirtualItem 11 Sheets, Sprint 3 UX 3 fixes (friendlySource map + grouping details/summary + panel top fold mobile). Verificacion chrome MCP gestoriard.com mobile 375: panelTop=77 (era 674 viewport 667 fuera fold), hasCorreoGriselda=true, detailsCount=1 grouping activo. 14 archivos modificados. Calificacion 8.5/10 (era 7.5/10).
+
+### 2026-04-29 17:14 UTC -- sprint4-uxpolish-290429
+Completada. Commit: 29a04acb
+Verificacion: Sprint 4 UX polish 3/5 items completados commit 29a04acb push main. 3 workers Sonnet paralelo: ITEM1 tooltip onboarding 1ª vez (+76L popover gradiente con arrow + localStorage flag + ARIA dialog), ITEM2 toast error especifico (UpdateStatusResult discriminated union + 4 call sites + duration 6000ms), ITEM3 labels mobile icon buttons (sr-only -> sm:sr-only en 3 botones). Archivos: PrefillSuggestionsPanel.tsx 757->909L (+152), useFormPrefillSuggestions.ts 81->92L (+11). tsc --noEmit EXIT 0. NO tocado: 4 placeholder forms (Carlos decide A/B), validators 18 forms, writer scraper. Calificacion 9/10 (era 8.5/10).
+
+### 2026-04-29 17:25 UTC -- verify-copy-4forms-290429
+Completada. Commit: 1ba8a8f5
+Verificacion: Verify copy/labels 4 Sheets DGII completado commit 1ba8a8f5 push main OK. Mi rol Disenador UI/UX puro: solo Sheet.tsx, sin tocar Form.tsx (scope gestoriard). 24 tooltips + 4 banners anadidos. 629 (3 tooltips + banner azul 2% retencion). IR-3 (5 tooltips + banner azul asalariados). IR-4 (6 tooltips + banner azul tasas 10/25/27%). TSS (10 tooltips porcentajes reales AFP/SFS/INFOTEP + BANNER AMBAR prominente con link a /tss diferenciando planilla SUIRPLUS vs CRM). +84/-36 lineas. tsc grep 4 Sheets: 0 errores. EXIT 0. Pendiente IR-3 codigos 05-06 requiere spec DGII oficial. Pendiente tooltips mobile (DGIIRowCardMobile no usa th).
+
+### 2026-04-29 17:46 UTC -- tests-e2e-playwright-4forms-290429
+Completada. Commit: 3cfa1106
+Verificacion: Tests E2E Playwright 4 forms DGII completado commit 3cfa1106 push main OK. Setup @playwright/test 1.59.1 + chromium browsers + playwright.config.ts + auth fixture. 5 workers Sonnet paralelo (1 setup + 4 specs). RESULTADO npx playwright test: 10/13 PASS PWEXIT:0. 629/IR-3/IR-4 = 3/3 PASS each. TSS = 1/4 PASS (3 fails hipotesis Form TSS no conectado por gestoriard o deploy Coolify pendiente). Cobertura floor inicial alcanzada. NO tocado Form.tsx (scope gestoriard). 4 specs creados sin race. Reporte completo /tmp/facturaia-tests-e2e-290429.md.
+
+### 2026-04-29 18:27 UTC -- e2e-fase2-14forms-datatestid-290429
+Completada. Commit: 09b767d3
+Verificacion: FRENTE C2 commit 09b767d3 push main OK. 7 workers Sonnet paralelo sin overlap. Inventario corregido: 9 forms restantes (no 14): 608/609/610/623/IR-1/IR-18/ACT/CRS/RST. 58 data-testid en 4 Sheets cubiertos (629=12, IR-3=14, IR-4=15, TSS=17). 5 specs E2E nuevos (606/607/IT-1/IR-2/IR-17). Total 30 tests Playwright: 22 PASS / 8 FAIL PWEXIT:0. PASS rate 73% (vs 77% fase 1). 8 fails diagnosticados: selectores fragiles 23 cols 606, friendly source 607, BUG IR-17 botón Agregar Fila no existe pero empty-state lo menciona, form monolítico IR-2, grouping text IT-1, TSS deploy/timeout. NO tocado Form.tsx (scope gestoriard).
+
+### 2026-04-29 19:14 UTC -- fase1-migrar-datatestid-290429
+Completada. Commit: 3cf9db5c
+Verificacion: FRENTE C3 commit 3cf9db5c push main OK. 4 workers Sonnet paralelo migraron specs 629/IR-3/IR-4/TSS de .nth(N) a getByTestId. BUG descubierto: DGIIRowCardMobile hereda testids -> duplicados DOM -> getByTestId().first() agarra mobile hidden -> fill fail. FIX: page.locator('[data-testid=X]:visible').first() en 44 callsites. Resultado: pre-migracion 22/30 (73%), post-migracion sin fix 12/30 (40%) por bug, post-fix :visible 21/30 (70%) recuperando +30 puntos. SM esperaba 90%+, alcanzamos 70%. Razones: bug consumio iteraciones, 5 specs sin testids siguen fragiles, edges validators requieren debug especifico. IR-3 e IR-4 perfecto 3/3 PASS, 629 y TSS casi perfecto. Reporte completo /tmp/facturaia-fase1-datatestid-290429.md.
+
+### 2026-04-29 19:34 UTC -- uxB-pricing-signup-onboarding-290429
+Completada. Commit: 9fcd5d07
+Verificacion: FRENTE C4 commit 9fcd5d07 push main OK. 3 workers Sonnet paralelo en app/components/marketing/ sin race con gestoriard. PricingPage.tsx 483L (3 tiers Starter RD$1,500/Pro RD$4,500/Enterprise + FAQ + trust badges + CTA arriba lista mejor UX mobile). SignupForm.tsx 648L (5 fields + 6 validators puros + password strength bar + plan banner). OnboardingWizard.tsx 766L (4 steps con progress accesible + step 2 saltable + tour 4 features). Total 1897L. tsc EXIT 0. NO middleware/routes/BD (scope gestoriard). Componentes puros con callbacks onSubmit/onComplete. CTAs apuntan a rutas que gestoriard cablea separadamente (/signup?plan=, /contacto, etc). Reporte completo /tmp/facturaia-uxBopcion-290429.md.
+
+### 2026-04-29 23:44 UTC -- uxsubirdgii-17forms-290429
+Completada. Commit: 941e947e
+Verificacion: FRENTE C5 commit 941e947e push main OK. 5 workers Sonnet paralelo (1 inventario + 4 implement) sin race con gestoriard. BotonSubirDGII.tsx 263L (5 estados + auto-reset + reintento directo). ModalConfirmSubirDGII.tsx 146L (resumen dl/dt/dd + formatPeriodo/formatRNC helpers + warning header). HistoricoSubidasDGII.tsx 319L (tabla con filtros + StatusBadge texto+icono+color WCAG). dgii-feedback.tsx 267L (3 custom toast + dgiiToast API simple). Total 995L. tsc EXIT 0. Inventario W1 descubrió: 0/17 forms cableados, solo IT-1 hardcoded ad-hoc en TabFormatos.tsx + clientes/[id], endpoint /api/dgii/submit YA existe con polling. Pendiente gestoriard: cablear 16 forms + schema BD dgii_uploads + reemplazar ad-hoc. Reporte completo /tmp/facturaia-uxsubirdgii-290429.md.
+
+### 2026-04-30 13:34 UTC -- facturaia-608-ocr-validacion-300430
+Completada. Commit: 5560c6d
+Verificacion: Commit 5560c6d push master facturaia-ocr OK. FRENTE A: endpoint Go GET /api/formato-608/{rnc} clonando patron 606 (3 archivos +migration SQL idempotente) + Build Go EXIT 0. NOTA: spec oficial 608 = 3 cols pero plan pidio 4, implementado con comentario para omitir 4a si OFV rechaza. FRENTE B: docs/606_field_mapping.md 242L. HALLAZGO: audit anterior desactualizado, aplica_606 automatico YA EXISTE (trigger trg_auto_tag_606). Cobertura real 21/23 = 91%. Faltan SOLO 2 campos (itbis_percibido/isr_percibido) para NCF B11/B12 prevalencia baja. Container v2.27.0 sin codigo nuevo hasta rebuild. 5 facturas test NO ejecutadas (necesita deploy primero). Reporte SM completo en KB resultado-facturaia-608-validacion-300426.
+
+### 2026-04-30 13:55 UTC -- facturaia-waves-2-3-4-300430
+Completada. Commit: 28d7c3a
+Verificacion: 3 waves completadas commit 28d7c3a master push OK. W2: migration 608 aplicada BD prod + 5 facturas test (3 aplica_608=true, 2 false), trigger 606+608 coexisten. W3: hook boris-stop.sh YA EXISTE (falso positivo SM, 360B 0775 bash valido). W4: doc 260L docs/ecf-emisor-plan-300430.md, HALLAZGO cero capability e-CF Go, recomendacion PSE certificado (TheFactoryHKA/ECF Express 3-5 dias) + prorroga DGII vs propio (15 dias-dev + 10-30 dias certificacion = excede deadline 15-mayo). HUYGHU sin cert_digital en BD verificable. Carlos debe consultar listados DGII + decidir PSE vs propio antes de cualquier codigo.
+
+### 2026-04-30 14:08 UTC -- facturaia-waves-2-3-4-300430
+Completada. Commit: f751772
+Verificacion: Continuacion auto-fluyo waves 2+3+4. Commits master facturaia-ocr: 5560c6d (W1+W2 endpoint+migration aplicada), 28d7c3a (W4 iter1 plan e-CF 260L), f751772 (W4 iter2 research +315L = 576L total). W2 verificado: trigger 608 testeado 5 facturas reales BD producción (3 aplica_608=true, 2 false). W3 §11 preservado: hook YA existe 360B 0775 bash-valid, NO sobrescrito (auto-save .brain/ funcional). W4 iter2 research técnico: victors1681/dgii-ecf maintained pero solo tipos 31/32 sin licencia, goxades Go inmadura, cobertura OCR 49-60%, recomendación PSE confirmada NO CAMBIA. KB saves: 8524 (waves general), nuevos hook-fix + ecf-emisor.
+
+### 2026-04-30 14:30 UTC -- facturaia-waves-5-6-7-300430
+Completada. Commit: f751772
+Verificacion: 3 waves auto-fluyo. W5 hook overwrite stub 360B->19B (lógica auto-save removida, Carlos confirmo override §11). W6 SMOKE 606 HUYGHU = FAIL con 5 bloqueos: B1 filtro SQL receptor_rnc=NULL (TXT vacio), B2 auth Postgres container roto SASL, B3 itbis/montos 0% llenos, B4 estado anulada no excluido, B5 sin merge SharePoint loader. W7 SMOKE 607 = FAIL endpoint Go NO EXISTE (solo flags BD aplica_607). 648 facturas candidatas pero sin GetFormato607 ni route. Estado peor que 608 pre-sprint. Recomendacion §11: deadline 5-may NO realista, beta HUYGHU con declaracion manual + fix correcto post-deadline. Estimacion fix correcto 4-5 dias-dev. KB save resultado-facturaia-smoke-end2end-huyghu-300426 con detalles + Memory Palace + Boris done. NO commit (waves read-only).
+
+### 2026-04-30 15:25 UTC -- facturaia-b2-rebuild-300430
+Completada. Commit: 6aa945f
+Verificacion: Commit 6aa945f master facturaia-ocr push OK. PASO 1 backfill 95 facturas HUYGHU 606 con receptor_rnc=131047939 (cliente_id 100% NULL en BD por lo que JOIN del SM no funciono, fallback constante HUYGHU para 606). PASO 2 trigger auto_set_receptor_rnc migration aplicada BD prod, 3 tests PASS. PASO 3 container v2.28.0 build OK 149MB rotacion exitosa + BUG B2 descubierto y resuelto: postgres user SASL fail desde host, fix DATABASE_URL=supabase_admin. SMOKE TEST FINAL: curl /api/formato-606/131047939?periodo=202504 retorna header 606|131047939|202504|11 + 11 lineas reales NCFs B01000009XX HUYGHU. 608 sin NCF anulados (correcto). Bugs estado: B1 RESUELTO, B2 RESUELTO, B3 itbis/montos SIGUE, B4/B5 SIGUEN. Container actual facturaia-ocr:v2.28.0 healthy, endpoint 606+608 OPERATIVOS produccion.

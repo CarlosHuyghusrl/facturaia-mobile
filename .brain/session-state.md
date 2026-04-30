@@ -1,5 +1,5 @@
 ## Estado de sesion
-Tarea: prefill-suggestions-api-280427
+Tarea: facturaia-b2-rebuild-300430
 Fase: started
-Tag retorno: pre-prefill-suggestions-api-280427
-Ultima actualizacion: 2026-04-28 19:50 UTC
+Tag retorno: pre-facturaia-b2-rebuild-300430
+Ultima actualizacion: 2026-04-30 15:10 UTC
