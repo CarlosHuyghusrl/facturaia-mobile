@@ -37,6 +37,22 @@ import { api } from '../utils/apiClient';
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
 
+// Devuelve color/label para el badge de clasificación fiscal de la factura.
+// Prioridad: review > 606 > 607 > gasto sin RNC.
+function getClasificacionBadge(item: Factura): { label: string; color: string; textColor: string } {
+  if (item.extraction_status === 'review') {
+    return { label: '🟡 Revisar', color: '#fbbf24', textColor: '#78350f' };
+  }
+  if (item.aplica_606 === true) {
+    return { label: '🟢 606', color: '#22c55e', textColor: '#052e16' };
+  }
+  if (item.aplica_607 === true) {
+    return { label: '🔵 607', color: '#3b82f6', textColor: '#0c1e3e' };
+  }
+  // Validated pero sin clasificar (gasto sin RNC)
+  return { label: '⚪ Gasto', color: '#94a3b8', textColor: '#0f172a' };
+}
+
 const HomeScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const { cliente, logout } = useAuth();
@@ -221,12 +237,21 @@ const HomeScreen: React.FC = () => {
             </Text>
             <Text style={styles.facturaNcf}>{item.ncf}</Text>
           </View>
-          <Chip
-            style={[styles.estadoBadge, { backgroundColor: getEstadoColor(item.estado) }]}
-            textStyle={styles.estadoText}
-          >
-            {item.estado}
-          </Chip>
+          <View style={styles.badgeRow}>
+            <Chip
+              style={[styles.estadoBadge, { backgroundColor: getEstadoColor(item.estado) }]}
+              textStyle={styles.estadoText}
+            >
+              {item.estado}
+            </Chip>
+            <Chip
+              style={[styles.clasificacionBadge, { backgroundColor: getClasificacionBadge(item).color }]}
+              textStyle={{ color: getClasificacionBadge(item).textColor, fontSize: 11, fontWeight: '700' }}
+              compact
+            >
+              {getClasificacionBadge(item).label}
+            </Chip>
+          </View>
         </View>
 
         <Divider style={styles.divider} />
@@ -410,8 +435,19 @@ const styles = StyleSheet.create({
     marginTop: 2,
     fontFamily: 'monospace',
   },
+  badgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
   estadoBadge: {
     height: 28,
+    justifyContent: 'center',
+  },
+  clasificacionBadge: {
+    height: 24,
+    marginLeft: 6,
     justifyContent: 'center',
   },
   estadoText: {

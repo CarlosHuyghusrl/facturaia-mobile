@@ -7,7 +7,7 @@
  * 5. Opciones: Ver detalle / Escanear otra
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -61,6 +61,43 @@ const ScannerScreen: React.FC = () => {
     emisor_nombre: '',
     total: '',
   });
+
+  // Auto-redirect tras OCR según extraction_status
+  useEffect(() => {
+    if (!processResult?.invoice_id) return;
+    const status = processResult.extraction_status;
+    if (status === 'review' || status === 'error') {
+      // Pequeño delay para que usuario vea el resultado primero
+      const timer = setTimeout(() => {
+        navigation.navigate('InvoiceReview', {
+          invoiceId: processResult.invoice_id,
+          imageUrl: processResult.image_url,
+          extractedData: {
+            ncf: processResult.data.ncf || '',
+            fecha_emision: processResult.data.fecha_documento || '',
+            emisor_rnc: processResult.data.emisor_rnc || '',
+            emisor_nombre: processResult.data.proveedor || '',
+            monto_servicios: 0,
+            monto_bienes: processResult.data.subtotal || 0,
+            descuento: processResult.data.descuento || 0,
+            itbis_facturado: processResult.data.itbis || 0,
+            itbis_retenido: processResult.data.itbis_retenido || 0,
+            isc_monto: processResult.data.isc || 0,
+            propina_legal: processResult.data.propina || 0,
+            otros_impuestos: processResult.data.otros_impuestos || 0,
+            total_factura: processResult.data.monto || 0,
+            retencion_isr_tipo: processResult.data.retencion_isr_tipo
+              ? String(processResult.data.retencion_isr_tipo)
+              : '',
+            retencion_isr_monto: processResult.data.isr || 0,
+          },
+          validation: processResult.validation,
+          extractionStatus: processResult.extraction_status,
+        });
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [processResult, navigation]);
 
   const formatMoney = (amount: number) => {
     return `RD$ ${amount.toLocaleString('es-DO', { minimumFractionDigits: 2 })}`;

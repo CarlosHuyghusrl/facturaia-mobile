@@ -65,6 +65,9 @@ export interface Factura {
   // Estado
   estado: 'pendiente' | 'procesado' | 'procesada' | 'completado' | 'completada' | 'error' | 'validado' | 'rechazado';
 
+  // Estado de extracción/validación OCR (para badge de clasificación)
+  extraction_status?: 'validated' | 'review' | 'error' | 'pending';
+
   // Imagen
   archivo_url?: string;
   archivo_nombre?: string;

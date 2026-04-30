@@ -36,6 +36,24 @@ export interface ValidationError {
   field: string;
   error: string;
   severity: 'error' | 'warning';
+  code?: string;
+}
+
+// Mapping de códigos de error backend → mensajes legibles en español
+const ERROR_CODE_MESSAGES: Record<string, { title: string; description: string; severity: 'error' | 'warning' | 'info' }> = {
+  missing_emisor_rnc: { title: 'Falta RNC del emisor', description: 'Edita el campo "RNC Emisor" y guarda para que aplique al 606.', severity: 'error' },
+  invalid_ncf: { title: 'NCF inválido', description: 'El NCF debe tener al menos 11 caracteres (ej: B0100099999).', severity: 'error' },
+  missing_date: { title: 'Falta fecha del documento', description: 'Edita el campo "Fecha" para incluir la factura en el período correcto.', severity: 'error' },
+  invalid_amount: { title: 'Monto inválido', description: 'El monto debe ser mayor a 0.', severity: 'error' },
+  consumer_final_b02: { title: 'Consumidor Final', description: 'NCF B02/E32 = consumidor final. Es gasto válido pero NO se incluye en el 606.', severity: 'info' },
+  ncf_expired: { title: 'NCF vencido', description: 'Verifica la fecha del documento — el NCF parece vencido.', severity: 'warning' },
+  itbis_mismatch: { title: 'ITBIS no coincide', description: 'ITBIS no es 18% de la base. Verifica si hay productos exentos o ISC.', severity: 'warning' },
+  total_mismatch: { title: 'Total no coincide', description: 'El total no es la suma de subtotal + ITBIS + propina + ISC. Verifica.', severity: 'warning' },
+  nota_credito_sin_referencia: { title: 'Nota de crédito sin referencia', description: 'Las notas de crédito requieren NCF de la factura original (campo ncfModifica).', severity: 'error' },
+};
+
+function getReadableMessage(code: string): { title: string; description: string; severity: 'error' | 'warning' | 'info' } {
+  return ERROR_CODE_MESSAGES[code] ?? { title: code || 'Problema detectado', description: 'Verifica este campo.', severity: 'warning' };
 }
 
 export interface ValidationResult {
@@ -262,6 +280,38 @@ const InvoiceReviewScreen: React.FC = () => {
           </Chip>
         </View>
 
+        {/* BANNER TOP CON RAZÓN PRINCIPAL */}
+        {validation.errors.length > 0 && (
+          <Surface style={[styles.section, { backgroundColor: '#7f1d1d', borderLeftWidth: 4, borderLeftColor: '#ef4444' }]}>
+            <Text style={[styles.sectionTitle, { color: '#fecaca' }]}>
+              ⚠️ Esta factura necesita corrección antes de aplicar al 606
+            </Text>
+            {validation.errors.slice(0, 3).map((err, idx) => {
+              const readable = getReadableMessage(err.code || '');
+              return (
+                <View key={`banner-${idx}`} style={{ marginTop: 8 }}>
+                  <Text style={{ color: '#fecaca', fontWeight: '700', fontSize: 14 }}>{readable.title}</Text>
+                  <Text style={{ color: '#fca5a5', fontSize: 12, marginTop: 2 }}>{readable.description}</Text>
+                </View>
+              );
+            })}
+            {validation.errors.length > 3 && (
+              <Text style={{ color: '#fca5a5', fontSize: 11, marginTop: 6, fontStyle: 'italic' }}>
+                ... y {validation.errors.length - 3} problema(s) más abajo
+              </Text>
+            )}
+          </Surface>
+        )}
+
+        {/* BANNER INFO consumidor final (solo si presente) */}
+        {validation.errors.some(e => e.code === 'consumer_final_b02') && (
+          <Surface style={[styles.section, { backgroundColor: '#1e3a8a', borderLeftWidth: 4, borderLeftColor: '#3b82f6' }]}>
+            <Text style={{ color: '#bfdbfe', fontSize: 13 }}>
+              ℹ️ Esta factura es consumidor final (B02/E32). Se guarda como gasto pero NO entra en el 606.
+            </Text>
+          </Surface>
+        )}
+
         {/* Imagen de factura */}
         {params.imageUrl && (
           <TouchableOpacity onPress={() => setImageModalVisible(true)}>
@@ -380,19 +430,33 @@ const InvoiceReviewScreen: React.FC = () => {
           <Surface style={styles.section}>
             <Text style={styles.sectionTitle}>Problemas Detectados</Text>
 
-            {validation.errors.map((err, idx) => (
-              <View key={`err-${idx}`} style={styles.issueRow}>
-                <IconButton icon="alert-circle" iconColor="#ef4444" size={18} />
-                <Text style={styles.issueError}>{err.error}</Text>
-              </View>
-            ))}
+            {validation.errors.map((err, idx) => {
+              const readable = getReadableMessage(err.code || '');
+              const fallback = err.error || readable.title;
+              const display = err.code
+                ? `${readable.title} — ${readable.description}`
+                : fallback;
+              return (
+                <View key={`err-${idx}`} style={styles.issueRow}>
+                  <IconButton icon="alert-circle" iconColor="#ef4444" size={18} />
+                  <Text style={styles.issueError}>{display}</Text>
+                </View>
+              );
+            })}
 
-            {validation.warnings.map((warn, idx) => (
-              <View key={`warn-${idx}`} style={styles.issueRow}>
-                <IconButton icon="alert" iconColor="#f59e0b" size={18} />
-                <Text style={styles.issueWarning}>{warn.error}</Text>
-              </View>
-            ))}
+            {validation.warnings.map((warn, idx) => {
+              const readable = getReadableMessage(warn.code || '');
+              const fallback = warn.error || readable.title;
+              const display = warn.code
+                ? `${readable.title} — ${readable.description}`
+                : fallback;
+              return (
+                <View key={`warn-${idx}`} style={styles.issueRow}>
+                  <IconButton icon="alert" iconColor="#f59e0b" size={18} />
+                  <Text style={styles.issueWarning}>{display}</Text>
+                </View>
+              );
+            })}
           </Surface>
         )}
 
