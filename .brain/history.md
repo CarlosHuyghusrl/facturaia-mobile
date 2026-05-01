@@ -3963,3 +3963,7 @@ Verificacion: 3 waves auto-fluyo. W5 hook overwrite stub 360B->19B (lógica auto
 ### 2026-04-30 15:25 UTC -- facturaia-b2-rebuild-300430
 Completada. Commit: 6aa945f
 Verificacion: Commit 6aa945f master facturaia-ocr push OK. PASO 1 backfill 95 facturas HUYGHU 606 con receptor_rnc=131047939 (cliente_id 100% NULL en BD por lo que JOIN del SM no funciono, fallback constante HUYGHU para 606). PASO 2 trigger auto_set_receptor_rnc migration aplicada BD prod, 3 tests PASS. PASO 3 container v2.28.0 build OK 149MB rotacion exitosa + BUG B2 descubierto y resuelto: postgres user SASL fail desde host, fix DATABASE_URL=supabase_admin. SMOKE TEST FINAL: curl /api/formato-606/131047939?periodo=202504 retorna header 606|131047939|202504|11 + 11 lineas reales NCFs B01000009XX HUYGHU. 608 sin NCF anulados (correcto). Bugs estado: B1 RESUELTO, B2 RESUELTO, B3 itbis/montos SIGUE, B4/B5 SIGUEN. Container actual facturaia-ocr:v2.28.0 healthy, endpoint 606+608 OPERATIVOS produccion.
+
+### 2026-05-01 02:36 UTC -- fix-b2-rls-form-prefill-suggestions-010526
+Completada. Commit: cacb39e9
+Verificacion: Migration BD aplicada y commit cacb39e9 push main. psql gestoria_app + context Huyghu COUNT form_prefill_suggestions=42 vs antes ERROR permission denied. Chrome MCP /formularios/607/ no muestra texto error (vs audit previo KB 8651 donde si).
