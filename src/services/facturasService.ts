@@ -27,6 +27,8 @@ export interface Factura {
 
   // Montos base
   subtotal: number;
+  monto_servicios?: number;           // BUG-04 fix: desglose servicios desde OCR
+  monto_bienes?: number;              // BUG-04 fix: desglose bienes desde OCR
   descuento: number;                  // NUEVO - Afecta base imponible ITBIS
   monto: number;                      // Total final
 
