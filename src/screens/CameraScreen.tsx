@@ -61,43 +61,61 @@ const ScannerScreen: React.FC = () => {
     emisor_nombre: '',
     total: '',
   });
+  // Countdown ms para auto-redirect tras OCR (UX-06)
+  const [redirectIn, setRedirectIn] = useState<number | null>(null);
 
-  // Auto-redirect tras OCR según extraction_status
+  // Helper: navegar a InvoiceReview con el mapping de campos OCR
+  const navigateToReview = React.useCallback(() => {
+    if (!processResult?.invoice_id) return;
+    navigation.navigate('InvoiceReview', {
+      invoiceId: processResult.invoice_id,
+      imageUrl: processResult.image_url,
+      extractedData: {
+        ncf: processResult.data.ncf || '',
+        fecha_emision: processResult.data.fecha_documento || '',
+        emisor_rnc: processResult.data.emisor_rnc || '',
+        emisor_nombre: processResult.data.proveedor || '',
+        monto_servicios: processResult.data.monto_servicios ?? 0,
+        monto_bienes: processResult.data.monto_bienes ?? processResult.data.subtotal ?? 0,
+        descuento: processResult.data.descuento || 0,
+        itbis_facturado: processResult.data.itbis || 0,
+        itbis_retenido: processResult.data.itbis_retenido || 0,
+        isc_monto: processResult.data.isc || 0,
+        propina_legal: processResult.data.propina || 0,
+        otros_impuestos: processResult.data.otros_impuestos || 0,
+        total_factura: processResult.data.monto || 0,
+        retencion_isr_tipo: processResult.data.retencion_isr_tipo
+          ? String(processResult.data.retencion_isr_tipo)
+          : '',
+        retencion_isr_monto: processResult.data.isr || 0,
+      },
+      validation: processResult.validation,
+      extractionStatus: processResult.extraction_status,
+    });
+  }, [processResult, navigation]);
+
+  // Auto-redirect tras OCR según extraction_status (con countdown visible y cancelable)
   useEffect(() => {
     if (!processResult?.invoice_id) return;
     const status = processResult.extraction_status;
     if (status === 'review' || status === 'error') {
-      // Pequeño delay para que usuario vea el resultado primero
+      // Delay 1200ms con contador visible cada 100ms para que usuario sepa qué pasa
+      const TOTAL_MS = 1200;
+      setRedirectIn(TOTAL_MS);
+      const tickInterval = setInterval(() => {
+        setRedirectIn(prev => (prev !== null && prev > 100 ? prev - 100 : 0));
+      }, 100);
       const timer = setTimeout(() => {
-        navigation.navigate('InvoiceReview', {
-          invoiceId: processResult.invoice_id,
-          imageUrl: processResult.image_url,
-          extractedData: {
-            ncf: processResult.data.ncf || '',
-            fecha_emision: processResult.data.fecha_documento || '',
-            emisor_rnc: processResult.data.emisor_rnc || '',
-            emisor_nombre: processResult.data.proveedor || '',
-            monto_servicios: processResult.data.monto_servicios ?? 0,
-            monto_bienes: processResult.data.monto_bienes ?? processResult.data.subtotal ?? 0,
-            descuento: processResult.data.descuento || 0,
-            itbis_facturado: processResult.data.itbis || 0,
-            itbis_retenido: processResult.data.itbis_retenido || 0,
-            isc_monto: processResult.data.isc || 0,
-            propina_legal: processResult.data.propina || 0,
-            otros_impuestos: processResult.data.otros_impuestos || 0,
-            total_factura: processResult.data.monto || 0,
-            retencion_isr_tipo: processResult.data.retencion_isr_tipo
-              ? String(processResult.data.retencion_isr_tipo)
-              : '',
-            retencion_isr_monto: processResult.data.isr || 0,
-          },
-          validation: processResult.validation,
-          extractionStatus: processResult.extraction_status,
-        });
-      }, 1500);
-      return () => clearTimeout(timer);
+        setRedirectIn(null);
+        navigateToReview();
+      }, TOTAL_MS);
+      return () => {
+        clearTimeout(timer);
+        clearInterval(tickInterval);
+        setRedirectIn(null);
+      };
     }
-  }, [processResult, navigation]);
+  }, [processResult?.invoice_id, processResult?.extraction_status, navigateToReview]);
 
   const formatMoney = (amount: number) => {
     return `RD$ ${amount.toLocaleString('es-DO', { minimumFractionDigits: 2 })}`;
@@ -460,7 +478,42 @@ const ScannerScreen: React.FC = () => {
           </View>
         )}
 
-        {processResult?.extraction_status !== 'validated' && (
+        {processResult?.extraction_status !== 'validated' && redirectIn !== null && (
+          <View style={{ backgroundColor: '#78350f', padding: 12, borderRadius: 8, marginBottom: 12, width: '100%', paddingHorizontal: 16 }}>
+            <Text style={{ color: '#fbbf24', fontSize: 13, textAlign: 'center', fontWeight: '600' }}>
+              ⏱ Redirigiendo a edición en {Math.ceil(redirectIn / 1000)}s
+            </Text>
+            <Text style={{ color: '#fde68a', fontSize: 11, textAlign: 'center', marginTop: 4 }}>
+              Algunos campos del OCR necesitan tu revisión
+            </Text>
+            <View style={{ flexDirection: 'row', gap: 8, marginTop: 10 }}>
+              <Button
+                mode="contained"
+                compact
+                buttonColor="#fbbf24"
+                textColor="#0f172a"
+                onPress={() => {
+                  setRedirectIn(null);
+                  navigateToReview();
+                }}
+                style={{ flex: 1, borderRadius: 8 }}
+              >
+                Editar ahora
+              </Button>
+              <Button
+                mode="outlined"
+                compact
+                textColor="#fbbf24"
+                onPress={() => setRedirectIn(null)}
+                style={{ flex: 1, borderRadius: 8, borderColor: '#fbbf24' }}
+              >
+                Cancelar
+              </Button>
+            </View>
+          </View>
+        )}
+
+        {processResult?.extraction_status !== 'validated' && redirectIn === null && (
           <View style={{ backgroundColor: '#78350f', padding: 10, borderRadius: 8, marginBottom: 12 }}>
             <Text style={{ color: '#fbbf24', fontSize: 12, textAlign: 'center' }}>
               ⚠️ Algunos campos necesitan revisión. Ve al detalle para verificar.
