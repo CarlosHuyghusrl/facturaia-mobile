@@ -114,6 +114,60 @@ const FISCAL_FIELDS = [
   { key: 'total_factura', label: 'Total Factura', type: 'currency' },
 ] as const;
 
+// Configuración de campos de identificación (editable post-OCR)
+// Permite al usuario corregir NCF, RNC, proveedor y fecha si el OCR falló.
+// Validaciones inline: NCF formato B0X/E3X + 8-11 dígitos, RNC 9/11 dígitos,
+// fecha YYYY-MM-DD. Al guardar, el trigger BD auto_tag_factura_606
+// recalcula aplica_606 automáticamente.
+const IDENTIFICATION_FIELDS: Array<{
+  key: keyof InvoiceData;
+  label: string;
+  hint?: string;
+  validate?: (val: string) => string | null;
+  placeholder?: string;
+}> = [
+  {
+    key: 'ncf',
+    label: 'NCF',
+    hint: 'Comprobante Fiscal (B01XXXXXXXXX o E31XXXXXXXXX)',
+    placeholder: 'Ej: B0100012345',
+    validate: (val: string) => {
+      if (!val || val === '') return 'NCF requerido para aplicar al 606';
+      if (!/^[BE]\d{2}\d{8,11}$/i.test(val.toUpperCase())) {
+        return 'Formato inválido (esperado: B0X o E3X + 8-11 dígitos)';
+      }
+      return null;
+    },
+  },
+  {
+    key: 'emisor_rnc',
+    label: 'RNC del Emisor',
+    placeholder: '101000001',
+    validate: (val: string) => {
+      if (!val) return null; // RNC opcional para B02 consumidor final
+      if (!/^\d{9,11}$/.test(val.replace(/-/g, ''))) {
+        return 'RNC debe tener 9 u 11 dígitos';
+      }
+      return null;
+    },
+  },
+  {
+    key: 'emisor_nombre',
+    label: 'Proveedor',
+    placeholder: 'Nombre del proveedor',
+  },
+  {
+    key: 'fecha_emision',
+    label: 'Fecha de la Factura',
+    placeholder: 'YYYY-MM-DD',
+    validate: (val: string) => {
+      if (!val) return 'Fecha requerida';
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(val)) return 'Formato esperado: YYYY-MM-DD';
+      return null;
+    },
+  },
+];
+
 const InvoiceReviewScreen: React.FC = () => {
   const route = useRoute<RouteProp<RouteParams, 'InvoiceReview'>>();
   const navigation = useNavigation();
@@ -158,10 +212,19 @@ const InvoiceReviewScreen: React.FC = () => {
     return `RD$ ${value.toLocaleString('es-DO', { minimumFractionDigits: 2 })}`;
   };
 
+  // Campos que mantienen valor como string (no parsear a float)
+  const STRING_FIELDS = new Set<string>([
+    'retencion_isr_tipo',
+    'ncf',
+    'emisor_rnc',
+    'emisor_nombre',
+    'fecha_emision',
+  ]);
+
   const handleFieldChange = (key: string, value: string) => {
     setFormData(prev => ({
       ...prev,
-      [key]: key === 'retencion_isr_tipo' ? value : parseFloat(value) || 0,
+      [key]: STRING_FIELDS.has(key) ? value : parseFloat(value) || 0,
     }));
   };
 
@@ -329,25 +392,55 @@ const InvoiceReviewScreen: React.FC = () => {
           </TouchableOpacity>
         )}
 
-        {/* Datos del comprobante (no editables) */}
+        {/* Datos del comprobante (editables post-OCR) */}
         <Surface style={styles.section}>
-          <Text style={styles.sectionTitle}>Comprobante Fiscal</Text>
-          <View style={styles.row}>
-            <Text style={styles.label}>NCF:</Text>
-            <Text style={[styles.value, styles.ncf]}>{formData.ncf}</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.label}>Fecha:</Text>
-            <Text style={styles.value}>{formData.fecha_emision}</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.label}>Emisor:</Text>
-            <Text style={styles.value}>{formData.emisor_nombre}</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.label}>RNC Emisor:</Text>
-            <Text style={styles.value}>{formData.emisor_rnc}</Text>
-          </View>
+          <Text style={styles.sectionTitle}>Datos del Comprobante</Text>
+          <Text style={styles.hint}>
+            Edita estos campos si el OCR no detectó correctamente
+          </Text>
+
+          {IDENTIFICATION_FIELDS.map((field) => {
+            const value = String(formData[field.key] ?? '');
+            const validationMsg = field.validate ? field.validate(value) : null;
+            const isUppercaseField =
+              field.key === 'ncf' || field.key === 'emisor_rnc';
+            return (
+              <View key={field.key} style={styles.fieldContainer}>
+                <Text style={styles.fieldLabel}>
+                  {field.label}
+                  {field.validate && <Text style={styles.fieldRequired}> *</Text>}
+                </Text>
+                {field.hint && (
+                  <Text style={styles.fieldHint}>{field.hint}</Text>
+                )}
+                <TextInput
+                  value={value}
+                  onChangeText={(text) =>
+                    handleFieldChange(field.key, text)
+                  }
+                  placeholder={field.placeholder}
+                  placeholderTextColor="#64748b"
+                  style={[
+                    styles.input,
+                    validationMsg
+                      ? { borderColor: '#ef4444', borderWidth: 2 }
+                      : null,
+                  ]}
+                  mode="outlined"
+                  outlineColor={validationMsg ? '#ef4444' : '#334155'}
+                  activeOutlineColor={validationMsg ? '#ef4444' : '#22D3EE'}
+                  textColor="#fff"
+                  autoCapitalize={isUppercaseField ? 'characters' : 'sentences'}
+                  autoCorrect={false}
+                  accessibilityLabel={field.label}
+                  testID={`identification-input-${field.key}`}
+                />
+                {validationMsg && (
+                  <Text style={styles.fieldErrorText}>⚠️ {validationMsg}</Text>
+                )}
+              </View>
+            );
+          })}
         </Surface>
 
         {/* Campos fiscales editables */}
@@ -622,6 +715,22 @@ const styles = StyleSheet.create({
     color: '#94a3b8',
     fontSize: 12,
     marginBottom: 4,
+  },
+  fieldRequired: {
+    color: '#ef4444',
+    fontWeight: 'bold',
+  },
+  fieldHint: {
+    color: '#64748b',
+    fontSize: 11,
+    marginBottom: 6,
+    fontStyle: 'italic',
+  },
+  fieldErrorText: {
+    color: '#ef4444',
+    fontSize: 11,
+    marginTop: 4,
+    fontWeight: '500',
   },
   input: {
     backgroundColor: '#0f172a',
