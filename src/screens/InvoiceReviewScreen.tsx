@@ -4,7 +4,7 @@
  * Permite aprobar o corregir facturas antes de guardar
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   StyleSheet,
@@ -180,6 +180,17 @@ const InvoiceReviewScreen: React.FC = () => {
   const [isRevalidating, setIsRevalidating] = useState(false);
   const [imageModalVisible, setImageModalVisible] = useState(false);
 
+  // BUG-09: AbortController para cancelar requests in-flight si el componente se desmonta
+  // o si se dispara una nueva request mientras hay otra en curso.
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    return () => {
+      // Cleanup: abortar cualquier request pendiente al desmontar
+      abortControllerRef.current?.abort();
+    };
+  }, []);
+
   // Mapa de errores por campo para acceso rápido
   const errorMap = new Map<string, ValidationError>();
   validation.errors.forEach(err => errorMap.set(err.field, err));
@@ -263,12 +274,20 @@ const InvoiceReviewScreen: React.FC = () => {
     }
   }, [formData, params.invoiceId, navigation]);
 
-  // Corregir y guardar (re-validar y guardar)
-  const handleCorrectAndSave = useCallback(async () => {
+  // Lógica real del save (extraída para que UX-03 pueda envolverla con Alert.confirm)
+  const doSaveAndUpdate = useCallback(async () => {
+    // BUG-09: cancelar request previa si existiera y crear nuevo controller
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
+
     setIsSubmitting(true);
     try {
       // Primero revalidar
       const validateResult = await api.post('/api/v1/invoices/validate', formData);
+      if (signal.aborted) return;
 
       if (!validateResult.success) {
         console.error('Error en validación');
@@ -296,17 +315,108 @@ const InvoiceReviewScreen: React.FC = () => {
           warnings: newValidation.warnings,
         }),
       });
+      if (signal.aborted) return;
 
       if (saveResult.success) {
+        // UX-04: feedback explícito si la factura ahora aplica al 606 (antes no aplicaba)
+        const previouslyApplied = (params.extractedData as any)?.aplica_606 === true;
+        const nowApplied =
+          saveResult.factura?.aplica_606 === true ||
+          (saveResult.data && saveResult.data.aplica_606 === true) ||
+          saveResult.aplica_606 === true;
+
+        if (!previouslyApplied && nowApplied) {
+          Alert.alert(
+            'Factura aplica al 606',
+            'Esta factura ahora aparecerá en el formulario 606 del cliente.',
+            [
+              {
+                text: 'OK',
+                onPress: () => {
+                  // BUG-10: navigation.goBack() activa useFocusEffect en HomeScreen
+                  // que re-fetcha la lista de facturas. No requiere fetch explícito aquí.
+                  navigation.goBack();
+                },
+              },
+            ]
+          );
+          return;
+        }
+
+        // BUG-10: navigation.goBack() activa useFocusEffect en HomeScreen
+        // que re-fetcha la lista de facturas. No requiere fetch explícito aquí.
         navigation.goBack();
       }
-    } catch (error) {
+    } catch (error: any) {
+      if (error?.name === 'AbortError' || signal.aborted) {
+        return;
+      }
       console.error('[InvoiceReview] Error guardando:', error);
       Alert.alert('Error', 'No se pudieron guardar los cambios.');
     } finally {
-      setIsSubmitting(false);
+      if (!signal.aborted) {
+        setIsSubmitting(false);
+      }
     }
-  }, [formData, params.invoiceId, navigation]);
+  }, [formData, params.invoiceId, params.extractedData, navigation]);
+
+  // Corregir y guardar (re-validar y guardar)
+  // UX-03: si NCF está vacío, advertir que NO aparecerá en el 606 (bloqueante)
+  const handleCorrectAndSave = useCallback(async () => {
+    // BUG-09: early return si ya hay un submit en curso
+    if (isSubmitting) return;
+
+    // UX-03: NCF vacío → confirmar antes de guardar
+    if (!formData.ncf || formData.ncf.trim() === '') {
+      Alert.alert(
+        'NCF vacío',
+        'Esta factura no tiene NCF. Si la guardas así, NO aparecerá en el formato 606. ¿Deseas continuar?',
+        [
+          { text: 'Cancelar', style: 'cancel' },
+          {
+            text: 'Guardar igual',
+            onPress: () => {
+              void doSaveAndUpdate();
+            },
+          },
+        ]
+      );
+      return;
+    }
+
+    await doSaveAndUpdate();
+  }, [isSubmitting, formData.ncf, doSaveAndUpdate]);
+
+  // UX-05: Reintentar OCR — vuelve a procesar la imagen con IA
+  const handleReprocessOCR = useCallback(async () => {
+    if (isSubmitting) return;
+    Alert.alert(
+      'Reprocesar OCR',
+      'Se volverá a analizar la imagen con IA. Los cambios manuales se perderán. ¿Continuar?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Reprocesar',
+          onPress: async () => {
+            setIsSubmitting(true);
+            try {
+              await api.post(`/api/facturas/${params.invoiceId}/reprocesar`, {});
+              Alert.alert(
+                'OCR reiniciado',
+                'La factura está siendo analizada de nuevo. Volverás a la lista.',
+                [{ text: 'OK', onPress: () => navigation.goBack() }]
+              );
+            } catch (e: any) {
+              console.error('[InvoiceReview] Error reprocesando OCR:', e);
+              Alert.alert('Error', e?.message || 'No se pudo reprocesar.');
+            } finally {
+              setIsSubmitting(false);
+            }
+          },
+        },
+      ]
+    );
+  }, [params.invoiceId, isSubmitting, navigation]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -565,6 +675,21 @@ const InvoiceReviewScreen: React.FC = () => {
             Revalidar
           </Button>
 
+          {/* UX-05: Reprocesar OCR — solo si la extracción falló */}
+          {params.extractionStatus === 'error' && (
+            <Button
+              mode="outlined"
+              onPress={handleReprocessOCR}
+              loading={isSubmitting}
+              style={styles.reprocessButton}
+              textColor="#fbbf24"
+              accessibilityLabel="Volver a procesar OCR"
+              testID="review-reprocess-ocr"
+            >
+              🔄 Reprocesar OCR
+            </Button>
+          )}
+
           <View style={styles.mainActions}>
             {validation.valid && !validation.needs_review && (
               <Button
@@ -791,6 +916,10 @@ const styles = StyleSheet.create({
   revalidateButton: {
     marginBottom: 12,
     borderColor: '#22D3EE',
+  },
+  reprocessButton: {
+    marginBottom: 12,
+    borderColor: '#fbbf24',
   },
   mainActions: {
     flexDirection: 'row',
