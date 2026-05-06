@@ -3,7 +3,7 @@
  * Pull to refresh, infinite scroll, FAB escanear
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   StyleSheet,
@@ -11,6 +11,7 @@ import {
   RefreshControl,
   TouchableOpacity,
   Alert,
+  Image,
 } from 'react-native';
 import {
   Text,
@@ -31,6 +32,7 @@ import {
   listarFacturas,
   obtenerResumen,
 } from '../services/facturasService';
+import { optimisticStore, OptimisticFactura } from '../utils/optimisticStore';
 import { RootStackParamList } from '../../App';
 import OfflineQueueBadge from '../components/OfflineQueueBadge';
 import { api } from '../utils/apiClient';
@@ -65,8 +67,18 @@ const HomeScreen: React.FC = () => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [tipoFilter, setTipoFilter] = useState<'todas' | 'compras' | 'ventas'>('todas');
+  // Optimistic rows from CameraScreen — appear instantly while OCR runs in background
+  const [optimisticFacturas, setOptimisticFacturas] = useState<OptimisticFactura[]>([]);
 
   const ITEMS_PER_PAGE = 20;
+
+  // Subscribe to optimistic store — instant rows from CameraScreen
+  useEffect(() => {
+    const unsubscribe = optimisticStore.subscribe(rows => {
+      setOptimisticFacturas(rows);
+    });
+    return unsubscribe;
+  }, []);
 
   // Cargar datos iniciales
   const loadData = useCallback(async (refresh = false) => {
@@ -120,6 +132,8 @@ const HomeScreen: React.FC = () => {
   useFocusEffect(
     useCallback(() => {
       loadData(true);
+      // Prune completed optimistic rows — real data now loaded from BD
+      optimisticStore.pruneCompleted();
     }, [])
   );
 
@@ -128,6 +142,12 @@ const HomeScreen: React.FC = () => {
     if (tipoFilter === 'ventas') return f.aplica_607 === true;
     return true;
   });
+
+  // Optimistic rows only shown when 'procesando' (not yet in BD)
+  const pendingOptimistic = useMemo(
+    () => optimisticFacturas.filter(o => o.estado === 'procesando'),
+    [optimisticFacturas]
+  );
 
   // Formatear moneda
   const formatMoney = (amount: number) => {
@@ -162,7 +182,7 @@ const HomeScreen: React.FC = () => {
     return api.upload('/api/facturas/upload', formData);
   };
 
-  // Renderizar header de la lista (badge offline + resumen)
+  // Renderizar header de la lista (badge offline + resumen + filas optimistas)
   const renderListHeader = () => (
     <>
       <OfflineQueueBadge
@@ -198,6 +218,12 @@ const HomeScreen: React.FC = () => {
           </TouchableOpacity>
         ))}
       </View>
+      {/* Optimistic rows — appear instantly while OCR processes in background */}
+      {pendingOptimistic.map(item => (
+        <React.Fragment key={item.id}>
+          {renderOptimisticFactura({ item })}
+        </React.Fragment>
+      ))}
     </>
   );
 
@@ -220,6 +246,24 @@ const HomeScreen: React.FC = () => {
         </Text>
         <Text style={styles.resumenLabel}>Pendientes</Text>
       </Surface>
+    </View>
+  );
+
+  // Renderizar fila optimista (mientras OCR procesa en background)
+  const renderOptimisticFactura = ({ item }: { item: OptimisticFactura }) => (
+    <View style={styles.optimisticCard}>
+      {item.thumbnail_uri && (
+        <Image
+          source={{ uri: item.thumbnail_uri }}
+          style={styles.optimisticThumb}
+          resizeMode="cover"
+        />
+      )}
+      <View style={styles.optimisticInfo}>
+        <Text style={styles.optimisticLabel}>Procesando factura...</Text>
+        <Text style={styles.optimisticSub}>La IA está leyendo los datos</Text>
+      </View>
+      <ActivityIndicator size="small" color="#22D3EE" style={styles.optimisticSpinner} />
     </View>
   );
 
@@ -536,6 +580,42 @@ const styles = StyleSheet.create({
   },
   filterTabTextActive: {
     color: '#22D3EE',
+  },
+  // Optimistic invoice row styles
+  optimisticCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 16,
+    marginBottom: 12,
+    padding: 14,
+    borderRadius: 12,
+    backgroundColor: '#1e293b',
+    borderWidth: 1,
+    borderColor: '#22D3EE',
+    borderStyle: 'dashed',
+  },
+  optimisticThumb: {
+    width: 48,
+    height: 48,
+    borderRadius: 6,
+    marginRight: 12,
+    backgroundColor: '#334155',
+  },
+  optimisticInfo: {
+    flex: 1,
+  },
+  optimisticLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#22D3EE',
+  },
+  optimisticSub: {
+    fontSize: 12,
+    color: '#64748b',
+    marginTop: 2,
+  },
+  optimisticSpinner: {
+    marginLeft: 8,
   },
 });
 

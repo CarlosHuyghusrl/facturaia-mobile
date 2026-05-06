@@ -18,6 +18,8 @@ import {
   PermissionsAndroid,
   Alert,
 } from 'react-native';
+import * as ImageManipulator from 'expo-image-manipulator';
+import * as FileSystem from 'expo-file-system';
 import {
   Text,
   Button,
@@ -33,6 +35,7 @@ import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
 import {
   subirFacturaConValidacion,
   actualizarFactura,
+  processInvoiceOptimistic,
   InvoiceProcessResponse,
   Factura,
 } from '../services/facturasService';
@@ -134,6 +137,36 @@ const ScannerScreen: React.FC = () => {
       console.error('[Scanner] Error guardando tipo:', err);
     } finally {
       setIsSavingTipo(false);
+    }
+  };
+
+  /**
+   * Resize image to max 1920px width at 80% quality before upload.
+   * Reduces ~4MB image → ~200-400KB, cutting upload time ~1-2s
+   * and helping the AI model process smaller payloads faster.
+   */
+  const resizeImage = async (uri: string): Promise<string> => {
+    try {
+      const result = await ImageManipulator.manipulateAsync(
+        uri,
+        [{ resize: { width: 1920 } }],
+        { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG }
+      );
+
+      // Log size delta in dev builds
+      if (__DEV__) {
+        try {
+          const info = await FileSystem.getInfoAsync(result.uri, { size: true });
+          const sizeKB = info.exists && 'size' in info ? Math.round(info.size / 1024) : 0;
+          console.log(`[OCR] image resized → ${result.width}px, ~${sizeKB}KB`);
+        } catch (_) {}
+      }
+
+      return result.uri;
+    } catch (err) {
+      // Fail-safe: if resize fails, use original URI
+      console.warn('[OCR] resize failed, using original:', err);
+      return uri;
     }
   };
 
@@ -249,7 +282,11 @@ const ScannerScreen: React.FC = () => {
       setState('processing');
       setError(null);
 
-      const result = await subirFacturaConValidacion(imageUri);
+      // Step D: resize image before upload (4MB → ~200-400KB)
+      const resizedUri = await resizeImage(imageUri);
+
+      // Step C: use optimistic flow — HomeScreen shows "procesando" row instantly
+      const result = await processInvoiceOptimistic(resizedUri);
       setProcessResult(result);
 
       const factura = result.data;

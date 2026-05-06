@@ -4,6 +4,7 @@
  */
 
 import { api } from '../utils/apiClient';
+import { optimisticStore } from '../utils/optimisticStore';
 
 // Tipos
 export interface Factura {
@@ -355,6 +356,50 @@ export const checkDuplicateNCF = async (
   }
 };
 
+/**
+ * Process invoice with optimistic UI feedback.
+ * 1. Instantly adds a "procesando" row to optimisticStore (HomeScreen renders it immediately).
+ * 2. Uploads + processes image in background.
+ * 3. Updates the row to 'procesado'/'error' when backend responds.
+ * 4. Prunes the optimistic row after a short delay (HomeScreen will have refreshed by then).
+ *
+ * @param imagenUri - local URI of the (already resized) image
+ * @returns Promise<InvoiceProcessResponse> — resolves when OCR completes
+ */
+export const processInvoiceOptimistic = async (imagenUri: string): Promise<InvoiceProcessResponse> => {
+  const tempId = `optimistic-${Date.now()}`;
+
+  // Step 1: instant optimistic row
+  optimisticStore.add({
+    id: tempId,
+    estado: 'procesando',
+    thumbnail_uri: imagenUri,
+    fecha_captura: new Date().toISOString(),
+  });
+
+  try {
+    const result = await subirFacturaConValidacion(imagenUri);
+
+    // Step 2: update row with real data
+    optimisticStore.update(tempId, {
+      estado: 'procesado',
+      invoice_id: result.invoice_id,
+      proveedor: result.data.proveedor || (result.data as any).emisor_nombre || '',
+      ncf: result.data.ncf || '',
+      monto: result.data.monto || 0,
+    });
+
+    // Step 3: prune after HomeScreen has time to refresh
+    setTimeout(() => optimisticStore.remove(tempId), 4000);
+
+    return result;
+  } catch (err) {
+    optimisticStore.update(tempId, { estado: 'error' });
+    setTimeout(() => optimisticStore.remove(tempId), 6000);
+    throw err;
+  }
+};
+
 export default {
   subirFactura,
   subirFacturaConValidacion,
@@ -367,4 +412,5 @@ export default {
   eliminarFactura,
   reprocesarFactura,
   checkDuplicateNCF,
+  processInvoiceOptimistic,
 };
