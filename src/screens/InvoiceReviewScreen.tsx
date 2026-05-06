@@ -520,6 +520,15 @@ const InvoiceReviewScreen: React.FC = () => {
           </Surface>
         )}
 
+        {/* BANNER INFO descuento detectado por OCR */}
+        {(params.extractedData.descuento ?? 0) > 0 && (
+          <Surface style={[styles.section, { backgroundColor: '#1c3d2a', borderLeftWidth: 4, borderLeftColor: '#22c55e' }]}>
+            <Text style={{ color: '#86efac', fontSize: 13 }}>
+              ℹ️ Descuento RD$ {(params.extractedData.descuento ?? 0).toLocaleString('es-DO', { minimumFractionDigits: 2 })} detectado por OCR. Verifica que el monto sea correcto antes de guardar.
+            </Text>
+          </Surface>
+        )}
+
         {/* Imagen de factura */}
         {params.imageUrl && (
           <TouchableOpacity onPress={() => setImageModalVisible(true)}>
