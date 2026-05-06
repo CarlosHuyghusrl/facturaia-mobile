@@ -307,6 +307,54 @@ export const reprocesarFactura = async (id: string): Promise<Factura> => {
   return response.factura;
 };
 
+export interface DuplicateCheckResult {
+  exists: boolean;
+  existing?: {
+    id: string;
+    ncf: string;
+    fecha_documento: string;
+    monto: number;
+  };
+}
+
+/**
+ * P1 Anti-Duplicadas NCF — check pre-save (cross-stack).
+ *
+ * Verifica si un NCF ya está registrado para el mismo cliente+empresa+tipo
+ * antes de guardar la factura editada en InvoiceReviewScreen.
+ *
+ * Fail-open: si backend timeout/error → devuelve exists=false (NO bloquea UX).
+ * NCF vacío → devuelve exists=false directamente (sin llamar backend).
+ * Multi-tenant safe: empresa_id lo deriva el backend desde JWT, no se envía aquí.
+ *
+ * @param ncf - NCF del comprobante (puede ser vacío)
+ * @param cliente_id - UUID del cliente autenticado
+ * @param tipo - "606" (compras) o "607" (ventas)
+ */
+export const checkDuplicateNCF = async (
+  ncf: string,
+  tipo: '606' | '607'
+): Promise<DuplicateCheckResult> => {
+  // NCF vacío → siempre permitir (UNIQUE PARCIAL migration 20260501)
+  if (!ncf || ncf.trim() === '') {
+    return { exists: false };
+  }
+
+  try {
+    const params = new URLSearchParams({ ncf: ncf.trim(), tipo });
+    // api.get auto-adds Authorization: Bearer <jwt> via apiClient
+    const result = await api.get<DuplicateCheckResult>(
+      `/api/facturas/check-duplicate?${params.toString()}`,
+      { skipRetry: true } // No retry for fast pre-save check
+    );
+    return result;
+  } catch (e) {
+    // Fail-open: backend error/timeout → log + allow save (don't block UX)
+    console.warn('[checkDuplicateNCF] backend error (fail-open):', e);
+    return { exists: false };
+  }
+};
+
 export default {
   subirFactura,
   subirFacturaConValidacion,
@@ -318,4 +366,5 @@ export default {
   obtenerResumen,
   eliminarFactura,
   reprocesarFactura,
+  checkDuplicateNCF,
 };

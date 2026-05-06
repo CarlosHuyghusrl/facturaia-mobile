@@ -29,6 +29,7 @@ import {
 } from 'react-native-paper';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { api } from '../utils/apiClient';
+import { checkDuplicateNCF } from '../services/facturasService';
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 // Tipos para validación
@@ -384,8 +385,42 @@ const InvoiceReviewScreen: React.FC = () => {
       return;
     }
 
+    // P1 Anti-Duplicadas NCF: check pre-save (cross-stack)
+    // Determinar tipo según clasificación de la factura
+    const tipo = (params.extractedData as any)?.aplica_607 === true ? '607' : '606';
+    let dupResult: Awaited<ReturnType<typeof checkDuplicateNCF>> = { exists: false };
+    try {
+      dupResult = await checkDuplicateNCF(formData.ncf, tipo);
+    } catch {
+      // fail-open: error → allow save
+    }
+
+    if (dupResult.exists && dupResult.existing) {
+      const { existing } = dupResult;
+      const montoStr = existing.monto
+        ? `RD$ ${existing.monto.toLocaleString('es-DO', { minimumFractionDigits: 2 })}`
+        : 'N/A';
+      Alert.alert(
+        'Esta factura ya está registrada',
+        `NCF ${existing.ncf} del ${existing.fecha_documento || 'fecha desconocida'}\nMonto: ${montoStr}\n\n¿Qué quieres hacer?`,
+        [
+          {
+            text: 'Ver factura existente',
+            onPress: () => (navigation as any).navigate('InvoiceDetail', { id: existing.id }),
+          },
+          {
+            text: 'Continuar de todos modos',
+            style: 'destructive',
+            onPress: () => { void doSaveAndUpdate(); },
+          },
+          { text: 'Cancelar', style: 'cancel' },
+        ]
+      );
+      return;
+    }
+
     await doSaveAndUpdate();
-  }, [isSubmitting, formData.ncf, doSaveAndUpdate]);
+  }, [isSubmitting, formData.ncf, params.extractedData, doSaveAndUpdate, navigation]);
 
   // UX-05: Reintentar OCR — vuelve a procesar la imagen con IA
   const handleReprocessOCR = useCallback(async () => {
