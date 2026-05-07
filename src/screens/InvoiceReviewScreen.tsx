@@ -4,7 +4,7 @@
  * Permite aprobar o corregir facturas antes de guardar
  */
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   View,
   StyleSheet,
@@ -180,6 +180,21 @@ const InvoiceReviewScreen: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRevalidating, setIsRevalidating] = useState(false);
   const [imageModalVisible, setImageModalVisible] = useState(false);
+
+  // W17.2: estado controlado del descuento (editable, separado de formData para recálculo inmediato)
+  const [descuento, setDescuento] = useState<number>(params.extractedData.descuento ?? 0);
+
+  // W17.2: sincronizar descuento → formData cuando cambia
+  useEffect(() => {
+    setFormData(prev => ({ ...prev, descuento }));
+  }, [descuento]);
+
+  // W17.2: Base Gravada recalculada en tiempo real
+  const baseGravadaDinamica = useMemo(() => {
+    const subtotal = (formData.monto_servicios || 0) + (formData.monto_bienes || 0);
+    const exento = formData.itbis_facturado ? 0 : 0; // itbis_exento no está en InvoiceData, se usa 0
+    return Math.max(0, subtotal - descuento - exento);
+  }, [formData.monto_servicios, formData.monto_bienes, descuento]);
 
   // BUG-09: AbortController para cancelar requests in-flight si el componente se desmonta
   // o si se dispara una nueva request mientras hay otra en curso.
@@ -520,11 +535,11 @@ const InvoiceReviewScreen: React.FC = () => {
           </Surface>
         )}
 
-        {/* BANNER INFO descuento detectado por OCR */}
+        {/* BANNER INFO descuento detectado por OCR (solo pre-fill, no dinámico) */}
         {(params.extractedData.descuento ?? 0) > 0 && (
           <Surface style={[styles.section, { backgroundColor: '#1c3d2a', borderLeftWidth: 4, borderLeftColor: '#22c55e' }]}>
             <Text style={{ color: '#86efac', fontSize: 13 }}>
-              ℹ️ Descuento RD$ {(params.extractedData.descuento ?? 0).toLocaleString('es-DO', { minimumFractionDigits: 2 })} detectado por OCR. Verifica que el monto sea correcto antes de guardar.
+              ℹ️ Descuento RD$ {(params.extractedData.descuento ?? 0).toLocaleString('es-DO', { minimumFractionDigits: 2 })} detectado por OCR. Puedes editar el campo "Descuento" en Campos Fiscales si el monto no es correcto.
             </Text>
           </Surface>
         )}
@@ -607,6 +622,56 @@ const InvoiceReviewScreen: React.FC = () => {
             const message = getFieldMessage(field.key);
             const value = formData[field.key as keyof InvoiceData];
 
+            // W17.2: campo descuento usa estado controlado con validación y banner dinámico
+            if (field.key === 'descuento') {
+              const subtotal = (formData.monto_servicios || 0) + (formData.monto_bienes || 0);
+              return (
+                <View key={field.key} style={styles.fieldContainer}>
+                  <Text style={styles.fieldLabel}>Descuento proveedor (RD$)</Text>
+                  <TextInput
+                    value={String(descuento)}
+                    onChangeText={(text) => {
+                      const parsed = parseFloat(text);
+                      if (isNaN(parsed) || parsed < 0) {
+                        setDescuento(0);
+                      } else if (parsed > subtotal) {
+                        setDescuento(Math.max(0, subtotal - 0.01));
+                      } else {
+                        setDescuento(parsed);
+                      }
+                    }}
+                    keyboardType="decimal-pad"
+                    style={[
+                      styles.input,
+                      { borderColor: getBorderColor(status), borderWidth: 2 }
+                    ]}
+                    mode="outlined"
+                    outlineColor={getBorderColor(status)}
+                    activeOutlineColor={getBorderColor(status)}
+                    textColor="#fff"
+                    accessibilityLabel="Descuento proveedor"
+                    testID="fiscal-input-descuento"
+                  />
+                  {/* Banner dinámico Base Gravada — solo si descuento > 0 */}
+                  {descuento > 0 && (
+                    <View style={styles.descuentoBanner}>
+                      <Text style={styles.descuentoBannerText}>
+                        ✓ Descuento aplicado: -RD$ {descuento.toFixed(2)} | Base Gravada: RD$ {baseGravadaDinamica.toFixed(2)}
+                      </Text>
+                    </View>
+                  )}
+                  {message && (
+                    <Text style={[
+                      styles.fieldMessage,
+                      { color: status === 'error' ? '#ef4444' : '#f59e0b' }
+                    ]}>
+                      {message}
+                    </Text>
+                  )}
+                </View>
+              );
+            }
+
             return (
               <View key={field.key} style={styles.fieldContainer}>
                 <Text style={styles.fieldLabel}>{field.label}</Text>
@@ -643,8 +708,12 @@ const InvoiceReviewScreen: React.FC = () => {
 
           <View style={styles.computedRow}>
             <Text style={styles.computedLabel}>Base Gravada (servicios + bienes - descuento):</Text>
-            <Text style={styles.computedValue}>
-              {formatCurrency(validation.computed.base_gravada)}
+            {/* W17.2: mostrar valor dinámico cuando hay descuento editado, o el valor del backend */}
+            <Text style={[
+              styles.computedValue,
+              descuento > 0 ? { color: '#22c55e' } : null
+            ]}>
+              {formatCurrency(descuento > 0 ? baseGravadaDinamica : validation.computed.base_gravada)}
             </Text>
           </View>
 
@@ -990,6 +1059,21 @@ const styles = StyleSheet.create({
   modalImage: {
     width: SCREEN_WIDTH,
     height: '80%',
+  },
+  // W17.2: banner dinámico Base Gravada bajo campo descuento
+  descuentoBanner: {
+    marginTop: 6,
+    backgroundColor: '#14532d',
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderLeftWidth: 3,
+    borderLeftColor: '#22c55e',
+  },
+  descuentoBannerText: {
+    color: '#86efac',
+    fontSize: 12,
+    fontWeight: '600',
   },
 });
 
