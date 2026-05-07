@@ -41,6 +41,7 @@ import {
 } from '../services/facturasService';
 import { getNetworkErrorMessage } from '../utils/errorMessages';
 import { addToQueue, isOnline } from '../utils/offlineQueue';
+import { optimisticStore } from '../utils/optimisticStore';
 import { RootStackParamList } from '../../App';
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
@@ -70,6 +71,39 @@ const ScannerScreen: React.FC = () => {
   // Helper: navegar a InvoiceReview con el mapping de campos OCR
   const navigateToReview = React.useCallback(() => {
     if (!processResult?.invoice_id) return;
+
+    // W17.4 — t4: navigation transition start (InvoiceReview params dispatched)
+    const w17_t4 = Date.now();
+    const __W17_DIAG_NAV = __DEV__ || true;
+    if (__W17_DIAG_NAV) {
+      // Find the optimistic entry to get full timings
+      const storeEntries = optimisticStore.getAll();
+      const entry = storeEntries.find(f => f.invoice_id === processResult.invoice_id);
+      const t = entry?.timings;
+      if (t?.t0 !== undefined) {
+        const summary = {
+          t0: t.t0,
+          t1: t.t1 ?? null,
+          t2: t.t2 ?? null,
+          t3: t.t3 ?? null,
+          t4: w17_t4,
+          capture_to_resize: t.t1 !== undefined ? t.t1 - t.t0 : null,
+          upload: t.t2 !== undefined && t.t1 !== undefined ? t.t2 - t.t1 : null,
+          gemini_processing: t.t3 !== undefined && t.t2 !== undefined ? t.t3 - t.t2 : null,
+          ui_render: t.t3 !== undefined ? w17_t4 - t.t3 : null,
+          total: w17_t4 - t.t0,
+        };
+        console.log(`[W17.4] FULL TIMINGS scan_id=${processResult.invoice_id}`, JSON.stringify(summary));
+        console.log(`[W17.4] t4 (nav_start) = ${w17_t4} | delta_total=${summary.total}ms | delta_step=${summary.ui_render ?? '?'}ms`);
+      } else {
+        console.log(`[W17.4] t4 (nav_start) = ${w17_t4} (no t0 stored)`);
+      }
+      // Update store entry with t4
+      if (entry) {
+        optimisticStore.update(entry.id, { timings: { ...t, t4: w17_t4 } });
+      }
+    }
+
     navigation.navigate('InvoiceReview', {
       invoiceId: processResult.invoice_id,
       imageUrl: processResult.image_url,
@@ -260,9 +294,16 @@ const ScannerScreen: React.FC = () => {
     }
   };
 
+  // W17.4 — always-on diagnostics flag
+  const __W17_DIAG = __DEV__ || true;
+
   // Procesar imagen con OCR y validación
   const processImage = async () => {
     if (!imageUri) return;
+
+    // W17.4 — t0: user pressed "Procesar OCR" button
+    const w17_t0 = Date.now();
+    if (__W17_DIAG) console.log(`[W17.4] t0 (procesar_pressed) = ${w17_t0}`);
 
     // Check internet before uploading
     const online = await isOnline();
@@ -285,8 +326,37 @@ const ScannerScreen: React.FC = () => {
       // Step D: resize image before upload (4MB → ~200-400KB)
       const resizedUri = await resizeImage(imageUri);
 
+      // W17.4 — t1: image resize complete
+      const w17_t1 = Date.now();
+      if (__W17_DIAG) console.log(`[W17.4] t1 (resize_done) = ${w17_t1} | delta_t0_t1=${w17_t1 - w17_t0}ms`);
+
       // Step C: use optimistic flow — HomeScreen shows "procesando" row instantly
-      const result = await processInvoiceOptimistic(resizedUri);
+      const result = await processInvoiceOptimistic(resizedUri, w17_t0, w17_t1);
+
+      // W17.4 — t4 is measured when InvoiceReviewScreen mounts (see optimisticStore subscribe in navigateToReview)
+      // Capture approximate t4 here as navigation transition start
+      const w17_t4_nav = Date.now();
+      if (__W17_DIAG) {
+        const t2: number | undefined = (result as any).__w17_t2;
+        const t3: number | undefined = (result as any).__w17_t3;
+        // t4 from optimisticStore if available
+        const storeEntry = optimisticStore.getAll().find(f => f.invoice_id === result.invoice_id);
+        const t4 = storeEntry?.timings?.t4 ?? w17_t4_nav;
+        const t3_fallback = t3 ?? w17_t4_nav;
+        console.log(`[W17.4] FULL TIMINGS scan_id=${result.invoice_id}`, JSON.stringify({
+          t0: w17_t0,
+          t1: w17_t1,
+          t2: t2 ?? null,
+          t3: t3 ?? null,
+          t4,
+          capture_to_resize: w17_t1 - w17_t0,
+          upload: t2 !== undefined ? t2 - w17_t1 : null,
+          gemini_processing: t3 !== undefined && t2 !== undefined ? t3 - t2 : null,
+          ui_render: t4 - t3_fallback,
+          total: t4 - w17_t0,
+        }));
+      }
+
       setProcessResult(result);
 
       const factura = result.data;

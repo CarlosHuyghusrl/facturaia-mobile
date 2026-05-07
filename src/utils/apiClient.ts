@@ -278,6 +278,13 @@ export const api = {
         body: formData,
       });
 
+      // W17.4 — t2: HTTP response headers received (network round-trip + backend + Gemini done)
+      const __w17_t2 = Date.now();
+      const __W17_DIAG = __DEV__ || true;
+      if (__W17_DIAG) console.log(`[W17.4] t2 (headers_received) = ${__w17_t2}`);
+      // Expose t2 for facturasService to pick up
+      (api as any).__lastUploadT2 = __w17_t2;
+
       if (response.status === 401) {
         if (onUnauthorized) {
           onUnauthorized();
@@ -294,7 +301,14 @@ export const api = {
         throw err;
       }
 
-      return await response.json();
+      const parsed = await response.json();
+
+      // W17.4 — t3: response.json() fully parsed (struct deserialization done)
+      const __w17_t3 = Date.now();
+      if (__W17_DIAG) console.log(`[W17.4] t3 (json_parsed) = ${__w17_t3} | delta_t2_t3=${__w17_t3 - __w17_t2}ms`);
+      (api as any).__lastUploadT3 = __w17_t3;
+
+      return parsed;
     } catch (error: any) {
       console.error(`[apiClient] Upload error:`, error.message);
       // Enriquecer errores de red si no tienen mensaje amigable

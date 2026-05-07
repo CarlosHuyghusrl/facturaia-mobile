@@ -4,6 +4,15 @@
  * Avoids Redux/Context overhead for a single cross-screen concern.
  */
 
+/** W17.4 — Timing diagnostics for OCR end-to-end performance */
+export interface W17Timings {
+  t0: number; // ms since epoch — "Procesar OCR" button pressed
+  t1: number; // ms since epoch — image resize complete
+  t2: number; // ms since epoch — HTTP response headers received (fetch resolved)
+  t3: number; // ms since epoch — response.json() parsed (OCR + Gemini done)
+  t4: number; // ms since epoch — InvoiceReviewScreen mounted with data
+}
+
 export interface OptimisticFactura {
   id: string; // temporary local id (e.g. "optimistic-1715000000000")
   estado: 'procesando' | 'procesado' | 'error';
@@ -13,6 +22,7 @@ export interface OptimisticFactura {
   ncf?: string;
   monto?: number;
   invoice_id?: string; // filled when backend responds
+  timings?: Partial<W17Timings>; // W17.4 — filled progressively during scan
 }
 
 type Listener = (facturas: OptimisticFactura[]) => void;

@@ -6,6 +6,9 @@
 import { api } from '../utils/apiClient';
 import { optimisticStore } from '../utils/optimisticStore';
 
+// W17.4 — always-on for diagnostics (remove when bottleneck identified)
+const __W17_DIAG = __DEV__ || true;
+
 // Tipos
 export interface Factura {
   id: string;
@@ -364,29 +367,55 @@ export const checkDuplicateNCF = async (
  * 4. Prunes the optimistic row after a short delay (HomeScreen will have refreshed by then).
  *
  * @param imagenUri - local URI of the (already resized) image
+ * @param w17_t0 - W17.4 diagnostic: timestamp when user pressed "Procesar OCR"
+ * @param w17_t1 - W17.4 diagnostic: timestamp after image resize completed
  * @returns Promise<InvoiceProcessResponse> — resolves when OCR completes
  */
-export const processInvoiceOptimistic = async (imagenUri: string): Promise<InvoiceProcessResponse> => {
+export const processInvoiceOptimistic = async (
+  imagenUri: string,
+  w17_t0?: number,
+  w17_t1?: number,
+): Promise<InvoiceProcessResponse> => {
   const tempId = `optimistic-${Date.now()}`;
 
-  // Step 1: instant optimistic row
+  // Step 1: instant optimistic row (include partial timings if available)
   optimisticStore.add({
     id: tempId,
     estado: 'procesando',
     thumbnail_uri: imagenUri,
     fecha_captura: new Date().toISOString(),
+    timings: w17_t0 !== undefined ? { t0: w17_t0, t1: w17_t1 } : undefined,
   });
 
   try {
     const result = await subirFacturaConValidacion(imagenUri);
 
-    // Step 2: update row with real data
+    // W17.4 — pick up t2/t3 written by api.upload into __lastUploadT2/__lastUploadT3
+    const t2: number | undefined = (api as any).__lastUploadT2;
+    const t3: number | undefined = (api as any).__lastUploadT3;
+
+    if (__W17_DIAG && w17_t0 !== undefined && t2 !== undefined && t3 !== undefined) {
+      const upload_ms = w17_t1 !== undefined ? t2 - w17_t1 : undefined;
+      const gemini_json_ms = t3 - t2;
+      const total_so_far = t3 - w17_t0;
+      console.log(
+        `[W17.4] upload=${upload_ms !== undefined ? upload_ms + 'ms' : '?'} | gemini+json=${gemini_json_ms}ms | total_so_far=${total_so_far}ms`,
+      );
+    }
+
+    // Step 2: update row with real data + timings t2/t3
     optimisticStore.update(tempId, {
       estado: 'procesado',
       invoice_id: result.invoice_id,
       proveedor: result.data.proveedor || (result.data as any).emisor_nombre || '',
       ncf: result.data.ncf || '',
       monto: result.data.monto || 0,
+      timings: {
+        t0: w17_t0,
+        t1: w17_t1,
+        t2,
+        t3,
+      },
     });
 
     // Step 3: prune after HomeScreen has time to refresh
