@@ -115,6 +115,21 @@ const FISCAL_FIELDS = [
   { key: 'total_factura', label: 'Total Factura', type: 'currency' },
 ] as const;
 
+// W18.3 — Sanitize OCR noise antes de poblar formData
+// NCF: strip espacios/guiones/underscores + uppercase
+// fecha_emision: strip ISO 8601 T/Z suffix → solo YYYY-MM-DD
+// emisor_rnc: strip espacios/guiones/underscores
+function sanitizeFormData(data: InvoiceData): InvoiceData {
+  return {
+    ...data,
+    ncf: data.ncf ? data.ncf.toUpperCase().replace(/[\s\-_]/g, '') : data.ncf,
+    fecha_emision: data.fecha_emision
+      ? (data.fecha_emision.match(/^(\d{4}-\d{2}-\d{2})/) || [data.fecha_emision])[0]
+      : data.fecha_emision,
+    emisor_rnc: data.emisor_rnc ? data.emisor_rnc.replace(/[\s\-_]/g, '') : data.emisor_rnc,
+  };
+}
+
 // Configuración de campos de identificación (editable post-OCR)
 // Permite al usuario corregir NCF, RNC, proveedor y fecha si el OCR falló.
 // Validaciones inline: NCF formato B0X/E3X + 8-11 dígitos, RNC 9/11 dígitos,
@@ -130,11 +145,13 @@ const IDENTIFICATION_FIELDS: Array<{
   {
     key: 'ncf',
     label: 'NCF',
-    hint: 'Comprobante Fiscal (B01XXXXXXXXX o E31XXXXXXXXX)',
+    hint: 'Comprobante Fiscal (B01XXXXXXXXX, E31XXXXXXXXX, E32XXXXXXXXX, etc.)',
     placeholder: 'Ej: B0100012345',
     validate: (val: string) => {
       if (!val || val === '') return 'NCF requerido para aplicar al 606';
-      if (!/^[BE]\d{2}\d{8,11}$/i.test(val.toUpperCase())) {
+      // W18.1: normalizar antes de validar — strip espacios/guiones/underscores que OCR introduce
+      const cleaned = val.toUpperCase().replace(/[\s\-_]/g, '');
+      if (!/^[BE]\d{2}\d{8,11}$/i.test(cleaned)) {
         return 'Formato inválido (esperado: B0X o E3X + 8-11 dígitos)';
       }
       return null;
@@ -163,7 +180,9 @@ const IDENTIFICATION_FIELDS: Array<{
     placeholder: 'YYYY-MM-DD',
     validate: (val: string) => {
       if (!val) return 'Fecha requerida';
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(val)) return 'Formato esperado: YYYY-MM-DD';
+      // W18.2: strip ISO 8601 T/Z suffix — OCR puede retornar '2026-05-07T00:00:00Z'
+      const cleaned = (val.match(/^(\d{4}-\d{2}-\d{2})/) || [val])[0];
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(cleaned)) return 'Formato esperado: YYYY-MM-DD';
       return null;
     },
   },
@@ -175,11 +194,15 @@ const InvoiceReviewScreen: React.FC = () => {
   const params = route.params;
 
   // Estado de campos editables
-  const [formData, setFormData] = useState<InvoiceData>(params.extractedData);
+  // W18.3: sanitizeFormData en initial load — strip OCR noise (espacios en NCF, ISO suffix en fecha)
+  const [formData, setFormData] = useState<InvoiceData>(sanitizeFormData(params.extractedData));
   const [validation, setValidation] = useState<ValidationResult>(params.validation);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRevalidating, setIsRevalidating] = useState(false);
   const [imageModalVisible, setImageModalVisible] = useState(false);
+  // W18.3: track campos editados por usuario → limpiar errores backend de esos campos
+  // (re-aparecerán al hacer Revalidar si siguen fallando)
+  const [clearedBackendErrors, setClearedBackendErrors] = useState<Set<string>>(new Set());
 
   // W17.2: estado controlado del descuento (editable, separado de formData para recálculo inmediato)
   const [descuento, setDescuento] = useState<number>(params.extractedData.descuento ?? 0);
@@ -208,10 +231,15 @@ const InvoiceReviewScreen: React.FC = () => {
   }, []);
 
   // Mapa de errores por campo para acceso rápido
+  // W18.3: excluir campos que el usuario editó (clearedBackendErrors) hasta próxima revalidación
   const errorMap = new Map<string, ValidationError>();
-  validation.errors.forEach(err => errorMap.set(err.field, err));
+  validation.errors.forEach(err => {
+    if (!clearedBackendErrors.has(err.field)) {
+      errorMap.set(err.field, err);
+    }
+  });
   validation.warnings.forEach(warn => {
-    if (!errorMap.has(warn.field)) {
+    if (!clearedBackendErrors.has(warn.field) && !errorMap.has(warn.field)) {
       errorMap.set(warn.field, warn);
     }
   });
@@ -249,19 +277,34 @@ const InvoiceReviewScreen: React.FC = () => {
   ]);
 
   const handleFieldChange = (key: string, value: string) => {
+    let processedValue: string | number = STRING_FIELDS.has(key) ? value : (parseFloat(value) || 0);
+    // W18.3: uppercase NCF en tiempo real mientras escribe
+    if (key === 'ncf' && typeof processedValue === 'string') {
+      processedValue = processedValue.toUpperCase();
+    }
     setFormData(prev => ({
       ...prev,
-      [key]: STRING_FIELDS.has(key) ? value : parseFloat(value) || 0,
+      [key]: processedValue,
     }));
+    // W18.3: limpiar error backend del campo editado (reaparecerá al Revalidar si sigue fallando)
+    setClearedBackendErrors(prev => {
+      const next = new Set(prev);
+      next.add(key);
+      return next;
+    });
   };
 
   // Re-validar campos editados
   const handleRevalidate = useCallback(async () => {
     setIsRevalidating(true);
     try {
-      const result = await api.post('/api/v1/invoices/validate', formData);
+      // W18.3: sanitize antes de enviar al backend (strip OCR noise)
+      const sanitized = sanitizeFormData(formData);
+      const result = await api.post('/api/v1/invoices/validate', sanitized);
       if (result.success) {
         setValidation(result.data);
+        // W18.3: reset cleared errors — errores del backend nuevo son la fuente de verdad
+        setClearedBackendErrors(new Set());
       }
     } catch (error) {
       console.error('[InvoiceReview] Error revalidando:', error);
@@ -301,8 +344,11 @@ const InvoiceReviewScreen: React.FC = () => {
 
     setIsSubmitting(true);
     try {
+      // W18.3: sanitize antes de enviar al backend (strip OCR noise en NCF/fecha/RNC)
+      const sanitized = sanitizeFormData(formData);
+
       // Primero revalidar
-      const validateResult = await api.post('/api/v1/invoices/validate', formData);
+      const validateResult = await api.post('/api/v1/invoices/validate', sanitized);
       if (signal.aborted) return;
 
       if (!validateResult.success) {
@@ -324,7 +370,7 @@ const InvoiceReviewScreen: React.FC = () => {
 
       // Guardar con el nuevo status
       const saveResult = await api.put(`/api/facturas/${params.invoiceId}/update`, {
-        ...formData,
+        ...sanitized,
         extraction_status: newStatus,
         review_notes: JSON.stringify({
           errors: newValidation.errors,
