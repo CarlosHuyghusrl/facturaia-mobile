@@ -57,6 +57,34 @@ function getReadableMessage(code: string): { title: string; description: string;
   return ERROR_CODE_MESSAGES[code] ?? { title: code || 'Problema detectado', description: 'Verifica este campo.', severity: 'warning' };
 }
 
+// W18.9 — Mapa códigos error Backend → mensaje UX rico con valor recibido
+const ENHANCED_ERROR_MESSAGES: Record<string, (received: string) => string> = {
+  ncf_invalid_format: (received) =>
+    `Formato NCF no reconocido. Esperado: B01XXXXXXXXX o E31XXXXXXXXX (11-13 chars). Recibido: "${received}"`,
+  ncf_expired: (received) =>
+    `NCF vencido. Verifica fecha vencimiento del comprobante. Recibido: "${received}"`,
+  rnc_8_digitos_posible_corte: (received) =>
+    `RNC con 8 dígitos detectado — posible corte OCR. Esperado: 9 u 11 dígitos. Recibido: "${received}"`,
+  itbis_mismatch: (received) =>
+    `ITBIS no coincide con 18% de base gravada. Verifica si es factura mixta o exenta. Calculado: "${received}"`,
+  total_mismatch: (received) =>
+    `Total no coincide con suma componentes. Verifica subtotal + ITBIS + otros. Calculado: "${received}"`,
+  no_amounts: (_received) =>
+    `No se detectó monto de servicios o bienes. Verifica que la factura tenga importe.`,
+  missing_payment_date: (_received) =>
+    `Fecha de pago requerida cuando hay retenciones (ITBIS/ISR).`,
+  exento_sector_servicio_basico: (_received) =>
+    `Servicio básico exento (electricidad/combustible/agua) — ITBIS=0 por ley.`,
+  verificar_si_exento: (received) =>
+    `ITBIS=0 detectado. Verifica si proveedor es exento por ley. Recibido: "${received}"`,
+};
+
+function getEnhancedMessage(errorCode: string, fieldValue: string | number | null | undefined): string | null {
+  const fmt = ENHANCED_ERROR_MESSAGES[errorCode];
+  if (!fmt) return null;
+  return fmt(String(fieldValue ?? ''));
+}
+
 export interface ValidationResult {
   valid: boolean;
   needs_review: boolean;
@@ -252,8 +280,75 @@ const InvoiceReviewScreen: React.FC = () => {
 
   const getFieldMessage = (fieldKey: string): string | null => {
     const error = errorMap.get(fieldKey);
-    return error?.error || null;
+    if (!error) return null;
+    // W18.9: si hay código y plantilla rica, usar mensaje UX mejorado
+    if (error.code) {
+      const fieldValue = (formData as any)[fieldKey];
+      const enhanced = getEnhancedMessage(error.code, fieldValue);
+      if (enhanced) return enhanced;
+    }
+    return error.error || null;
   };
+
+  // W18.10 — Enviar reporte de bug al SM dashboard
+  const handleReportBug = useCallback((fieldKey: string) => {
+    const error = errorMap.get(fieldKey);
+    const reportData = {
+      timestamp: new Date().toISOString(),
+      invoice_id: params.invoiceId,
+      field: fieldKey,
+      error_code: error?.code,
+      error_message: error?.error || (error as any)?.message,
+      received_value: (formData as any)[fieldKey],
+      ocr_data_partial: {
+        ncf: formData.ncf,
+        emisor_rnc: formData.emisor_rnc,
+        fecha_emision: formData.fecha_emision,
+        total_factura: formData.total_factura,
+      },
+      app_version: '2.6.3',
+      user_agent: 'FacturaIA-Android',
+    };
+
+    Alert.alert(
+      'Reportar bug',
+      `Vamos a enviar los datos al equipo de soporte:\n\n` +
+      `Campo: ${fieldKey}\n` +
+      `Error: ${error?.code || 'desconocido'}\n` +
+      `Recibido: "${reportData.received_value}"\n\n` +
+      `¿Confirmas el envío?`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Enviar',
+          onPress: async () => {
+            try {
+              const res = await fetch('http://217.216.48.91:9099/api/sm/notifications', {
+                method: 'POST',
+                headers: {
+                  'X-Api-Key': 'huygh-secret-2026',
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  type: 'bug_report',
+                  result: `FacturaIA bug: ${fieldKey} ${error?.code}`,
+                  detail: JSON.stringify(reportData),
+                }),
+              });
+              if (res.ok) {
+                Alert.alert('Reporte enviado', 'Gracias. El equipo recibirá los datos.');
+              } else {
+                Alert.alert('Error', 'No se pudo enviar (HTTP ' + res.status + '). Intenta más tarde.');
+              }
+            } catch (e: any) {
+              console.error('[BugReport]', e);
+              Alert.alert('Error', 'No se pudo enviar el reporte: ' + (e?.message || 'red'));
+            }
+          },
+        },
+      ]
+    );
+  }, [errorMap, formData, params.invoiceId]);
 
   const getBorderColor = (status: 'valid' | 'warning' | 'error'): string => {
     switch (status) {
@@ -653,6 +748,17 @@ const InvoiceReviewScreen: React.FC = () => {
                 {validationMsg && (
                   <Text style={styles.fieldErrorText}>⚠️ {validationMsg}</Text>
                 )}
+                {/* W18.10: botón Reportar bug cuando hay error del backend en este campo */}
+                {getFieldStatus(field.key) === 'error' && (
+                  <View style={{ marginTop: 4, flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+                    <Text style={{ color: '#ef4444', fontSize: 12, flex: 1 }}>{getFieldMessage(field.key)}</Text>
+                    <TouchableOpacity onPress={() => handleReportBug(field.key)} accessibilityLabel="Reportar bug">
+                      <Text style={{ color: '#3b82f6', fontSize: 11, textDecorationLine: 'underline' }}>
+                        Reportar bug
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
               </View>
             );
           })}
@@ -741,6 +847,14 @@ const InvoiceReviewScreen: React.FC = () => {
                   ]}>
                     {message}
                   </Text>
+                )}
+                {/* W18.10: botón Reportar bug cuando hay error del backend en campo fiscal */}
+                {status === 'error' && (
+                  <TouchableOpacity onPress={() => handleReportBug(field.key)} accessibilityLabel="Reportar bug" style={{ marginTop: 4 }}>
+                    <Text style={{ color: '#3b82f6', fontSize: 11, textDecorationLine: 'underline' }}>
+                      Reportar bug
+                    </Text>
+                  </TouchableOpacity>
                 )}
               </View>
             );
