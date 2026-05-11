@@ -175,16 +175,17 @@ const ScannerScreen: React.FC = () => {
   };
 
   /**
-   * Resize image to max 1920px width at 80% quality before upload.
-   * Reduces ~4MB image → ~200-400KB, cutting upload time ~1-2s
-   * and helping the AI model process smaller payloads faster.
+   * Resize image to max 2560px width at 92% quality before upload.
+   * Reduces ~4-12MB image → ~500-800KB, balanceando upload speed
+   * con calidad visual al verla en SaaS gestoriard Vista Previa modal.
+   * OCR Gemini Vision sigue funcional hasta 4MB.
    */
   const resizeImage = async (uri: string): Promise<string> => {
     try {
       const result = await ImageManipulator.manipulateAsync(
         uri,
-        [{ resize: { width: 1920 } }],
-        { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG }
+        [{ resize: { width: 2560 } }],
+        { compress: 0.92, format: ImageManipulator.SaveFormat.JPEG }
       );
 
       // Log size delta in dev builds
