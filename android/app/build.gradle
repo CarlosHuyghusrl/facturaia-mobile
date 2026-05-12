@@ -91,8 +91,8 @@ android {
         applicationId 'com.gestoriard.facturaia'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 17
-        versionName "2.6.8"
+        versionCode 19
+        versionName "2.7.0"
     }
     signingConfigs {
         debug {
@@ -144,6 +144,43 @@ android {
     }
     androidResources {
         ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:!CVS:!thumbs.db:!picasa.ini:!*~'
+    }
+}
+
+// Smoke test pre-build hook (SK-3) — bloquea release si npm run smoke-test falla.
+// Override emergencia: SKIP_SMOKE_TEST=true ./gradlew assembleRelease
+//
+// Requiere backend facturaia-ocr corriendo en localhost:8081 ANTES del build.
+// Solo aplica a buildType=release. Builds debug/dev no bloqueados.
+def projectRootDir = rootDir.getAbsoluteFile().getParentFile()
+
+task smokeTest(type: Exec) {
+    workingDir = projectRootDir
+    commandLine 'npm', 'run', 'smoke-test'
+    ignoreExitValue = false
+    standardOutput = System.out
+    errorOutput = System.err
+    onlyIf {
+        def skip = System.getenv('SKIP_SMOKE_TEST')
+        if (skip != null && skip.equalsIgnoreCase('true')) {
+            println "⚠️  SK-3: SKIP_SMOKE_TEST=true detectado — saltando smoke test (emergencia)"
+            return false
+        }
+        return true
+    }
+    doFirst {
+        println "🔬 SK-3: ejecutando smoke test pre-build (10 fixtures) — espera ~10s..."
+    }
+}
+
+afterEvaluate {
+    android.applicationVariants.all { variant ->
+        if (variant.buildType.name == 'release') {
+            def assembleTaskName = "assemble${variant.name.capitalize()}"
+            tasks.matching { it.name == assembleTaskName }.configureEach {
+                dependsOn smokeTest
+            }
+        }
     }
 }
 

@@ -1,6 +1,6 @@
 {
   "name": "FacturaScannerApp",
-  "version": "1.0.0",
+  "version": "2.7.0",
   "description": "Mobile app for scanning and managing invoices with OCR and AI",
   "private": true,
   "scripts": {

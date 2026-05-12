@@ -31,6 +31,58 @@ import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { api } from '../utils/apiClient';
 import { checkDuplicateNCF } from '../services/facturasService';
 import { SM_DASHBOARD_URL, SM_DASHBOARD_API_KEY } from '../config/api';
+
+/**
+ * W21prep — Hook validate-ncf (preparado para Wave 7 gestoriard)
+ *
+ * Cuando gestoriard exponga endpoint POST /api/v2/dgii/validate-ncf,
+ * activar este hook descomentándolo + integrar el estado en el render
+ * del campo NCF (badge color según validity).
+ *
+ * Estados esperados del backend:
+ *   - vigente:           NCF activo en DGII OFV (verde ✓)
+ *   - vencido:           NCF expirado (rojo)
+ *   - not_found:         DGII no reconoce NCF (amarillo)
+ *   - unknown_retry_later: query DGII falló transient (gris)
+ *
+ * Endpoint Wave 7 (cuando exista):
+ *   POST https://gestoriard.com/api/v2/dgii/validate-ncf
+ *   body: { ncf: string, rnc_emisor: string }
+ *   response: { status: 'vigente'|'vencido'|'not_found'|'unknown_retry_later',
+ *               fecha_vencimiento?: string }
+ *
+ * QR e-CF: cuando seguridad cierre con librería QR local, validar offline E31-E47.
+ */
+// import { useEffect, useState } from 'react';
+// type NcfValidationStatus = 'vigente' | 'vencido' | 'not_found' | 'unknown_retry_later' | 'idle';
+// type NcfValidationResult = {
+//   status: NcfValidationStatus;
+//   fecha_vencimiento?: string;
+//   error?: string;
+// };
+// function useNcfValidation(ncf: string, rncEmisor: string): NcfValidationResult {
+//   const [result, setResult] = useState<NcfValidationResult>({ status: 'idle' });
+//   useEffect(() => {
+//     if (!ncf || !rncEmisor) {
+//       setResult({ status: 'idle' });
+//       return;
+//     }
+//     // TODO Wave 7: llamar gestoriard /api/v2/dgii/validate-ncf
+//     // const controller = new AbortController();
+//     // fetch(`${GESTORIARD_BASE}/api/v2/dgii/validate-ncf`, {
+//     //   method: 'POST',
+//     //   headers: { 'Content-Type': 'application/json' },
+//     //   body: JSON.stringify({ ncf, rnc_emisor: rncEmisor }),
+//     //   signal: controller.signal,
+//     // })
+//     //   .then(r => r.json())
+//     //   .then((data: NcfValidationResult) => setResult(data))
+//     //   .catch(() => setResult({ status: 'unknown_retry_later', error: 'network' }));
+//     // return () => controller.abort();
+//   }, [ncf, rncEmisor]);
+//   return result;
+// }
+
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 // Tipos para validación

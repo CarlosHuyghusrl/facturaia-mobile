@@ -163,7 +163,9 @@ export const subirFactura = async (imagenUri: string): Promise<Factura> => {
   // Preparar imagen para upload
   const filename = imagenUri.split('/').pop() || 'factura.jpg';
   const match = /\.(\w+)$/.exec(filename);
-  const type = match ? `image/${match[1]}` : 'image/jpeg';
+  // W21fix B-N1c: Supabase Storage rechaza 'image/jpg' (HTTP 415). Normalizar a 'image/jpeg'.
+  const ext = match ? match[1].toLowerCase() : 'jpeg';
+  const type = ext === 'jpg' ? 'image/jpeg' : `image/${ext}`;
 
   formData.append('image', {
     uri: imagenUri,
@@ -188,7 +190,9 @@ export const subirFacturaConValidacion = async (imagenUri: string): Promise<Invo
   // Preparar imagen para upload
   const filename = imagenUri.split('/').pop() || 'factura.jpg';
   const match = /\.(\w+)$/.exec(filename);
-  const type = match ? `image/${match[1]}` : 'image/jpeg';
+  // W21fix B-N1c: Supabase Storage rechaza 'image/jpg' (HTTP 415). Normalizar a 'image/jpeg'.
+  const ext = match ? match[1].toLowerCase() : 'jpeg';
+  const type = ext === 'jpg' ? 'image/jpeg' : `image/${ext}`;
 
   formData.append('image', {
     uri: imagenUri,

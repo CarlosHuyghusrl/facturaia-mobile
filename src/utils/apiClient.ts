@@ -158,7 +158,10 @@ export const apiClient = async <T = any>(
         if (onUnauthorized) {
           onUnauthorized();
         }
-        throw new Error('Sesión expirada. Por favor inicie sesión nuevamente.');
+        // W21fix B-N2: añadir .status al error para que UI muestre código correcto.
+        const err = new Error('Sesión expirada. Por favor inicie sesión nuevamente.') as any;
+        err.status = 401;
+        throw err;
       }
 
       // Manejar otros errores HTTP
@@ -174,9 +177,13 @@ export const apiClient = async <T = any>(
           continue;
         }
 
+        // W21fix B-N2: propagar status HTTP en el error para que consumers
+        // (Wave 4 handleRevalidate, etc.) muestren el código real en vez de "sin código".
         const err = new Error(errorMessage) as any;
+        err.status = response.status;
         err.errorCode = errorBody.error_code;
         err.userMessage = errorMessage;
+        err.body = errorBody;
         throw err;
       }
 
@@ -289,15 +296,21 @@ export const api = {
         if (onUnauthorized) {
           onUnauthorized();
         }
-        throw new Error('Sesión expirada');
+        // W21fix B-N2: añadir .status al error para que UI muestre código correcto.
+        const err401 = new Error('Sesión expirada') as any;
+        err401.status = 401;
+        throw err401;
       }
 
       if (!response.ok) {
         const errorBody = await response.json().catch(() => ({}));
         const friendlyMessage = getUserMessage(errorBody) || errorBody.error || errorBody.message || `Error ${response.status}`;
+        // W21fix B-N2: propagar status HTTP en el error para upload también.
         const err = new Error(friendlyMessage) as any;
+        err.status = response.status;
         err.errorCode = errorBody.error_code;
         err.userMessage = friendlyMessage;
+        err.body = errorBody;
         throw err;
       }
 
