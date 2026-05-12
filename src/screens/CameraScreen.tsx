@@ -641,6 +641,15 @@ const ScannerScreen: React.FC = () => {
           </View>
         ) : null}
 
+        {/* Preview imagen escaneada */}
+        {imageUri && (
+          <Image
+            source={{ uri: imageUri }}
+            style={{ width: 200, height: 260, borderRadius: 8, marginBottom: 12, backgroundColor: '#1e293b' }}
+            resizeMode="contain"
+          />
+        )}
+
         {/* Info breve de la factura */}
         <Surface style={styles.quickInfo}>
           <Text style={styles.quickNCF}>{factura?.ncf || editData.ncf}</Text>
@@ -648,7 +657,20 @@ const ScannerScreen: React.FC = () => {
           <Text style={styles.quickTotal}>{formatMoney(factura?.monto || parseFloat(editData.total) || 0)}</Text>
         </Surface>
 
-        {/* Dos botones principales */}
+        {/* Botón principal: Editar campos (siempre visible) */}
+        <Button
+          mode="contained"
+          onPress={navigateToReview}
+          style={{ width: '100%', borderRadius: 8, marginBottom: 8 }}
+          contentStyle={{ paddingVertical: 6 }}
+          buttonColor="#f59e0b"
+          textColor="#0f172a"
+          icon="pencil"
+        >
+          Revisar / Editar campos
+        </Button>
+
+        {/* Dos botones secundarios */}
         <View style={styles.quickActions}>
           <Button
             mode="contained"
@@ -675,14 +697,14 @@ const ScannerScreen: React.FC = () => {
           </Button>
         </View>
 
-        {/* Link pequeño para ver detalle si necesita editar */}
+        {/* Link pequeño para ver detalle */}
         <Button
           mode="text"
           onPress={goToDetail}
           textColor="#64748b"
           compact
         >
-          Ver detalle / editar
+          Ver detalle
         </Button>
       </View>
     </View>
