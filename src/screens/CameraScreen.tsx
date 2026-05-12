@@ -175,17 +175,21 @@ const ScannerScreen: React.FC = () => {
   };
 
   /**
-   * Resize image to max 2560px width at 92% quality before upload.
-   * Reduces ~4-12MB image → ~500-800KB, balanceando upload speed
-   * con calidad visual al verla en SaaS gestoriard Vista Previa modal.
-   * OCR Gemini Vision sigue funcional hasta 4MB.
+   * Resize image to max 3200px width at 95% quality before upload.
+   * Increases resolution vs v2.6.4 (2560px@92%) to maximize OCR accuracy.
+   * react-native-document-scanner-plugin does NOT support colorScheme/B&W option
+   * natively — so max resolution + quality is the best lever for Gemini Vision.
+   * Result: ~800KB-1.2MB JPEG (within Gemini Vision 4MB recommended limit).
+   *
+   * §11 Wave futura: add expo-image-manipulator-extra or native grayscale module
+   * for true B/W threshold filter when scanning low-contrast invoices.
    */
   const resizeImage = async (uri: string): Promise<string> => {
     try {
       const result = await ImageManipulator.manipulateAsync(
         uri,
-        [{ resize: { width: 2560 } }],
-        { compress: 0.92, format: ImageManipulator.SaveFormat.JPEG }
+        [{ resize: { width: 3200 } }],
+        { compress: 0.95, format: ImageManipulator.SaveFormat.JPEG }
       );
 
       // Log size delta in dev builds
@@ -209,7 +213,7 @@ const ScannerScreen: React.FC = () => {
   const startScanner = async () => {
     try {
       const result = await DocumentScanner.scanDocument({
-        croppedImageQuality: 70,
+        croppedImageQuality: 100,
         maxNumDocuments: 1,
         responseType: 'imageFilePath',
       });
