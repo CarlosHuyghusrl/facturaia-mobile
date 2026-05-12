@@ -1,11 +1,27 @@
 # Task
 
-No hay tarea activa.
+## Tarea actual: APK v2.6.6 + backend v2.45.0 (ready) — 120526
 
+## Estado
+- APK v2.6.6 entregado (commit 3721d0c0): botón Revisar/Editar siempre visible en success state + preview imagen
+- Backend v2.44.0 deployed healthy. v2.45.0 imagen ready (NO deployed mid-test)
+- Backend fix v2.45.0 (commit 39b4310 factory): DualImageStore log primary + combined error
 
+## Progreso 120526
+- [x] Fix #1-3 InvoiceReview (commit e948f3e3)
+- [x] APK v2.6.5 build (commit 9b53ea8d)
+- [x] Backend v2.44.0 ReprocesarClientInvoice role cliente (commit b808c6f)
+- [x] APK v2.6.6 botón Revisar visible + preview imagen (commit 3721d0c0)
+- [x] Audit imágenes Acela: 2 facturas archivo_url=NULL (root: Supabase transient + MinIO down)
+- [x] Backend v2.45.0 fix DualImageStore silent fallback (commit 39b4310, imagen sha256:4ce2fa85)
+- [ ] Deploy v2.45.0 (script /tmp/restart-facturaia-ocr-v2.45.0.sh — await ventana sin test activo)
 
-## Progreso actual
-WAVE 5 audit profundo COMPLETO + WAVE 4 BACKLOG completado. KB 8842 ready-apertura-piloto-huyghu-final-060526. Veredicto: 🟡 READY-CON-AVISO + 1 BLOQUEADOR pendiente clarif dgii. W5.1 responsive 7/9 PASS (2 timeout IT-1). W5.2 WCAG 2.1 AA FAIL 4 criterios (form labels 9% 606, NO H1 3/3, touch targets 48-59%, NO aria-live). W5.3 calco fiel NO MATCH 34 deltas (606=18, 607=8, IT-1=8). §11 caveat: si DGII OFV acepta TXT canonónico (Norma 07-2018 Art. 12), Excel solo backup, deltas cosméticos. W5.4 14 bugs re-clasif: 0 CRITICAL, 5 HIGH, 6 MEDIUM, 3 LOW + UPGRADE GAP-IT1-04 cas027 negativo MEDIUM→HIGH riesgo fiscal. A2A 299 enviado arquitecto-dgii-scraper pregunta DECISIVA TXT vs Excel. A2A 300 enviado SM verdict + plan acción CASO A (TXT) vs CASO B (Excel). Wave 4 backlog: W3 APK v2.5.0 BUILD SUCCESSFUL arm64 25.3M signed (sub-agent 32min), W4 admin-dashboard 736+1777 LOC, W5 onboarding 472+1345 LOC, W2 specs Anexo A+IR-2+IR-17 1171 LOC. KBs creadas hoy 8772-8842. Total 6 forms specs + 3 component specs + APK v2.5.0 + 3 gaps gestoriard + 5 audit reports.
+## Próximo paso
+1. Carlos test APK v2.6.6 device real
+2. Si Carlos confirma APK OK → deploy backend v2.45.0 con script
+3. Wave futura: retry primary 3x antes fallback en DualImageStore.Upload
 
-## Proximo paso
-Standby esperando respuesta arquitecto-dgii-scraper sobre TXT vs Excel canonónico DGII OFV. Mientras: opcional commit APK v2.5.0 build.gradle changes (versionCode 9 + versionName 2.5.0 + applicationId com.gestoriard.facturaia). Si dgii responde TXT canonónico → plan CASO A (5 fixes wave 6 gestoriard P1). Si Excel obligatorio → plan CASO B (5 días rebuild generators bloqueando apertura). Si ctx alto → cierre graceful persistencia 4x para próxima sesión.
+## Archivos modificados
+- src/screens/CameraScreen.tsx (preview imagen + botón Revisar)
+- android/app/build.gradle (vc=15 vn=2.6.6)
+- /home/gestoria/factory/apps/facturaia-ocr/internal/storage/imagestore.go (slog + combined error)
