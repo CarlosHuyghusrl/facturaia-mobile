@@ -429,6 +429,8 @@ const InvoiceReviewScreen: React.FC = () => {
   }, [formData, params.invoiceId, navigation]);
 
   // Lógica real del save (extraída para que UX-03 pueda envolverla con Alert.confirm)
+  // FIX-W19: revalidación no bloquea el save — si falla, se guarda con status actual
+  // FIX-W19: errores backend se muestran en Alert con razón legible
   const doSaveAndUpdate = useCallback(async () => {
     // BUG-09: cancelar request previa si existiera y crear nuevo controller
     if (abortControllerRef.current) {
@@ -442,28 +444,31 @@ const InvoiceReviewScreen: React.FC = () => {
       // W18.3: sanitize antes de enviar al backend (strip OCR noise en NCF/fecha/RNC)
       const sanitized = sanitizeFormData(formData);
 
-      // Primero revalidar
-      const validateResult = await api.post('/api/v1/invoices/validate', sanitized);
+      // FIX-W19: revalidar pero no bloquear save si revalidación falla
+      let newStatus = params.extractionStatus || 'review';
+      let newValidation = validation;
+      try {
+        const validateResult = await api.post('/api/v1/invoices/validate', sanitized);
+        if (!signal.aborted && validateResult.success && validateResult.data) {
+          newValidation = validateResult.data;
+          setValidation(newValidation);
+          // Determinar status basado en validación
+          if (!newValidation.valid) {
+            newStatus = 'error';
+          } else if (newValidation.needs_review) {
+            newStatus = 'review';
+          } else {
+            newStatus = 'validated';
+          }
+        }
+      } catch (validateError) {
+        // FIX-W19: revalidación falló → guardar con status actual (no bloquear)
+        console.warn('[InvoiceReview] Revalidación falló, guardando con status actual:', validateError);
+      }
+
       if (signal.aborted) return;
 
-      if (!validateResult.success) {
-        console.error('Error en validación');
-        setIsSubmitting(false);
-        return;
-      }
-
-      const newValidation = validateResult.data;
-      setValidation(newValidation);
-
-      // Determinar status basado en validación
-      let newStatus = 'validated';
-      if (!newValidation.valid) {
-        newStatus = 'error';
-      } else if (newValidation.needs_review) {
-        newStatus = 'review';
-      }
-
-      // Guardar con el nuevo status
+      // Guardar con el status determinado (o status actual si revalidación falló)
       const saveResult = await api.put(`/api/facturas/${params.invoiceId}/update`, {
         ...sanitized,
         extraction_status: newStatus,
@@ -503,19 +508,25 @@ const InvoiceReviewScreen: React.FC = () => {
         // BUG-10: navigation.goBack() activa useFocusEffect en HomeScreen
         // que re-fetcha la lista de facturas. No requiere fetch explícito aquí.
         navigation.goBack();
+      } else {
+        // FIX-W19: mostrar razón de error del backend
+        const errorMsg = saveResult.error || saveResult.message || 'No se pudieron guardar los cambios.';
+        Alert.alert('Error al guardar', errorMsg);
       }
     } catch (error: any) {
       if (error?.name === 'AbortError' || signal.aborted) {
         return;
       }
       console.error('[InvoiceReview] Error guardando:', error);
-      Alert.alert('Error', 'No se pudieron guardar los cambios.');
+      // FIX-W19: mostrar razón específica si disponible (ej: "NCF duplicado")
+      const errorMsg = error?.message || 'No se pudieron guardar los cambios.';
+      Alert.alert('Error', errorMsg);
     } finally {
       if (!signal.aborted) {
         setIsSubmitting(false);
       }
     }
-  }, [formData, params.invoiceId, params.extractedData, navigation]);
+  }, [formData, params.invoiceId, params.extractedData, params.extractionStatus, validation, navigation]);
 
   // Corregir y guardar (re-validar y guardar)
   // UX-03: si NCF está vacío, advertir que NO aparecerá en el 606 (bloqueante)
@@ -575,39 +586,59 @@ const InvoiceReviewScreen: React.FC = () => {
       return;
     }
 
-    await doSaveAndUpdate();
+    // FIX-W19: confirmación antes de guardar cuando hay datos editados
+    Alert.alert(
+      'Guardar cambios',
+      'Vas a guardar los cambios de esta factura. ¿Confirmas?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Guardar', onPress: () => { void doSaveAndUpdate(); } },
+      ]
+    );
   }, [isSubmitting, formData.ncf, params.extractedData, doSaveAndUpdate, navigation]);
 
+  // W19.Q3 — Re-procesar OCR: estado controlado independiente de isSubmitting
+  const [isReprocessing, setIsReprocessing] = useState(false);
+
   // UX-05: Reintentar OCR — vuelve a procesar la imagen con IA
+  // FIX-W19: disponible siempre (no solo cuando extractionStatus===error)
+  // FIX-W19: usa isReprocessing propio para no bloquear botón Guardar
+  // FIX-W19: actualiza formData con datos re-extraídos sin navegar de vuelta
   const handleReprocessOCR = useCallback(async () => {
-    if (isSubmitting) return;
+    if (isReprocessing) return;
     Alert.alert(
-      'Reprocesar OCR',
-      'Se volverá a analizar la imagen con IA. Los cambios manuales se perderán. ¿Continuar?',
+      'Re-procesar OCR',
+      'Esto volverá a leer la factura con la IA usando la imagen original guardada. Los datos actuales se reemplazarán. ¿Continuar?',
       [
         { text: 'Cancelar', style: 'cancel' },
         {
-          text: 'Reprocesar',
+          text: 'Re-procesar',
           onPress: async () => {
-            setIsSubmitting(true);
+            setIsReprocessing(true);
             try {
-              await api.post(`/api/facturas/${params.invoiceId}/reprocesar`, {});
-              Alert.alert(
-                'OCR reiniciado',
-                'La factura está siendo analizada de nuevo. Volverás a la lista.',
-                [{ text: 'OK', onPress: () => navigation.goBack() }]
-              );
+              const res = await api.post(`/api/facturas/${params.invoiceId}/reprocesar`, {});
+              if (res.success && res.data) {
+                setFormData(sanitizeFormData(res.data));
+                setClearedBackendErrors(new Set());
+                Alert.alert('OK', 'Factura re-procesada. Revisa los campos extraídos.');
+              } else if (res.success && res.factura) {
+                setFormData(sanitizeFormData(res.factura));
+                setClearedBackendErrors(new Set());
+                Alert.alert('OK', 'Factura re-procesada. Revisa los campos extraídos.');
+              } else {
+                Alert.alert('Error', res.error || 'No se pudo re-procesar la factura.');
+              }
             } catch (e: any) {
               console.error('[InvoiceReview] Error reprocesando OCR:', e);
-              Alert.alert('Error', e?.message || 'No se pudo reprocesar.');
+              Alert.alert('Error inesperado', e?.message || 'Re-procesar falló');
             } finally {
-              setIsSubmitting(false);
+              setIsReprocessing(false);
             }
           },
         },
       ]
     );
-  }, [params.invoiceId, isSubmitting, navigation]);
+  }, [params.invoiceId, isReprocessing]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -685,22 +716,24 @@ const InvoiceReviewScreen: React.FC = () => {
           </Surface>
         )}
 
-        {/* Imagen de factura */}
-        {params.imageUrl && (
-          <TouchableOpacity onPress={() => setImageModalVisible(true)}>
-            <Surface style={styles.imageContainer}>
-              <Image
-                source={{ uri: params.imageUrl }}
-                style={styles.facturaImage}
-                resizeMode="contain"
-              />
-              <View style={styles.imageOverlay}>
-                <IconButton icon="magnify-plus" iconColor="#fff" size={20} />
-                <Text style={styles.imageHint}>Ampliar</Text>
-              </View>
-            </Surface>
-          </TouchableOpacity>
-        )}
+        {/* Imagen de factura — FIX-W19: mostrar siempre con fallback a backend URL */}
+        {/* Prioridad: 1) imageUrl del param (backend URL), 2) URL construida con invoiceId */}
+        <TouchableOpacity onPress={() => setImageModalVisible(true)}>
+          <Surface style={styles.imageContainer}>
+            <Image
+              source={{ uri: params.imageUrl || `http://217.216.48.91:8081/api/facturas/${params.invoiceId}/imagen` }}
+              style={styles.facturaImage}
+              resizeMode="contain"
+              onError={() => {
+                console.warn('[InvoiceReview] Imagen no disponible, usando fallback URL');
+              }}
+            />
+            <View style={styles.imageOverlay}>
+              <IconButton icon="magnify-plus" iconColor="#fff" size={20} />
+              <Text style={styles.imageHint}>Ampliar</Text>
+            </View>
+          </Surface>
+        </TouchableOpacity>
 
         {/* Datos del comprobante (editables post-OCR) */}
         <Surface style={styles.section}>
@@ -948,20 +981,19 @@ const InvoiceReviewScreen: React.FC = () => {
             Revalidar
           </Button>
 
-          {/* UX-05: Reprocesar OCR — solo si la extracción falló */}
-          {params.extractionStatus === 'error' && (
-            <Button
-              mode="outlined"
-              onPress={handleReprocessOCR}
-              loading={isSubmitting}
-              style={styles.reprocessButton}
-              textColor="#fbbf24"
-              accessibilityLabel="Volver a procesar OCR"
-              testID="review-reprocess-ocr"
-            >
-              🔄 Reprocesar OCR
-            </Button>
-          )}
+          {/* FIX-W19: Reprocesar OCR — siempre visible (no solo cuando extractionStatus===error) */}
+          <Button
+            mode="outlined"
+            onPress={handleReprocessOCR}
+            loading={isReprocessing}
+            disabled={isReprocessing}
+            style={styles.reprocessButton}
+            textColor="#fbbf24"
+            accessibilityLabel="Re-procesar OCR"
+            testID="review-reprocess-ocr"
+          >
+            🔄 {isReprocessing ? 'Re-procesando...' : 'Re-procesar OCR'}
+          </Button>
 
           <View style={styles.mainActions}>
             {validation.valid && !validation.needs_review && (
@@ -1008,7 +1040,7 @@ const InvoiceReviewScreen: React.FC = () => {
             <IconButton icon="close" iconColor="#fff" size={28} />
           </TouchableOpacity>
           <Image
-            source={{ uri: params.imageUrl }}
+            source={{ uri: params.imageUrl || `http://217.216.48.91:8081/api/facturas/${params.invoiceId}/imagen` }}
             style={styles.modalImage}
             resizeMode="contain"
           />
