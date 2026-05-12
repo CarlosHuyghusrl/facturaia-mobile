@@ -240,11 +240,11 @@ const InvoiceReviewScreen: React.FC = () => {
     setFormData(prev => ({ ...prev, descuento }));
   }, [descuento]);
 
-  // W17.2: Base Gravada recalculada en tiempo real
+  // W17.2 + W19fix: Subtotal bruto recalculado en tiempo real
+  // (anterior tenía ternary muerto `itbis_facturado ? 0 : 0` — siempre 0)
   const baseGravadaDinamica = useMemo(() => {
     const subtotal = (formData.monto_servicios || 0) + (formData.monto_bienes || 0);
-    const exento = formData.itbis_facturado ? 0 : 0; // itbis_exento no está en InvoiceData, se usa 0
-    return Math.max(0, subtotal - descuento - exento);
+    return Math.max(0, subtotal - descuento);
   }, [formData.monto_servicios, formData.monto_bienes, descuento]);
 
   // BUG-09: AbortController para cancelar requests in-flight si el componente se desmonta
@@ -390,23 +390,47 @@ const InvoiceReviewScreen: React.FC = () => {
   };
 
   // Re-validar campos editados
+  // V19fix: retries 2x exponencial + detalle error (HTTP + snippet + acción sugerida)
   const handleRevalidate = useCallback(async () => {
     setIsRevalidating(true);
-    try {
-      // W18.3: sanitize antes de enviar al backend (strip OCR noise)
-      const sanitized = sanitizeFormData(formData);
-      const result = await api.post('/api/v1/invoices/validate', sanitized);
-      if (result.success) {
-        setValidation(result.data);
-        // W18.3: reset cleared errors — errores del backend nuevo son la fuente de verdad
-        setClearedBackendErrors(new Set());
+    const sanitized = sanitizeFormData(formData);
+    const delays = [0, 1000, 3000]; // intento inmediato + 2 retries
+    let lastError: any = null;
+    let lastResponseText = '';
+
+    for (let i = 0; i < delays.length; i++) {
+      if (delays[i] > 0) {
+        await new Promise(r => setTimeout(r, delays[i]));
       }
-    } catch (error) {
-      console.error('[InvoiceReview] Error revalidando:', error);
-      Alert.alert('Error', 'No se pudo revalidar la factura.');
-    } finally {
-      setIsRevalidating(false);
+      try {
+        const result = await api.post('/api/v1/invoices/validate', sanitized);
+        if (result.success) {
+          setValidation(result.data);
+          setClearedBackendErrors(new Set());
+          setIsRevalidating(false);
+          return;
+        }
+        lastError = result.error || 'Respuesta sin success';
+        lastResponseText = JSON.stringify(result).slice(0, 200);
+      } catch (error: any) {
+        lastError = error;
+        lastResponseText = (error?.message || String(error)).slice(0, 200);
+        console.warn(`[InvoiceReview] Revalidación intento ${i + 1}/${delays.length} falló:`, error);
+      }
     }
+
+    setIsRevalidating(false);
+    const httpCode = lastError?.status || lastError?.response?.status || 'sin código';
+    const accion = httpCode === 401 || httpCode === 403
+      ? 'Cierra sesión y vuelve a entrar.'
+      : httpCode >= 500
+      ? 'Servidor caído. Intenta en 1 minuto o reporta a soporte.'
+      : 'Verifica tu conexión a internet o reporta a soporte.';
+    Alert.alert(
+      'No se pudo revalidar',
+      `Endpoint: POST /api/v1/invoices/validate\nHTTP: ${httpCode}\nDetalle: ${lastResponseText || lastError?.message || 'sin detalle'}\n\nAcción sugerida: ${accion}`,
+      [{ text: 'OK' }]
+    );
   }, [formData]);
 
   // Aprobar factura (guardar como validada)
@@ -664,16 +688,23 @@ const InvoiceReviewScreen: React.FC = () => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Header con estado */}
-        <View style={styles.header}>
-          <Text style={styles.title}>Revisión de Factura</Text>
-          <Chip
-            style={[styles.statusChip, { backgroundColor: getStatusColor(params.extractionStatus) }]}
-            textStyle={styles.statusText}
-          >
-            {getStatusLabel(params.extractionStatus)}
-          </Chip>
-        </View>
+        {/* Header con estado — V19fix: live derived de validation actual */}
+        {(() => {
+          let liveStatus: 'validated' | 'review' | 'error' = 'validated';
+          if (validation.errors.length > 0) liveStatus = 'error';
+          else if (validation.warnings.length > 0) liveStatus = 'review';
+          return (
+            <View style={styles.header}>
+              <Text style={styles.title}>Revisión de Factura</Text>
+              <Chip
+                style={[styles.statusChip, { backgroundColor: getStatusColor(liveStatus) }]}
+                textStyle={styles.statusText}
+              >
+                {getStatusLabel(liveStatus)}
+              </Chip>
+            </View>
+          );
+        })()}
 
         {/* BANNER TOP CON RAZÓN PRINCIPAL */}
         {validation.errors.length > 0 && (
@@ -894,14 +925,13 @@ const InvoiceReviewScreen: React.FC = () => {
           })}
         </Surface>
 
-        {/* Sección de valores calculados */}
+        {/* Sección de valores calculados — V19fix: labels descriptivos sin engaño UX */}
         <Surface style={styles.section}>
-          <Text style={styles.sectionTitle}>Valores Calculados</Text>
-          <Text style={styles.hint}>Basados en reglas DGII</Text>
+          <Text style={styles.sectionTitle}>Cálculos de Referencia</Text>
+          <Text style={styles.hint}>Comparación con regla 18% estándar — facturas mixtas (supermercado) tienen items exentos/16% y el ITBIS real puede ser menor</Text>
 
           <View style={styles.computedRow}>
-            <Text style={styles.computedLabel}>Base Gravada (servicios + bienes - descuento):</Text>
-            {/* W17.2: mostrar valor dinámico cuando hay descuento editado, o el valor del backend */}
+            <Text style={styles.computedLabel}>Subtotal bruto (servicios + bienes - descuento):</Text>
             <Text style={[
               styles.computedValue,
               descuento > 0 ? { color: '#22c55e' } : null
@@ -911,25 +941,25 @@ const InvoiceReviewScreen: React.FC = () => {
           </View>
 
           <View style={styles.computedRow}>
-            <Text style={styles.computedLabel}>ITBIS Esperado (18% base gravada):</Text>
+            <Text style={styles.computedLabel}>ITBIS facturado (real factura):</Text>
             <Text style={styles.computedValue}>
-              {formatCurrency(validation.computed.itbis_esperado)}
+              {formatCurrency(formData.itbis_facturado || 0)}
             </Text>
           </View>
 
           <View style={styles.computedRow}>
-            <Text style={styles.computedLabel}>Monto Facturado (servicios + bienes - descuento):</Text>
-            <Text style={styles.computedValue}>
-              {formatCurrency(validation.computed.monto_facturado)}
+            <Text style={styles.computedLabel}>ITBIS si todo fuera 18% (referencia teórica):</Text>
+            <Text style={[styles.computedValue, { color: '#94a3b8', fontStyle: 'italic' }]}>
+              {formatCurrency(validation.computed.itbis_esperado)}
             </Text>
           </View>
 
           <Divider style={styles.divider} />
 
           <View style={styles.computedRow}>
-            <Text style={styles.computedLabelTotal}>Total Esperado:</Text>
+            <Text style={styles.computedLabelTotal}>Total real factura:</Text>
             <Text style={styles.computedValueTotal}>
-              {formatCurrency(validation.computed.total_esperado)}
+              {formatCurrency(formData.total_factura || validation.computed.total_esperado)}
             </Text>
           </View>
         </Surface>
