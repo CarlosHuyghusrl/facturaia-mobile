@@ -1,0 +1,15 @@
+{
+  "ncf": "E310000098765",
+  "rnc_emisor": "101013855",
+  "nombre_emisor": "EDESUR DOMINICANA SA",
+  "fecha_emision": "2026-05-05",
+  "monto_servicios": 8500.00,
+  "monto_bienes": 0,
+  "descuento": 0,
+  "itbis_facturado": 0,
+  "itbis_exento": 8500.00,
+  "total_factura": 8500.00,
+  "categoria_itbis": "exento",
+  "sector_proveedor": "electricidad",
+  "tipo_ncf": "E31"
+}

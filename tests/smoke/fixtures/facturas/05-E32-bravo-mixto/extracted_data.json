@@ -1,0 +1,14 @@
+{
+  "ncf": "E320000123456",
+  "rnc_emisor": "131234568",
+  "nombre_emisor": "BRAVO SUPERMERCADOS SAS",
+  "fecha_emision": "2026-05-08",
+  "monto_servicios": 0,
+  "monto_bienes": 2150.00,
+  "descuento": 50.00,
+  "itbis_facturado": 178.50,
+  "total_factura": 2278.50,
+  "categoria_itbis": "mixto",
+  "sector_proveedor": "comercio",
+  "tipo_ncf": "E32"
+}

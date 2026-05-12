@@ -1,0 +1,14 @@
+{
+  "ncf": "E320000045678",
+  "rnc_emisor": "131234567",
+  "nombre_emisor": "PRICESMART DOMINICANA SA",
+  "fecha_emision": "2026-05-10",
+  "monto_servicios": 0,
+  "monto_bienes": 3200.00,
+  "descuento": 0,
+  "itbis_facturado": 245.30,
+  "total_factura": 3445.30,
+  "categoria_itbis": "mixto",
+  "sector_proveedor": "comercio",
+  "tipo_ncf": "E32"
+}

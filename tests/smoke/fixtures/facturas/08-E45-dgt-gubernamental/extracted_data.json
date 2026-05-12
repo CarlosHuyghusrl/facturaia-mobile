@@ -1,0 +1,15 @@
+{
+  "ncf": "E450000033333",
+  "rnc_emisor": "401007896",
+  "nombre_emisor": "DIRECCION GENERAL DE TRANSITO",
+  "fecha_emision": "2026-05-07",
+  "monto_servicios": 600.00,
+  "monto_bienes": 0,
+  "descuento": 0,
+  "itbis_facturado": 0,
+  "itbis_exento": 600.00,
+  "total_factura": 600.00,
+  "categoria_itbis": "exento",
+  "sector_proveedor": "gobierno",
+  "tipo_ncf": "E45"
+}

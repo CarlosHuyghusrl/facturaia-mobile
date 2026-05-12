@@ -1,0 +1,14 @@
+{
+  "ncf": "B0200001234",
+  "rnc_emisor": "130123456",
+  "nombre_emisor": "RESTAURANTE LA SUIZA SRL",
+  "fecha_emision": "2026-05-09",
+  "monto_servicios": 850.00,
+  "monto_bienes": 0,
+  "descuento": 0,
+  "itbis_facturado": 153.00,
+  "total_factura": 1003.00,
+  "categoria_itbis": "general",
+  "sector_proveedor": "comercio",
+  "tipo_ncf": "B02"
+}
