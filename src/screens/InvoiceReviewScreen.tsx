@@ -30,6 +30,7 @@ import {
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { api } from '../utils/apiClient';
 import { checkDuplicateNCF } from '../services/facturasService';
+import { SM_DASHBOARD_URL, SM_DASHBOARD_API_KEY } from '../config/api';
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 // Tipos para validación
@@ -323,10 +324,10 @@ const InvoiceReviewScreen: React.FC = () => {
           text: 'Enviar',
           onPress: async () => {
             try {
-              const res = await fetch('http://217.216.48.91:9099/api/sm/notifications', {
+              const res = await fetch(`${SM_DASHBOARD_URL}/api/sm/notifications`, {
                 method: 'POST',
                 headers: {
-                  'X-Api-Key': 'huygh-secret-2026',
+                  'X-Api-Key': SM_DASHBOARD_API_KEY,
                   'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
@@ -443,6 +444,8 @@ const InvoiceReviewScreen: React.FC = () => {
       });
       if (result.success) {
         navigation.goBack();
+      } else {
+        Alert.alert('No se pudo aprobar', result.error || 'Backend rechazó la aprobación sin detalle. Verifica que la factura no esté ya en 606 o aprobada por otro usuario.');
       }
     } catch (error) {
       console.error('[InvoiceReview] Error aprobando:', error);
@@ -644,6 +647,12 @@ const InvoiceReviewScreen: React.FC = () => {
               if (res.success && res.data) {
                 setFormData(sanitizeFormData(res.data));
                 setClearedBackendErrors(new Set());
+                // V20fix: resetear descuento y validation tras reprocess
+                // (antes baseGravadaDinamica quedaba stale con descuento viejo)
+                setDescuento((res.data as any)?.descuento ?? 0);
+                if ((res.data as any)?.validation) {
+                  setValidation((res.data as any).validation);
+                }
                 Alert.alert('OK', 'Factura re-procesada. Revisa los campos extraídos.');
               } else if (res.success && res.factura) {
                 setFormData(sanitizeFormData(res.factura));
@@ -1026,18 +1035,26 @@ const InvoiceReviewScreen: React.FC = () => {
           </Button>
 
           <View style={styles.mainActions}>
-            {validation.valid && !validation.needs_review && (
-              <Button
-                mode="contained"
-                onPress={handleApprove}
-                loading={isSubmitting}
-                style={styles.approveButton}
-                buttonColor="#22c55e"
-                testID="review-approve"
-                accessibilityLabel="Aprobar factura"
-              >
-                Aprobar
-              </Button>
+            <Button
+              mode="contained"
+              onPress={handleApprove}
+              loading={isSubmitting}
+              disabled={!validation.valid || validation.needs_review}
+              style={styles.approveButton}
+              buttonColor="#22c55e"
+              textColor="#0f172a"
+              icon="check-circle"
+              testID="review-approve"
+              accessibilityLabel="Aprobar factura"
+            >
+              Aprobar
+            </Button>
+            {(!validation.valid || validation.needs_review) && (
+              <Text style={{ color: '#94a3b8', fontSize: 12, marginTop: 4, textAlign: 'center' }}>
+                {validation.errors.length > 0
+                  ? 'Corrige los errores marcados para habilitar Aprobar'
+                  : 'Revisa las advertencias antes de aprobar'}
+              </Text>
             )}
 
             <Button

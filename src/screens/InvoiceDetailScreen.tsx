@@ -83,7 +83,11 @@ const InvoiceDetailScreen: React.FC = () => {
           onPress: async () => {
             setIsDeleting(true);
             try {
-              await api.delete(`/api/facturas/${facturaId}`);
+              const deleteResult = await api.delete(`/api/facturas/${facturaId}`);
+              if (deleteResult?.success === false) {
+                Alert.alert('No se pudo eliminar', deleteResult.error || 'La factura puede estar incluida en un 606 enviado. Si necesitas eliminarla, contacta soporte.');
+                return;
+              }
               Alert.alert('Eliminada', 'La factura fue eliminada correctamente.');
               navigation.goBack();
             } catch (error: any) {
@@ -358,20 +362,25 @@ const InvoiceDetailScreen: React.FC = () => {
           </Surface>
         )}
 
-        {/* Botón reprocesar si hay error */}
-        {factura.estado_ocr === 'error' && (
-          <Button
-            mode="contained"
-            onPress={handleReprocesar}
-            loading={isReprocesando}
-            style={styles.reprocesarButton}
-            buttonColor="#f59e0b"
-            testID="detail-reprocesar"
-            accessibilityLabel="Reprocesar factura"
-          >
-            Reprocesar OCR
-          </Button>
-        )}
+        {/* Botón reprocesar — siempre visible */}
+        <Button
+          mode={factura.estado_ocr === 'error' ? 'contained' : 'outlined'}
+          onPress={handleReprocesar}
+          loading={isReprocesando}
+          style={styles.reprocesarButton}
+          icon="reload"
+          textColor={factura.estado_ocr === 'error' ? '#0f172a' : '#22D3EE'}
+          buttonColor={factura.estado_ocr === 'error' ? '#f59e0b' : undefined}
+          testID="detail-reprocesar"
+          accessibilityLabel="Reprocesar factura"
+        >
+          {factura.estado_ocr === 'error' ? 'Reprocesar OCR' : 'Re-extraer con IA'}
+        </Button>
+        <Text style={{ color: '#94a3b8', fontSize: 11, marginTop: 4, textAlign: 'center' }}>
+          {factura.estado_ocr === 'error'
+            ? 'OCR falló. Reintentar extracción AI.'
+            : 'Volver a leer la factura con IA si los datos están incorrectos.'}
+        </Text>
 
         {/* Botón eliminar factura */}
         <Button

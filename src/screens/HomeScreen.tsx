@@ -138,9 +138,9 @@ const HomeScreen: React.FC = () => {
   );
 
   const facturasFiltradas = facturas.filter(f => {
-    if (tipoFilter === 'compras') return f.aplica_607 !== true;
+    if (tipoFilter === 'compras') return f.aplica_606 === true;
     if (tipoFilter === 'ventas') return f.aplica_607 === true;
-    return true;
+    return true; // 'todas'
   });
 
   // Optimistic rows only shown when 'procesando' (not yet in BD)

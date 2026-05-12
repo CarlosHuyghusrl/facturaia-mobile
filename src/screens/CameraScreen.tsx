@@ -74,7 +74,7 @@ const ScannerScreen: React.FC = () => {
 
     // W17.4 — t4: navigation transition start (InvoiceReview params dispatched)
     const w17_t4 = Date.now();
-    const __W17_DIAG_NAV = __DEV__ || true;
+    const __W17_DIAG_NAV = __DEV__;
     if (__W17_DIAG_NAV) {
       // Find the optimistic entry to get full timings
       const storeEntries = optimisticStore.getAll();
@@ -300,7 +300,7 @@ const ScannerScreen: React.FC = () => {
   };
 
   // W17.4 — always-on diagnostics flag
-  const __W17_DIAG = __DEV__ || true;
+  const __W17_DIAG = __DEV__;
 
   // Procesar imagen con OCR y validación
   const processImage = async () => {
@@ -367,7 +367,7 @@ const ScannerScreen: React.FC = () => {
       const factura = result.data;
       setEditData({
         ncf: factura.ncf || '',
-        emisor_nombre: factura.emisor_nombre || '',
+        emisor_nombre: factura.proveedor || factura.emisor_nombre || '',
         total: String(factura.monto || 0),
       });
 

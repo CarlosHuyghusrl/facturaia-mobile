@@ -17,3 +17,10 @@ export const API_BASE_URL = API_PRODUCTION_URL;
 
 // Exportar flag para que otros modulos sepan si estamos en HTTPS
 export const IS_HTTPS = API_BASE_URL.startsWith('https');
+
+// URL del SM dashboard interno (Carlos, panel monitoreo agentes)
+// IP directa porque SM no tiene HTTPS aún. NO usar en producción cliente final.
+export const SM_DASHBOARD_URL = 'http://217.216.48.91:9099';
+
+// API key compartida bug report. Mover a env var en wave futura.
+export const SM_DASHBOARD_API_KEY = 'huygh-secret-2026';
