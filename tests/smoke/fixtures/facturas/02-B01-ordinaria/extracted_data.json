@@ -1,0 +1,13 @@
+{
+  "ncf": "B0100012345",
+  "rnc_emisor": "131234567",
+  "nombre_emisor": "FERRETERIA SAN JOSE SRL",
+  "fecha_emision": "2026-05-10",
+  "monto_servicios": 0,
+  "monto_bienes": 1000.00,
+  "descuento": 0,
+  "itbis_facturado": 180.00,
+  "total_factura": 1180.00,
+  "categoria_itbis": "general",
+  "sector_proveedor": "comercio"
+}

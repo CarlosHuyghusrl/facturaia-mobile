@@ -1,0 +1,7 @@
+{
+  "expected_valid": true,
+  "expected_needs_review": true,
+  "warnings_codes_should_contain": ["ncf_unknown_type", "itbis_skip_mixto"],
+  "errors_codes_should_NOT_contain": ["ncf_invalid_format", "ncf_expired", "total_mismatch", "itbis_mismatch"],
+  "warnings_codes_should_NOT_contain": ["rnc_8_digitos_posible_corte", "rnc_longitud_invalida"]
+}

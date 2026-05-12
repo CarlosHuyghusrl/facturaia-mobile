@@ -1,0 +1,13 @@
+{
+  "ncf": "E120046718576",
+  "rnc_emisor": "101019921",
+  "nombre_emisor": "JUMBO PUERTO PLATA",
+  "fecha_emision": "2026-08-26",
+  "monto_servicios": 0,
+  "monto_bienes": 1378.53,
+  "descuento": 0,
+  "itbis_facturado": 98.51,
+  "total_factura": 1477.04,
+  "categoria_itbis": "mixto",
+  "sector_proveedor": "comercio"
+}

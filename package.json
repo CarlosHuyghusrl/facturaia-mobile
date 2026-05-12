@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "start": "react-native start",
     "test": "jest",
+    "smoke-test": "node tests/smoke/run.js",
     "clean": "cd android && ./gradlew clean && cd ..",
     "clean:ios": "cd ios && xcodebuild clean && cd ..",
     "pods": "cd ios && pod install && cd ..",
