@@ -31,7 +31,7 @@ import {
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { api } from '../utils/apiClient';
 import { checkDuplicateNCF } from '../services/facturasService';
-import { SM_DASHBOARD_URL, SM_DASHBOARD_API_KEY } from '../config/api';
+import { API_BASE_URL, SM_DASHBOARD_URL, SM_DASHBOARD_API_KEY } from '../config/api';
 
 /**
  * W21prep — Hook validate-ncf (preparado para Wave 7 gestoriard)
@@ -828,7 +828,7 @@ const InvoiceReviewScreen: React.FC = () => {
         <TouchableOpacity onPress={() => setImageModalVisible(true)}>
           <Surface style={styles.imageContainer}>
             <Image
-              source={{ uri: params.imageUrl || `http://217.216.48.91:8081/api/facturas/${params.invoiceId}/imagen` }}
+              source={{ uri: params.imageUrl || `${API_BASE_URL}/api/facturas/${params.invoiceId}/imagen` }}
               style={styles.facturaImage}
               resizeMode="contain"
               onError={() => {
@@ -1154,7 +1154,7 @@ const InvoiceReviewScreen: React.FC = () => {
             <IconButton icon="close" iconColor="#fff" size={28} />
           </TouchableOpacity>
           <Image
-            source={{ uri: params.imageUrl || `http://217.216.48.91:8081/api/facturas/${params.invoiceId}/imagen` }}
+            source={{ uri: params.imageUrl || `${API_BASE_URL}/api/facturas/${params.invoiceId}/imagen` }}
             style={styles.modalImage}
             resizeMode="contain"
           />
