@@ -9,6 +9,7 @@ import {NavigationContainer} from "@react-navigation/native";
 import {createStackNavigator} from "@react-navigation/stack";
 import {Provider as PaperProvider, DefaultTheme} from "react-native-paper";
 import {GestureHandlerRootView} from "react-native-gesture-handler";
+import {SafeAreaProvider} from "react-native-safe-area-context";
 
 // Error monitoring
 import {ErrorBoundary} from "./src/components/ErrorBoundary";
@@ -136,6 +137,7 @@ const AppNavigator = () => {
 function App(): React.JSX.Element {
   return (
     <GestureHandlerRootView style={{flex: 1}}>
+      <SafeAreaProvider>
       <ErrorBoundary>
       <AuthProvider>
         <PaperProvider theme={theme}>
@@ -144,6 +146,7 @@ function App(): React.JSX.Element {
         </PaperProvider>
       </AuthProvider>
       </ErrorBoundary>
+      </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }

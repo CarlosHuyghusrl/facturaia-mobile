@@ -18,6 +18,7 @@ import {
   PermissionsAndroid,
   Alert,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as ImageManipulator from 'expo-image-manipulator';
 import * as FileSystem from 'expo-file-system';
 import {
@@ -52,6 +53,7 @@ type ScanState = 'idle' | 'preview' | 'processing' | 'success' | 'error';
 
 const ScannerScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
+  const insets = useSafeAreaInsets();
 
   const [state, setState] = useState<ScanState>('idle');
   const [imageUri, setImageUri] = useState<string | null>(null);
@@ -479,7 +481,7 @@ const ScannerScreen: React.FC = () => {
   if (state === 'preview') {
     return (
       <View style={styles.container}>
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ScrollView contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 32 }]}>
           <Text style={styles.stepText}>Paso 1 de 2: Confirmar imagen</Text>
 
           <Surface style={styles.imagePreview}>
@@ -734,7 +736,7 @@ const ScannerScreen: React.FC = () => {
             </Button>
 
             {/* Dos botones secundarios */}
-            <View style={styles.quickActions}>
+            <View style={[styles.quickActions, { paddingBottom: insets.bottom + 24 }]}>
               <Button
                 mode="contained"
                 onPress={reset}

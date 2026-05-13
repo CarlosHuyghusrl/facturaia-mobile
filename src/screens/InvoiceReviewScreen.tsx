@@ -17,6 +17,7 @@ import {
   Platform,
   Alert,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Text,
   Surface,
@@ -273,6 +274,7 @@ const InvoiceReviewScreen: React.FC = () => {
   const route = useRoute<RouteProp<RouteParams, 'InvoiceReview'>>();
   const navigation = useNavigation();
   const params = route.params;
+  const insets = useSafeAreaInsets();
 
   // Estado de campos editables
   // W18.3: sanitizeFormData en initial load — strip OCR noise (espacios en NCF, ISO suffix en fecha)
@@ -761,7 +763,7 @@ const InvoiceReviewScreen: React.FC = () => {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 32 }]}>
         {/* Header con estado — V19fix: live derived de validation actual */}
         {(() => {
           let liveStatus: 'validated' | 'review' | 'error' = 'validated';
