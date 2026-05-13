@@ -559,6 +559,27 @@ const InvoiceReviewScreen: React.FC = () => {
       if (signal.aborted) return;
 
       if (saveResult.success) {
+        // V22 B-N4: post-save toast claro según extraction_status final
+        const errorsCount = newValidation.errors.length;
+        const warningsCount = newValidation.warnings.length;
+
+        let toastTitle = '';
+        let toastMessage = '';
+
+        if (newStatus === 'validated') {
+          toastTitle = '✅ Guardada validada';
+          toastMessage = 'La factura aplicará automáticamente al 606/607 mensual.';
+        } else if (newStatus === 'review') {
+          toastTitle = '⚠️ Guardada para revisar';
+          toastMessage = `Tienes ${warningsCount} advertencia${warningsCount !== 1 ? 's' : ''}. Revisa antes de incluir en 606.`;
+        } else if (newStatus === 'error') {
+          toastTitle = '🔴 Guardada con errores';
+          toastMessage = `NO aplicará al 606 hasta corregir ${errorsCount} error${errorsCount !== 1 ? 'es' : ''}. Edita y guarda de nuevo.`;
+        } else {
+          toastTitle = 'Guardada';
+          toastMessage = 'La factura fue guardada.';
+        }
+
         // UX-04: feedback explícito si la factura ahora aplica al 606 (antes no aplicaba)
         const previouslyApplied = (params.extractedData as any)?.aplica_606 === true;
         const nowApplied =
@@ -567,26 +588,18 @@ const InvoiceReviewScreen: React.FC = () => {
           saveResult.aplica_606 === true;
 
         if (!previouslyApplied && nowApplied) {
-          Alert.alert(
-            'Factura aplica al 606',
-            'Esta factura ahora aparecerá en el formulario 606 del cliente.',
-            [
-              {
-                text: 'OK',
-                onPress: () => {
-                  // BUG-10: navigation.goBack() activa useFocusEffect en HomeScreen
-                  // que re-fetcha la lista de facturas. No requiere fetch explícito aquí.
-                  navigation.goBack();
-                },
-              },
-            ]
-          );
-          return;
+          // Merge UX-04 + B-N4: incluir info aplica_606 en el toast
+          toastMessage = `Esta factura ahora aparecerá en el formulario 606 del cliente. ${toastMessage}`;
         }
 
         // BUG-10: navigation.goBack() activa useFocusEffect en HomeScreen
         // que re-fetcha la lista de facturas. No requiere fetch explícito aquí.
-        navigation.goBack();
+        Alert.alert(toastTitle, toastMessage, [
+          {
+            text: 'Entendido',
+            onPress: () => navigation.goBack(),
+          },
+        ]);
       } else {
         // FIX-W19: mostrar razón de error del backend
         const errorMsg = saveResult.error || saveResult.message || 'No se pudieron guardar los cambios.';

@@ -67,6 +67,8 @@ const ScannerScreen: React.FC = () => {
   });
   // Countdown ms para auto-redirect tras OCR (UX-06)
   const [redirectIn, setRedirectIn] = useState<number | null>(null);
+  // V22 B-N1a: flag OCR fail (>50% campos críticos null)
+  const [ocrFailedFlag, setOcrFailedFlag] = useState(false);
 
   // Helper: navegar a InvoiceReview con el mapping de campos OCR
   const navigateToReview = React.useCallback(() => {
@@ -132,8 +134,10 @@ const ScannerScreen: React.FC = () => {
   }, [processResult, navigation]);
 
   // Auto-redirect tras OCR según extraction_status (con countdown visible y cancelable)
+  // V22 B-N1a: skip auto-redirect when ocrFailedFlag is true (user must act)
   useEffect(() => {
     if (!processResult?.invoice_id) return;
+    if (ocrFailedFlag) return; // B-N1a: no auto-redirect on OCR fail
     const status = processResult.extraction_status;
     if (status === 'review' || status === 'error') {
       // Delay 1200ms con contador visible cada 100ms para que usuario sepa qué pasa
@@ -152,7 +156,7 @@ const ScannerScreen: React.FC = () => {
         setRedirectIn(null);
       };
     }
-  }, [processResult?.invoice_id, processResult?.extraction_status, navigateToReview]);
+  }, [processResult?.invoice_id, processResult?.extraction_status, navigateToReview, ocrFailedFlag]);
 
   const formatMoney = (amount: number) => {
     return `RD$ ${amount.toLocaleString('es-DO', { minimumFractionDigits: 2 })}`;
@@ -371,6 +375,18 @@ const ScannerScreen: React.FC = () => {
         total: String(factura.monto || 0),
       });
 
+      // V22 B-N1a: detectar OCR fail (>50% campos críticos null/empty)
+      const criticalFields = [
+        factura?.ncf,
+        factura?.emisor_rnc || factura?.rnc_emisor || (factura as any)?.rncEmisor,
+        factura?.proveedor || factura?.emisor_nombre || (factura as any)?.nombreEmisor,
+        factura?.fecha_documento || factura?.fecha_emision || (factura as any)?.fechaFactura,
+        factura?.monto || factura?.total_factura || (factura as any)?.total,
+      ];
+      const nullCount = criticalFields.filter(v => v === null || v === undefined || v === '').length;
+      const ocrFailed = nullCount >= 3; // 3 de 5 = 60% null → fail
+      setOcrFailedFlag(ocrFailed);
+
       setState('success');
     } catch (err: any) {
       console.error('[Scanner] Error procesando:', err);
@@ -387,6 +403,7 @@ const ScannerScreen: React.FC = () => {
     setProcessResult(null);
     setError(null);
     setTipoFactura(null);
+    setOcrFailedFlag(false); // V22 B-N1a: reset ocrFailedFlag on new scan
   };
 
   // Ver detalle de factura
@@ -650,62 +667,110 @@ const ScannerScreen: React.FC = () => {
           />
         )}
 
-        {/* Info breve de la factura */}
-        <Surface style={styles.quickInfo}>
-          <Text style={styles.quickNCF}>{factura?.ncf || editData.ncf}</Text>
-          <Text style={styles.quickProveedor}>{factura?.emisor_nombre || editData.emisor_nombre}</Text>
-          <Text style={styles.quickTotal}>{formatMoney(factura?.monto || parseFloat(editData.total) || 0)}</Text>
-        </Surface>
-
-        {/* Botón principal: Editar campos (siempre visible) */}
-        <Button
-          mode="contained"
-          onPress={navigateToReview}
-          style={{ width: '100%', borderRadius: 8, marginBottom: 8 }}
-          contentStyle={{ paddingVertical: 6 }}
-          buttonColor="#f59e0b"
-          textColor="#0f172a"
-          icon="pencil"
-        >
-          Revisar / Editar campos
-        </Button>
-
-        {/* Dos botones secundarios */}
-        <View style={styles.quickActions}>
-          <Button
-            mode="contained"
-            onPress={reset}
-            style={styles.primaryAction}
-            contentStyle={styles.buttonContent}
-            buttonColor="#22D3EE"
-            textColor="#0f172a"
-            icon="camera"
+        {/* V22 B-N1a: OCR fail banner (>50% campos críticos null) */}
+        {ocrFailedFlag ? (
+          <Surface
+            style={{
+              backgroundColor: '#7f1d1d',
+              borderRadius: 12,
+              padding: 16,
+              marginBottom: 16,
+              borderLeftWidth: 4,
+              borderLeftColor: '#ef4444',
+              width: '100%',
+            }}
           >
-            Escanear Otra
-          </Button>
+            <Text style={{ color: '#fecaca', fontSize: 16, fontWeight: '700', marginBottom: 8 }}>
+              ⚠️ OCR no leyó esta factura
+            </Text>
+            <Text style={{ color: '#fca5a5', fontSize: 13, marginBottom: 12, lineHeight: 18 }}>
+              La IA no pudo extraer datos suficientes. Posibles causas:
+              {'\n'}• Imagen borrosa o desenfocada
+              {'\n'}• Luz baja o reflejos
+              {'\n'}• Ángulo inclinado o factura recortada
+            </Text>
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <Button
+                mode="contained"
+                onPress={() => { setState('idle'); setOcrFailedFlag(false); }}
+                buttonColor="#fbbf24"
+                textColor="#0f172a"
+                icon="camera-retake"
+                style={{ flex: 1 }}
+              >
+                Reescanear
+              </Button>
+              <Button
+                mode="outlined"
+                onPress={navigateToReview}
+                textColor="#fecaca"
+                icon="pencil"
+                style={{ flex: 1 }}
+              >
+                Editar manual
+              </Button>
+            </View>
+          </Surface>
+        ) : (
+          <>
+            {/* Info breve de la factura */}
+            <Surface style={styles.quickInfo}>
+              <Text style={styles.quickNCF}>{factura?.ncf || editData.ncf}</Text>
+              <Text style={styles.quickProveedor}>{factura?.emisor_nombre || editData.emisor_nombre}</Text>
+              <Text style={styles.quickTotal}>{formatMoney(factura?.monto || parseFloat(editData.total) || 0)}</Text>
+            </Surface>
 
-          <Button
-            mode="contained"
-            onPress={() => navigation.navigate('Home')}
-            style={styles.secondaryAction}
-            contentStyle={styles.buttonContent}
-            buttonColor="#3b82f6"
-            textColor="#fff"
-            icon="format-list-bulleted"
-          >
-            Ver Lista
-          </Button>
-        </View>
+            {/* Botón principal: Editar campos (siempre visible) */}
+            <Button
+              mode="contained"
+              onPress={navigateToReview}
+              style={{ width: '100%', borderRadius: 8, marginBottom: 8 }}
+              contentStyle={{ paddingVertical: 6 }}
+              buttonColor="#f59e0b"
+              textColor="#0f172a"
+              icon="pencil"
+            >
+              Revisar / Editar campos
+            </Button>
 
-        {/* Link pequeño para ver detalle */}
-        <Button
-          mode="text"
-          onPress={goToDetail}
-          textColor="#64748b"
-          compact
-        >
-          Ver detalle
-        </Button>
+            {/* Dos botones secundarios */}
+            <View style={styles.quickActions}>
+              <Button
+                mode="contained"
+                onPress={reset}
+                style={styles.primaryAction}
+                contentStyle={styles.buttonContent}
+                buttonColor="#22D3EE"
+                textColor="#0f172a"
+                icon="camera"
+              >
+                Escanear Otra
+              </Button>
+
+              <Button
+                mode="contained"
+                onPress={() => navigation.navigate('Home')}
+                style={styles.secondaryAction}
+                contentStyle={styles.buttonContent}
+                buttonColor="#3b82f6"
+                textColor="#fff"
+                icon="format-list-bulleted"
+              >
+                Ver Lista
+              </Button>
+            </View>
+
+            {/* Link pequeño para ver detalle */}
+            <Button
+              mode="text"
+              onPress={goToDetail}
+              textColor="#64748b"
+              compact
+            >
+              Ver detalle
+            </Button>
+          </>
+        )}
       </View>
     </View>
   );
