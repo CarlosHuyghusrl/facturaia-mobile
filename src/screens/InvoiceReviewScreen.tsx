@@ -459,13 +459,19 @@ const InvoiceReviewScreen: React.FC = () => {
       }
       try {
         const result = await api.post('/api/v1/invoices/validate', sanitized);
-        if (result.success) {
-          setValidation(result.data);
+        // V23 BUG FIX (Yolanda v2.10.0): backend /api/v1/invoices/validate retorna
+        // directamente {valid, needs_review, errors, warnings, computed}, NO wrap
+        // {success, data}. Wave 4 (commit 2d14aca8) introdujo este bug con check
+        // result.success que era SIEMPRE undefined → Yolanda veía "No se pudo
+        // revalidar" aunque backend respondiera HTTP 200 OK. 6 versiones APK con
+        // bug latente. Carlos detectado 13-may después 50+ tests Yolanda.
+        if (result && typeof result.valid === 'boolean') {
+          setValidation(result);
           setClearedBackendErrors(new Set());
           setIsRevalidating(false);
           return;
         }
-        lastError = result.error || 'Respuesta sin success';
+        lastError = result?.error || 'Respuesta sin valid';
         lastResponseText = JSON.stringify(result).slice(0, 200);
       } catch (error: any) {
         lastError = error;
@@ -530,8 +536,10 @@ const InvoiceReviewScreen: React.FC = () => {
       let newValidation = validation;
       try {
         const validateResult = await api.post('/api/v1/invoices/validate', sanitized);
-        if (!signal.aborted && validateResult.success && validateResult.data) {
-          newValidation = validateResult.data;
+        // V23 BUG FIX (mismo bug que handleRevalidate): backend retorna validation
+        // directo, no wrap {success,data}. Check valid bool en lugar de success.
+        if (!signal.aborted && validateResult && typeof validateResult.valid === 'boolean') {
+          newValidation = validateResult;
           setValidation(newValidation);
           // Determinar status basado en validación
           if (!newValidation.valid) {
@@ -887,6 +895,12 @@ const InvoiceReviewScreen: React.FC = () => {
                 />
                 {validationMsg && (
                   <Text style={styles.fieldErrorText}>⚠️ {validationMsg}</Text>
+                )}
+                {/* V23 Bug 2: fecha format español RD bajo el TextInput (display only). BD mantiene YYYY-MM-DD por compat trigger 606. */}
+                {field.key === 'fecha_emision' && /^\d{4}-\d{2}-\d{2}$/.test(String(formData[field.key] ?? '')) && (
+                  <Text style={{ color: '#94a3b8', fontSize: 12, marginTop: 4 }}>
+                    📅 {new Date(String(formData[field.key]) + 'T00:00:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'long', year: 'numeric' })}
+                  </Text>
                 )}
                 {/* W18.10: botón Reportar bug cuando hay error del backend en este campo */}
                 {getFieldStatus(field.key) === 'error' && (
