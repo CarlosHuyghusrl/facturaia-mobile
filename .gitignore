@@ -39,3 +39,4 @@ logs/
 *.log
 mcp_scheduler.log
 .gitnexus
+keystores/

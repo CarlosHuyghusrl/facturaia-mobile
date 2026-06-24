@@ -4,7 +4,7 @@
   "expo": {
     "name": "FacturaIA",
     "slug": "facturascannerapp",
-    "version": "1.0.4",
+    "version": "2.11.0",
     "sdkVersion": "52.0.0",
     "platforms": [
       "android",
@@ -17,8 +17,8 @@
       "backgroundColor": "#0F172A"
     },
     "android": {
-      "versionCode": 1,
-      "package": "com.huyghusrl.facturaia",
+      "versionCode": 23,
+      "package": "com.gestoriard.facturaia",
       "usesCleartextTraffic": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
@@ -32,7 +32,7 @@
       ]
     },
     "ios": {
-      "bundleIdentifier": "com.huyghusrl.facturaia",
+      "bundleIdentifier": "com.gestoriard.facturaia",
       "supportsTablet": true
     },
     "plugins": [

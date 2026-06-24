@@ -1,0 +1,109 @@
+================================================================================
+PLAY STORE LISTING — FacturaIA
+Desarrollado por HUYGHU y ASOCIADOS SRL (GestoriaRD)
+================================================================================
+
+--------------------------------------------------------------------------------
+1. APP TITLE (max 30 chars)
+--------------------------------------------------------------------------------
+FacturaIA - Escanea Facturas
+
+CHARACTER COUNT: 28 characters
+
+
+--------------------------------------------------------------------------------
+2. SHORT DESCRIPTION (max 80 chars)
+--------------------------------------------------------------------------------
+Escanea facturas con IA, extrae NCF y RNC automáticamente. Listo para DGII.
+
+CHARACTER COUNT: 76 characters
+
+
+--------------------------------------------------------------------------------
+3. FULL DESCRIPTION (max 4000 chars)
+--------------------------------------------------------------------------------
+¿Cansado de registrar facturas a mano para el 606 y 607? FacturaIA lo hace por ti en segundos.
+
+FacturaIA es la app inteligente para contadores, empresas y emprendedores dominicanos que necesitan registrar y organizar facturas fiscales de forma rápida y sin errores. Con solo apuntar la cámara a una factura, nuestra IA extrae automáticamente todos los datos que exige la DGII.
+
+━━━ CARACTERÍSTICAS PRINCIPALES ━━━
+
+📷 Escaneo instantáneo con la cámara
+Fotografía cualquier factura fiscal dominicana y obtén todos los datos en segundos. Sin escribir nada.
+
+🤖 Extracción automática con Inteligencia Artificial
+La IA reconoce y extrae automáticamente:
+• NCF (Número de Comprobante Fiscal)
+• RNC del proveedor y receptor
+• Monto total y monto gravado
+• ITBIS (18%)
+• Fecha de emisión
+• Nombre del proveedor
+
+✅ Validación contra normas DGII
+La app verifica que los datos extraídos cumplen con las reglas de la DGII antes de guardarlos. Te alerta si hay errores en el NCF o el RNC.
+
+📂 Organización automática por proveedor
+Todas tus facturas quedan organizadas por proveedor, fecha y NCF. Búsqueda rápida cuando la necesitas.
+
+📊 Datos listos para el 606 y 607
+La información queda estructurada exactamente como la requieren los formularios 606 (compras) y 607 (ventas) de la DGII. Reduce horas de trabajo a minutos.
+
+🔒 Almacenamiento seguro
+Tus facturas se guardan de forma segura. Solo tú tienes acceso a tus datos.
+
+📶 Funciona sin conexión
+Escanea facturas aunque no tengas internet. La app guarda todo localmente y sincroniza automáticamente cuando recuperas la señal.
+
+━━━ CÓMO FUNCIONA ━━━
+
+1️⃣ FOTOGRAFÍA
+Abre la app, apunta la cámara a la factura y toma la foto. Sin importar si es térmica, laser o digital.
+
+2️⃣ LA IA EXTRAE
+En segundos, la Inteligencia Artificial lee la factura y extrae NCF, RNC, montos, ITBIS y fecha. Verifica los datos antes de guardarlos.
+
+3️⃣ LISTO PARA DGII
+Tu factura queda registrada, validada y organizada. Cuando llegue el momento de declarar, ya tienes todo listo para el 606 o 607.
+
+━━━ PARA QUIÉN ES ━━━
+
+✔ Contadores y estudios contables que manejan múltiples empresas
+✔ Empresas dominicanas que compran con comprobantes fiscales
+✔ Emprendedores y freelancers que necesitan control de sus gastos deducibles
+✔ Cualquier persona que quiera dejar de registrar facturas a mano
+
+━━━ TECNOLOGÍA ━━━
+
+FacturaIA usa modelos avanzados de visión artificial entrenados específicamente para comprobantes fiscales dominicanos. Compatible con todos los tipos de NCF: B01, B02, B11, B14, B15, B16 y más.
+
+━━━ EMPIEZA HOY ━━━
+
+Descarga FacturaIA gratis y olvídate del registro manual de facturas. Tu tiempo vale más.
+
+Desarrollado por HUYGHU y ASOCIADOS SRL — GestoriaRD
+República Dominicana 🇩🇴
+
+CHARACTER COUNT: 2,701 characters
+
+
+--------------------------------------------------------------------------------
+4. CATEGORY
+--------------------------------------------------------------------------------
+Finance
+(alternativa: Business)
+
+
+--------------------------------------------------------------------------------
+5. TAGS / KEYWORDS (hasta 5)
+--------------------------------------------------------------------------------
+facturas
+OCR
+DGII
+contabilidad
+RNC
+
+
+================================================================================
+FIN DEL LISTING
+================================================================================
